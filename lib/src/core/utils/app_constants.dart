@@ -14,6 +14,12 @@ class AppConstants {
     'API_ENDPOINT',
     defaultValue: "/api/",
   );
+  /// Instancia de Cobalt que respalda a Instagram cuando su página de
+  /// inserción no entrega el video. Vacía por omisión: no hay ninguna pública
+  /// de confianza. Se activa con `--dart-define=COBALT_URL=https://…` y,
+  /// si la instancia pide clave, `--dart-define=COBALT_KEY=…`.
+  static const String cobaltUrl = String.fromEnvironment('COBALT_URL');
+  static const String cobaltKey = String.fromEnvironment('COBALT_KEY');
   static const int navigateTime = 2000;
   static const int animationTime = 1000;
 }
