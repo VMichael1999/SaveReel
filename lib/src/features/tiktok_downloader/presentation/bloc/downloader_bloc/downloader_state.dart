@@ -75,6 +75,15 @@ class DownloaderSaveVideoFailure extends DownloaderState {
   List<Object?> get props => [message];
 }
 
+class DownloaderSaveVideoCancelled extends DownloaderState {
+  final String path;
+
+  const DownloaderSaveVideoCancelled(this.path);
+
+  @override
+  List<Object?> get props => [path];
+}
+
 class OldDownloadsLoading extends DownloaderState {
   const OldDownloadsLoading();
 

@@ -6,8 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
+import '../../../../../core/error/failure.dart';
 import '../../../../../core/helpers/dir_helper.dart';
 import '../../../../../core/utils/app_enums.dart';
+import '../../../domain/entities/cancel_signal.dart';
 import '../../../domain/entities/download_item.dart';
 import '../../../domain/entities/tiktok_video.dart';
 import '../../../domain/entities/video_item.dart';
@@ -33,6 +35,8 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     on<LoadOldDownloads>(_loadOldDownloads);
     on<DownloaderGetVideo>(_getVideo);
     on<DownloaderSaveVideo>(_saveVideo);
+    on<DownloaderCancelVideo>(_cancelVideo);
+    on<DownloaderRetryVideo>(_retryVideo);
   }
 
   /// Peso de un archivo en bytes, o nulo si no se pudo saber.
@@ -55,6 +59,10 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     );
   }
 
+  /// Señal de cancelación y formato de cada descarga, por ruta de archivo.
+  final Map<String, CancelSignal> _signals = {};
+  final Map<String, DownloadFormat> _formats = {};
+
   Future<void> _saveVideo(
     DownloaderSaveVideo event,
     Emitter<DownloaderState> emit,
@@ -65,27 +73,31 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     final link = format.isAudio
         ? format.urlOf(videoData)
         : _processLink(format.urlOf(videoData));
-    DownloadItem item = DownloadItem(
+
+    final signal = CancelSignal();
+    _signals[path] = signal;
+    _formats[path] = format;
+    _upsert(DownloadItem(
       video: event.tikTokVideo,
       status: DownloadStatus.downloading,
       path: path,
-    );
-    int index = _checkIfItemIsExistInDownloads(item);
-    _addItem(index, item);
+      startedAt: DateTime.now(),
+    ));
     emit(const DownloaderSaveVideoLoading());
 
     int lastPercent = -1;
     final params = SaveVideoParams(
       savePath: path,
       videoLink: link,
+      cancelSignal: signal,
       onProgress: (received, total) {
         // Solo se emite cuando cambia el porcentaje, para no saturar la UI.
         final percent = total > 0 ? received * 100 ~/ total : received ~/ 65536;
         if (percent == lastPercent) return;
         lastPercent = percent;
-        _updateItem(
-          index,
-          item.copyWith(receivedBytes: received, totalBytes: total),
+        _update(
+          path,
+          (item) => item.copyWith(receivedBytes: received, totalBytes: total),
         );
         emit(DownloaderSaveVideoProgress(
           path: path,
@@ -96,18 +108,63 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     );
 
     final result = await saveVideoUseCase(params);
+    _signals.remove(path);
     final failure = result.fold((failure) => failure, (_) => null);
+    if (failure is CancelRequestFailure) {
+      await _discard(path);
+      emit(DownloaderSaveVideoCancelled(path));
+      return;
+    }
     if (failure != null) {
-      _updateItem(index, item.copyWith(status: DownloadStatus.error));
+      _update(
+        path,
+        (item) => item.copyWith(
+          status: DownloadStatus.error,
+          failureMessage: failure.message,
+        ),
+      );
       emit(DownloaderSaveVideoFailure(failure.message));
       return;
     }
-    _updateItem(index, item.copyWith(status: DownloadStatus.success));
+    _update(
+      path,
+      (item) => item.copyWith(
+        status: DownloadStatus.success,
+        receivedBytes: item.totalBytes,
+        clearFailure: true,
+      ),
+    );
     if (!format.isAudio) await _saveToGallery(path);
     emit(DownloaderSaveVideoSuccess(
       message: result.fold((_) => '', (message) => message),
       path: path,
     ));
+  }
+
+  void _cancelVideo(
+    DownloaderCancelVideo event,
+    Emitter<DownloaderState> emit,
+  ) {
+    _signals[event.path]?.cancel();
+  }
+
+  void _retryVideo(DownloaderRetryVideo event, Emitter<DownloaderState> emit) {
+    final item = newDownloads.where((d) => d.path == event.path).firstOrNull;
+    if (item == null) return;
+    add(DownloaderSaveVideo(
+      tikTokVideo: item.video,
+      format: _formats[event.path] ?? DownloadFormat.withCredits,
+    ));
+  }
+
+  /// Quita la descarga de la lista y borra lo que alcanzó a bajar.
+  Future<void> _discard(String path) async {
+    newDownloads.removeWhere((d) => d.path == path);
+    _formats.remove(path);
+    try {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    } catch (_) {}
   }
 
   /// Copia el video a la galería. Si falla (por ejemplo, sin permiso),
@@ -129,31 +186,19 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     return "$appPath/${format.fileNameFor(id)}";
   }
 
-  _updateItem(int index, DownloadItem item) {
+  /// Agrega la descarga o, si ya existía (un reintento), la reemplaza.
+  void _upsert(DownloadItem item) {
+    final index = newDownloads.indexWhere((d) => d.path == item.path);
     if (index == -1) {
-      newDownloads.last = item;
+      newDownloads.add(item);
     } else {
       newDownloads[index] = item;
     }
   }
 
-  _addItem(int index, DownloadItem item) {
-    if (index == -1) {
-      newDownloads.add(item);
-    } else {
-      newDownloads[index] = item.copyWith(status: DownloadStatus.downloading);
-    }
-  }
-
-  int _checkIfItemIsExistInDownloads(DownloadItem item) {
-    int index = -1;
-    for (int i = 0; i < newDownloads.length; i++) {
-      if (newDownloads[i].video == item.video) {
-        index = i;
-        return index;
-      }
-    }
-    return index;
+  void _update(String path, DownloadItem Function(DownloadItem) change) {
+    final index = newDownloads.indexWhere((d) => d.path == path);
+    if (index != -1) newDownloads[index] = change(newDownloads[index]);
   }
 
   List<VideoItem> oldDownloads = [];

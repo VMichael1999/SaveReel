@@ -26,6 +26,24 @@ class DownloaderSaveVideo extends DownloaderEvent {
   List<Object?> get props => [tikTokVideo, format];
 }
 
+class DownloaderCancelVideo extends DownloaderEvent {
+  final String path;
+
+  const DownloaderCancelVideo(this.path);
+
+  @override
+  List<Object?> get props => [path];
+}
+
+class DownloaderRetryVideo extends DownloaderEvent {
+  final String path;
+
+  const DownloaderRetryVideo(this.path);
+
+  @override
+  List<Object?> get props => [path];
+}
+
 class LoadOldDownloads extends DownloaderEvent {
   @override
   List<Object?> get props => [];
