@@ -103,7 +103,12 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final link = VideoLink.find(data?.text ?? '');
     if (!mounted || link == null) return;
-    if (link == _handledLink || link == _controller.text.trim()) return;
+    // El mismo video puede venir con y sin parámetros de seguimiento.
+    final clean = VideoLink.normalize(link);
+    if (clean == VideoLink.normalize(_handledLink ?? '') ||
+        clean == VideoLink.normalize(_controller.text)) {
+      return;
+    }
     setState(() => _clipboardLink = link);
   }
 

@@ -68,6 +68,7 @@ Future<(_Repo, FakeSharedSource)> _pump(
   WidgetTester tester, {
   String? initialShared,
   bool firstUseDismissed = false,
+  String? clipboardText,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 3;
@@ -76,7 +77,12 @@ Future<(_Repo, FakeSharedSource)> _pump(
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-    if (call.method == 'Clipboard.hasStrings') return {'value': false};
+    switch (call.method) {
+      case 'Clipboard.hasStrings':
+        return {'value': clipboardText != null};
+      case 'Clipboard.getData':
+        return clipboardText == null ? null : {'text': clipboardText};
+    }
     return null;
   });
   messenger.setMockMethodCallHandler(
@@ -187,4 +193,20 @@ void main() {
     expect(repo.searched, isEmpty);
     expect(find.text('Video con créditos'), findsNothing);
   });
+
+  testWidgets(
+    'si el enlace compartido es el mismo del portapapeles no repite la tarjeta',
+    (tester) async {
+      await _pump(
+        tester,
+        initialShared:
+            'https://www.tiktok.com/@frutinoveladrama9/video/7689496424051952910',
+        clipboardText:
+            'https://www.tiktok.com/@frutinoveladrama9/video/7689496424051952910?is_from_webapp=1&sender_device=pc',
+      );
+
+      expect(find.text('Video con créditos'), findsOneWidget);
+      expect(find.text('Tienes un enlace copiado'), findsNothing);
+    },
+  );
 }
