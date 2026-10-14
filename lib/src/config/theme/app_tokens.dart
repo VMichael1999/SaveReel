@@ -64,4 +64,5 @@ abstract final class AppOverlay {
   static const Color shadeTop = Color(0x73000000);
   static const Color shadeBottom = Color(0xD1000000);
   static const Color clear = Color(0x00000000);
+  static const Color videoBackground = Color(0xFF000000);
 }
