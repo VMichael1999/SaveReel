@@ -89,10 +89,19 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       return;
     }
     _updateItem(index, item.copyWith(status: DownloadStatus.success));
+    await _saveToGallery(path);
     emit(DownloaderSaveVideoSuccess(
       message: result.fold((_) => '', (message) => message),
       path: path,
     ));
+  }
+
+  /// Copia el video a la galería. Si falla (por ejemplo, sin permiso),
+  /// el archivo sigue disponible dentro de la app.
+  Future<void> _saveToGallery(String path) async {
+    try {
+      await DirHelper.saveVideoToGallery(path);
+    } catch (_) {}
   }
 
   String _processLink(String link) {
