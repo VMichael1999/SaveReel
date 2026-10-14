@@ -1,5 +1,6 @@
 import '../../container_injector.dart';
 import '../../core/helpers/dir_helper.dart';
+import '../../core/helpers/onboarding_store.dart';
 import 'data/datasources/local/saved_videos_local_data_source.dart';
 import 'data/datasources/remote/tiktok_video_remote_data_source.dart';
 import 'data/repositories/saved_videos_repo.dart';
@@ -11,6 +12,7 @@ import 'domain/usecases/get_saved_videos_usecase.dart';
 import 'domain/usecases/get_video_thumbnail_usecase.dart';
 import 'domain/usecases/probe_video_duration_usecase.dart';
 import 'domain/usecases/record_saved_video_usecase.dart';
+import 'presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'presentation/bloc/library_cubit/library_cubit.dart';
 import 'domain/usecases/get_file_size_usecase.dart';
 import 'domain/usecases/get_video_usecase.dart';
@@ -57,6 +59,9 @@ void initDownloader() {
       forgetSavedVideo: sl(),
     ),
   );
+  // primer uso
+  sl.registerLazySingleton(() => OnboardingStore());
+  sl.registerLazySingleton(() => FirstUseCubit(store: sl()));
   // downloader bloc
   sl.registerFactory(
     () => DownloaderBloc(

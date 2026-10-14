@@ -7,6 +7,7 @@ import 'config/theme/app_theme.dart';
 import 'container_injector.dart';
 import 'features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
+import 'features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 
 /// En depuración, `--dart-define=CATALOG=true` abre el catálogo de componentes.
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => sl<DownloaderBloc>()),
         BlocProvider(create: (context) => sl<LibraryCubit>()..load()),
+        BlocProvider(create: (context) => sl<FirstUseCubit>()..load()),
       ],
       child: BlocListener<DownloaderBloc, DownloaderState>(
         listener: _syncLibrary,
