@@ -12,6 +12,10 @@ const String _apiHost = "tiktok-download-without-watermark.p.rapidapi.com";
 class DioHelper {
   final Dio dio;
 
+  /// Cliente sin las cabeceras de RapidAPI, para bajar los archivos de los
+  /// servidores de video: esos no deben recibir la clave.
+  final Dio _fileDio = Dio();
+
   DioHelper({required this.dio}) {
     Map<String, dynamic> headers = {
       _contentType: _applicationJson,
@@ -40,7 +44,7 @@ class DioHelper {
     Map<String, dynamic>? queryParams,
     ProgressCallback? onReceiveProgress,
   }) async {
-    return await dio.download(
+    return await _fileDio.download(
       downloadLink,
       savePath,
       onReceiveProgress: onReceiveProgress,
