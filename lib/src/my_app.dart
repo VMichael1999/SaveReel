@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'config/routes_manager.dart';
 import 'config/theme/app_theme.dart';
 import 'container_injector.dart';
+import 'features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
+import 'features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 
 /// En depuración, `--dart-define=CATALOG=true` abre el catálogo de componentes.
 const bool _showCatalog = kDebugMode && bool.fromEnvironment('CATALOG');
@@ -15,16 +17,50 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<DownloaderBloc>(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
-        onGenerateRoute: AppRouter.getRoute,
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.dark,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => sl<DownloaderBloc>()),
+        BlocProvider(create: (context) => sl<LibraryCubit>()..load()),
+      ],
+      child: BlocListener<DownloaderBloc, DownloaderState>(
+        listener: _syncLibrary,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
+          onGenerateRoute: AppRouter.getRoute,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.dark,
+        ),
       ),
     );
+  }
+
+  /// Mantiene la biblioteca al día con lo que pasa en las descargas.
+  void _syncLibrary(BuildContext context, DownloaderState state) {
+    final library = context.read<LibraryCubit>();
+    switch (state) {
+      case DownloaderSaveVideoSuccess(:final path):
+        final data =
+            context
+                .read<DownloaderBloc>()
+                .newDownloads
+                .where((d) => d.path == path)
+                .firstOrNull
+                ?.video
+                .videoData;
+        library.record(
+          SavedVideoMetadata(
+            path: path,
+            title: data?.title,
+            authorHandle: data?.authorHandle,
+            durationSeconds: data?.duration,
+          ),
+        );
+      case DownloaderVideoDeleted(:final path):
+        library.forget(path);
+      default:
+        break;
+    }
   }
 }
