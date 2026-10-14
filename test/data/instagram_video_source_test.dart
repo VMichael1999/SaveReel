@@ -22,7 +22,8 @@ window.__additionalDataLoaded('extra',{"shortcode_media":{
 const _tagPage = '''
 <div class="Embed"><span class="UsernameText">viajes.peru</span>
 <img class="EmbeddedMediaImage" src="https://cdn.ig/cover.jpg?a=1&amp;b=2">
-<video class="tvp" src="https://cdn.ig/clip.mp4?a=1&amp;b=2"></video></div>
+<video class="tvp" src="https://cdn.ig/clip.mp4?a=1&amp;b=2"></video>
+<div class="Caption"><a class="CaptionUsername" href="/viajes.peru/">viajes.peru</a><br /><br />Machu Picchu al amanecer &#128525; &amp; más<br /><br />Segunda línea</div></div>
 ''';
 
 class _FakeAdapter implements HttpClientAdapter {
@@ -86,6 +87,7 @@ void main() {
       expect(data!.playVideo, 'https://cdn.ig/clip.mp4?a=1&b=2');
       expect(data.authorHandle, 'viajes.peru');
       expect(data.originCover, 'https://cdn.ig/cover.jpg?a=1&b=2');
+      expect(data.title, 'Machu Picchu al amanecer 😍 & más');
     });
 
     test('devuelve nulo si la página no trae ningún video', () {

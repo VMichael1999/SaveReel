@@ -16,7 +16,7 @@ abstract final class InstagramEmbedParser {
         _jsonString(html, 'thumbnail_src') ??
         _firstGroup(html, _embeddedImage) ??
         '';
-    final caption = _caption(html);
+    final caption = _caption(html) ?? _captionBlock(html);
 
     return VideoData(
       id: shortcode,
@@ -63,6 +63,42 @@ abstract final class InstagramEmbedParser {
     ).firstMatch(html);
     final text = match == null ? null : _unescape(match.group(1)!).trim();
     return text == null || text.isEmpty ? null : text;
+  }
+
+  /// Pie del video en el formato HTML de la página: `<div class="Caption">`
+  /// con el autor en un enlace, saltos `<br />` y entidades.
+  static String? _captionBlock(String html) {
+    final match = RegExp(
+      r'<div class="Caption">(.*?)</div>',
+      dotAll: true,
+    ).firstMatch(html);
+    if (match == null) return null;
+    var text = match
+        .group(1)!
+        .replaceAll(
+          RegExp(r'<a class="CaptionUsername".*?</a>', dotAll: true),
+          '',
+        )
+        .replaceAll(RegExp(r'<br\s*/?>'), '\n')
+        .replaceAll(RegExp(r'<[^>]+>'), '');
+    text = text
+        .replaceAllMapped(
+          RegExp(r'&#(x?)([0-9a-fA-F]+);'),
+          (m) => String.fromCharCode(
+            int.parse(m.group(2)!, radix: m.group(1) == 'x' ? 16 : 10),
+          ),
+        )
+        .replaceAll('&amp;', '&')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>');
+    final lines = text
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty);
+    if (lines.isEmpty) return null;
+    final first = lines.first;
+    return first.length <= 120 ? first : '${first.substring(0, 117)}…';
   }
 
   static String? _firstGroup(String html, RegExp pattern) {
