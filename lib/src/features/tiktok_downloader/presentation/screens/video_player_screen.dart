@@ -37,6 +37,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   VideoPlayerArgs get _args => widget.args;
 
+  /// Sombra del texto para que se lea también sobre videos claros.
+  static const List<Shadow> _textShadow = [
+    Shadow(color: AppOverlay.shadeBottom, blurRadius: 8),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -182,7 +187,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [AppOverlay.clear, AppOverlay.shadeBottom],
+                    colors: [
+                      AppOverlay.clear,
+                      AppOverlay.shadeTop,
+                      AppOverlay.shadeBottom,
+                    ],
+                    stops: [0, 0.2, 0.5],
                   ),
                 ),
                 child: SafeArea(
@@ -190,7 +200,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg,
-                      AppSpacing.xxl,
+                      AppSpacing.xxl * 2,
                       AppSpacing.lg,
                       AppSpacing.lg,
                     ),
@@ -205,13 +215,15 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: AppOverlay.onVideo,
+                              shadows: _textShadow,
                             ),
                           ),
                         if (_args.authorHandle != null)
                           Text(
                             '@${_args.authorHandle}',
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: AppOverlay.onVideoMuted,
+                              color: AppOverlay.onVideo,
+                              shadows: _textShadow,
                             ),
                           ),
                         const SizedBox(height: AppSpacing.md),
