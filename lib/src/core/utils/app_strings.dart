@@ -99,4 +99,28 @@ class AppStrings {
       "No pudimos guardarlo en la galería. Revisa el permiso de Fotos.";
   static const String galleryDone = "Guardado en tu galería";
   static String playerPosition(String now, String total) => "$now de $total";
+
+  // Biblioteca
+  static const String libraryTitle = "Tus descargas";
+  static const String libraryAll = "Todo";
+  static const String libraryVideos = "Videos";
+  static const String libraryAudio = "Audio";
+  static const String libraryFilterEmpty = "No hay nada en este filtro.";
+  static const String openLibrary = "Tu biblioteca";
+  static const String audioBadge = "Audio";
+  static String filesSummary(int count, String size) =>
+      "${count == 1 ? '1 archivo' : '$count archivos'} · $size";
+  static String libraryTile(
+    String? title, {
+    bool isAudio = false,
+    String? duration,
+  }) {
+    final base =
+        title == null ? "Reproducir video guardado" : "Reproducir $title";
+    return [
+      base,
+      if (isAudio) "audio",
+      if (duration != null) duration,
+    ].join(", ");
+  }
 }
