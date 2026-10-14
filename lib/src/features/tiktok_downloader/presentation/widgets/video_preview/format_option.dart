@@ -28,7 +28,7 @@ class FormatOption extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = context.colors;
     final enabled = onTap != null;
-    final borderColor = selected ? colors.accent : colors.line;
+    final borderColor = selected ? colors.accent : colors.border;
 
     return Semantics(
       inMutuallyExclusiveGroup: true,

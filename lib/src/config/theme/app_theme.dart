@@ -105,7 +105,7 @@ abstract final class AppTheme {
           shape: buttonShape,
           textStyle: textTheme.labelLarge,
           foregroundColor: scheme.onSurface,
-          side: BorderSide(color: extension.line, width: 1.5),
+          side: BorderSide(color: extension.border, width: AppSizes.borderThin),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -134,8 +134,8 @@ abstract final class AppTheme {
           color: extension.failed,
           fontWeight: FontWeight.w600,
         ),
-        border: _inputBorder(extension.line),
-        enabledBorder: _inputBorder(extension.line),
+        border: _inputBorder(extension.border),
+        enabledBorder: _inputBorder(extension.border),
         focusedBorder: _inputBorder(scheme.primary),
         errorBorder: _inputBorder(extension.failed),
         focusedErrorBorder: _inputBorder(extension.failed),
@@ -149,7 +149,7 @@ abstract final class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: Colors.transparent,
         selectedColor: scheme.onSurface,
-        side: BorderSide(color: extension.line, width: 1.5),
+        side: BorderSide(color: extension.border, width: AppSizes.borderThin),
         labelStyle: textTheme.labelMedium?.copyWith(color: extension.muted),
         secondaryLabelStyle: textTheme.labelMedium?.copyWith(color: scaffold),
         shape: const StadiumBorder(),
@@ -196,6 +196,6 @@ abstract final class AppTheme {
 
   static OutlineInputBorder _inputBorder(Color color) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(AppRadii.md),
-    borderSide: BorderSide(color: color, width: 1.5),
+    borderSide: BorderSide(color: color, width: AppSizes.borderThin),
   );
 }

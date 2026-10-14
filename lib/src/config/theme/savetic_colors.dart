@@ -12,6 +12,7 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
     required this.failedSoft,
     required this.raised,
     required this.line,
+    required this.border,
     required this.muted,
     required this.scrim,
   });
@@ -36,6 +37,10 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
   /// Divisores y bordes finos.
   final Color line;
 
+  /// Contorno de los controles (campos, botones con borde, filtros): llega
+  /// a 3:1 contra el fondo para que se distingan.
+  final Color border;
+
   /// Texto secundario.
   final Color muted;
 
@@ -51,6 +56,7 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
     failedSoft: Color(0xFF3A1A24),
     raised: Color(0xFF13294D),
     line: Color(0xFF1C3356),
+    border: Color(0xFF4E6D9A),
     muted: Color(0xFF93A3B8),
     scrim: Color(0x9E020812),
   );
@@ -64,6 +70,7 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
     failedSoft: Color(0xFFFCE4E4),
     raised: Color(0xFFEEF1F5),
     line: Color(0xFFE1E6ED),
+    border: Color(0xFF7F8DA4),
     muted: Color(0xFF53627A),
     scrim: Color(0x9E020812),
   );
@@ -78,6 +85,7 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
     Color? failedSoft,
     Color? raised,
     Color? line,
+    Color? border,
     Color? muted,
     Color? scrim,
   }) {
@@ -90,6 +98,7 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
       failedSoft: failedSoft ?? this.failedSoft,
       raised: raised ?? this.raised,
       line: line ?? this.line,
+      border: border ?? this.border,
       muted: muted ?? this.muted,
       scrim: scrim ?? this.scrim,
     );
@@ -107,6 +116,7 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
       failedSoft: Color.lerp(failedSoft, other.failedSoft, t)!,
       raised: Color.lerp(raised, other.raised, t)!,
       line: Color.lerp(line, other.line, t)!,
+      border: Color.lerp(border, other.border, t)!,
       muted: Color.lerp(muted, other.muted, t)!,
       scrim: Color.lerp(scrim, other.scrim, t)!,
     );
