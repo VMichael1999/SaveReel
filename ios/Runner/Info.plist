@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>SaveTic guarda los videos que descargas en tu galería.</string>
 	<key>CFBundleDisplayName</key>
 	<string>SaveTic</string>
 	<key>CFBundleExecutable</key>
