@@ -41,6 +41,21 @@ class DownloaderSaveVideoLoading extends DownloaderState {
   List<Object?> get props => [];
 }
 
+class DownloaderSaveVideoProgress extends DownloaderState {
+  final String path;
+  final int receivedBytes;
+  final int totalBytes;
+
+  const DownloaderSaveVideoProgress({
+    required this.path,
+    required this.receivedBytes,
+    required this.totalBytes,
+  });
+
+  @override
+  List<Object?> get props => [path, receivedBytes, totalBytes];
+}
+
 class DownloaderSaveVideoSuccess extends DownloaderState {
   final String message;
   final String path;

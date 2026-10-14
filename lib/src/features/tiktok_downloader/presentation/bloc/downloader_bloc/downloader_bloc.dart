@@ -56,22 +56,43 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       status: DownloadStatus.downloading,
       path: path,
     );
-    SaveVideoParams params = SaveVideoParams(savePath: path, videoLink: link);
     int index = _checkIfItemIsExistInDownloads(item);
     _addItem(index, item);
     emit(const DownloaderSaveVideoLoading());
 
-    final result = await saveVideoUseCase(params);
-    result.fold(
-      (failure) {
-        _updateItem(index, item.copyWith(status: DownloadStatus.error));
-        emit(DownloaderSaveVideoFailure(failure.message));
-      },
-      (right) {
-        _updateItem(index, item.copyWith(status: DownloadStatus.success));
-        emit(DownloaderSaveVideoSuccess(message: right, path: path));
+    int lastPercent = -1;
+    final params = SaveVideoParams(
+      savePath: path,
+      videoLink: link,
+      onProgress: (received, total) {
+        // Solo se emite cuando cambia el porcentaje, para no saturar la UI.
+        final percent = total > 0 ? received * 100 ~/ total : received ~/ 65536;
+        if (percent == lastPercent) return;
+        lastPercent = percent;
+        _updateItem(
+          index,
+          item.copyWith(receivedBytes: received, totalBytes: total),
+        );
+        emit(DownloaderSaveVideoProgress(
+          path: path,
+          receivedBytes: received,
+          totalBytes: total,
+        ));
       },
     );
+
+    final result = await saveVideoUseCase(params);
+    final failure = result.fold((failure) => failure, (_) => null);
+    if (failure != null) {
+      _updateItem(index, item.copyWith(status: DownloadStatus.error));
+      emit(DownloaderSaveVideoFailure(failure.message));
+      return;
+    }
+    _updateItem(index, item.copyWith(status: DownloadStatus.success));
+    emit(DownloaderSaveVideoSuccess(
+      message: result.fold((_) => '', (message) => message),
+      path: path,
+    ));
   }
 
   String _processLink(String link) {
