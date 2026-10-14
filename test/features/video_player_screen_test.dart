@@ -235,7 +235,8 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    // Las transiciones de página de Flutter 3.47 duran más que las de 3.29.
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('@cocinaconlucia'), findsNothing);
     expect(find.text('abrir'), findsOneWidget);
