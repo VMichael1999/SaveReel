@@ -9,14 +9,14 @@ class FormatOption extends StatelessWidget {
   const FormatOption({
     super.key,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.selected,
     required this.onTap,
     this.size,
   });
 
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final bool selected;
   final VoidCallback? onTap;
 
@@ -34,7 +34,11 @@ class FormatOption extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       checked: selected,
       enabled: enabled,
-      label: size == null ? '$title. $subtitle' : '$title. $subtitle. $size',
+      label: [
+        title,
+        if (subtitle != null) subtitle!,
+        if (size != null) size!,
+      ].join('. '),
       excludeSemantics: true,
       onTap: onTap,
       child: Opacity(
@@ -69,12 +73,13 @@ class FormatOption extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(title, style: theme.textTheme.labelLarge),
-                        Text(
-                          subtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.muted,
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.muted,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
