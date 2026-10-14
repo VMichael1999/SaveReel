@@ -63,6 +63,9 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   final Map<String, CancelSignal> _signals = {};
   final Map<String, DownloadFormat> _formats = {};
 
+  /// Formato con que se pidió la descarga de [path], si sigue en la lista.
+  DownloadFormat? formatOf(String path) => _formats[path];
+
   Future<void> _saveVideo(
     DownloaderSaveVideo event,
     Emitter<DownloaderState> emit,
