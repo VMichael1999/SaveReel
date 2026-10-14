@@ -184,4 +184,22 @@ void main() {
     expect(bloc.newDownloads, hasLength(2));
     await bloc.close();
   });
+
+  test('eliminar borra el archivo y quita el video de las listas', () async {
+    final repo = _ScriptedRepo((_, __) async => const Right('ok'));
+    final bloc = _bloc(repo);
+
+    bloc.add(const DownloaderSaveVideo(tikTokVideo: _video));
+    await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
+    final path = bloc.newDownloads.single.path;
+    await File(path).writeAsString('video');
+
+    bloc.add(DownloaderDeleteVideo(path));
+    await bloc.stream.firstWhere((s) => s is DownloaderVideoDeleted);
+
+    expect(bloc.newDownloads, isEmpty);
+    expect(await File(path).exists(), isFalse);
+    expect(bloc.isInGallery(path), isFalse);
+    await bloc.close();
+  });
 }
