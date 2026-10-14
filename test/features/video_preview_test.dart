@@ -42,7 +42,14 @@ const _video = TikTokVideo(
 );
 
 class _FakeRepo implements TiktokVideoBaseRepo {
+  _FakeRepo({this.video = _video});
+
+  /// Lo que devuelve la búsqueda del video.
+  final TikTokVideo video;
   final List<String> saved = [];
+
+  /// Enlaces de los que se pidió el peso al servidor de video.
+  final List<String> sizeRequests = [];
 
   /// Pesos simulados por enlace, en bytes.
   final Map<String, int?> sizes = {
@@ -53,11 +60,13 @@ class _FakeRepo implements TiktokVideoBaseRepo {
 
   @override
   Future<Either<Failure, TikTokVideo>> getVideo(String videoLink) async =>
-      const Right(_video);
+      Right(video);
 
   @override
-  Future<Either<Failure, int?>> getFileSize(String url) async =>
-      Right(sizes[url]);
+  Future<Either<Failure, int?>> getFileSize(String url) async {
+    sizeRequests.add(url);
+    return Right(sizes[url]);
+  }
 
   @override
   Future<Either<Failure, String>> saveVideo({
@@ -74,6 +83,7 @@ class _FakeRepo implements TiktokVideoBaseRepo {
 Future<_FakeRepo> _openPreview(
   WidgetTester tester, {
   AppSettings settings = const AppSettings(),
+  TikTokVideo video = _video,
 }) async {
   // Pantalla de teléfono: con la de prueba por defecto el botón queda fuera.
   tester.view.physicalSize = const Size(1080, 2400);
@@ -90,7 +100,7 @@ Future<_FakeRepo> _openPreview(
     (call) async => Directory.systemTemp.path,
   );
 
-  final repo = _FakeRepo();
+  final repo = _FakeRepo(video: video);
   await tester.pumpWidget(
     BlocProvider(
       create:
@@ -210,4 +220,37 @@ void main() {
 
     expect(find.text('Descargar audio · 0.5 MB'), findsOneWidget);
   });
+
+  testWidgets(
+    'usa los pesos que informa el servicio y solo pregunta por el resto',
+    (tester) async {
+      final repo = await _openPreview(
+        tester,
+        video: const TikTokVideo(
+          code: 0,
+          msg: 'success',
+          processedTime: 0.5,
+          videoData: VideoData(
+            id: '42',
+            duration: 218,
+            title: 'La nieve de Mango',
+            originCover: 'https://ejemplo.pe/portada.jpg',
+            playVideo: 'https://ejemplo.pe/limpio',
+            wmPlayVideo: 'https://ejemplo.pe/con-marca',
+            music: 'https://ejemplo.pe/audio.mp3',
+            playCount: 1,
+            downloadCount: 1,
+            playBytes: 79585360,
+            wmPlayBytes: 65062252,
+          ),
+        ),
+      );
+
+      // 62.0 MB con créditos y 75.9 MB sin marca, sin preguntarle al servidor.
+      expect(find.text('Descargar video · 62.0 MB'), findsOneWidget);
+      expect(find.text('75.9 MB'), findsOneWidget);
+      expect(find.text('0.5 MB'), findsOneWidget);
+      expect(repo.sizeRequests, ['https://ejemplo.pe/audio.mp3']);
+    },
+  );
 }

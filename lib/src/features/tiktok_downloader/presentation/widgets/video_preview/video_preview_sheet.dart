@@ -64,10 +64,24 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
     _loadSizes();
   }
 
+  /// Los pesos que el servicio ya informó; el resto se pregunta al servidor
+  /// de video, que no siempre contesta.
+  void _useKnownSizes() {
+    final known = {
+      DownloadFormat.withCredits: _data.wmPlayBytes,
+      DownloadFormat.noWatermark: _data.playBytes,
+    };
+    for (final entry in known.entries) {
+      final bytes = entry.value;
+      if (bytes != null && bytes > 0) _sizes[entry.key] = bytes;
+    }
+  }
+
   Future<void> _loadSizes() async {
+    _useKnownSizes();
     final bloc = context.read<DownloaderBloc>();
     for (final format in DownloadFormat.values) {
-      if (!format.isAvailableIn(_data)) continue;
+      if (!format.isAvailableIn(_data) || _sizes.containsKey(format)) continue;
       bloc.fileSizeOf(format.urlOf(_data)).then((bytes) {
         if (bytes != null && mounted) {
           setState(() => _sizes[format] = bytes);
