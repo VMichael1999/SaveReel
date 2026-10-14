@@ -14,6 +14,10 @@ class VideoData extends Equatable {
   /// Usuario del autor sin la arroba, si la API lo informa.
   final String? authorHandle;
 
+  /// Peso en bytes de cada versión, si el servicio lo informa.
+  final int? playBytes;
+  final int? wmPlayBytes;
+
   const VideoData({
     required this.id,
     required this.duration,
@@ -25,19 +29,23 @@ class VideoData extends Equatable {
     required this.playCount,
     required this.downloadCount,
     this.authorHandle,
+    this.playBytes,
+    this.wmPlayBytes,
   });
 
   @override
   List<Object?> get props => [
-        id,
-        duration,
-        title,
-        originCover,
-        playVideo,
-        wmPlayVideo,
-        music,
-        playCount,
-        downloadCount,
-        authorHandle,
-      ];
+    id,
+    duration,
+    title,
+    originCover,
+    playVideo,
+    wmPlayVideo,
+    music,
+    playCount,
+    downloadCount,
+    authorHandle,
+    playBytes,
+    wmPlayBytes,
+  ];
 }
