@@ -40,6 +40,7 @@ Failure _handleResponseError(Response? response) {
   switch (response?.statusCode) {
     case 400:
       return const BadRequestFailure();
+    case 401:
     case 403:
       return const NotSubscribedFailure();
     case 429:
