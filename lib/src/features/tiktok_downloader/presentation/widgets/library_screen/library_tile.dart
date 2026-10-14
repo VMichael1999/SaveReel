@@ -57,8 +57,8 @@ class LibraryTile extends StatelessWidget {
                   LibraryThumbnail(path: video.path),
                   if (video.durationSeconds != null)
                     Positioned(
-                      left: AppSpacing.sm - 2,
-                      bottom: AppSpacing.sm - 2,
+                      left: AppSpacing.sm,
+                      bottom: AppSpacing.sm,
                       child: _Badge(
                         child: Text(
                           formatDuration(video.durationSeconds!),
@@ -69,12 +69,12 @@ class LibraryTile extends StatelessWidget {
                     ),
                   if (video.isAudio)
                     const Positioned(
-                      right: AppSpacing.sm - 2,
-                      top: AppSpacing.sm - 2,
+                      right: AppSpacing.sm,
+                      top: AppSpacing.sm,
                       child: _Badge(
                         child: Icon(
                           Icons.music_note_rounded,
-                          size: AppSpacing.md + 1,
+                          size: AppSizes.iconBadge,
                           color: AppOverlay.onVideo,
                           semanticLabel: AppStrings.audioBadge,
                         ),
@@ -98,11 +98,11 @@ class _Badge extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppOverlay.controlFill,
-        borderRadius: BorderRadius.circular(AppSpacing.sm - 2),
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm - 2,
+          horizontal: AppSpacing.sm,
           vertical: 1,
         ),
         child: child,

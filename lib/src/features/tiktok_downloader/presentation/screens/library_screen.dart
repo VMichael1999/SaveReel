@@ -111,8 +111,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
-                          mainAxisSpacing: AppSpacing.sm - 2,
-                          crossAxisSpacing: AppSpacing.sm - 2,
+                          mainAxisSpacing: AppSpacing.sm,
+                          crossAxisSpacing: AppSpacing.sm,
                           childAspectRatio: 9 / 16,
                         ),
                     itemCount: videos.length,
@@ -143,8 +143,8 @@ class _GridSkeleton extends StatelessWidget {
       sliver: SliverGrid.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          mainAxisSpacing: AppSpacing.sm - 2,
-          crossAxisSpacing: AppSpacing.sm - 2,
+          mainAxisSpacing: AppSpacing.sm,
+          crossAxisSpacing: AppSpacing.sm,
           childAspectRatio: 9 / 16,
         ),
         itemCount: 6,

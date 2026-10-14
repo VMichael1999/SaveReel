@@ -7,7 +7,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../config/theme/app_tokens.dart';
-import '../../../../config/theme/savetic_colors.dart';
 import '../../../../core/helpers/dir_helper.dart';
 import '../../../../core/utils/app_enums.dart';
 import '../../../../core/utils/app_strings.dart';
@@ -39,7 +38,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   /// Sombra del texto para que se lea también sobre videos claros.
   static const List<Shadow> _textShadow = [
-    Shadow(color: AppOverlay.shadeBottom, blurRadius: 8),
+    Shadow(color: AppOverlay.shadeBottom, blurRadius: AppSpacing.sm),
   ];
 
   @override
@@ -200,7 +199,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg,
-                      AppSpacing.xxl * 2,
+                      AppSpacing.xxxl,
                       AppSpacing.lg,
                       AppSpacing.lg,
                     ),
@@ -247,9 +246,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                           ? Icons.check_rounded
                                           : Icons.photo_library_outlined,
                                   iconColor:
-                                      _inGallery
-                                          ? SaveticColors.dark.done
-                                          : null,
+                                      _inGallery ? AppOverlay.done : null,
                                   label:
                                       _inGallery
                                           ? AppStrings.inGallery
@@ -319,7 +316,7 @@ class _Backdrop extends StatelessWidget {
             ? const Center(
               child: Icon(
                 Icons.music_note_rounded,
-                size: 96,
+                size: AppSizes.backdropIcon,
                 color: AppOverlay.onVideoMuted,
               ),
             )
@@ -367,15 +364,15 @@ class _BigPlayIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 68,
-      height: 68,
+      width: AppSizes.playButton,
+      height: AppSizes.playButton,
       decoration: const BoxDecoration(
         color: AppOverlay.controlFill,
         shape: BoxShape.circle,
       ),
       child: const Icon(
         Icons.play_arrow_rounded,
-        size: 36,
+        size: AppSizes.playIcon,
         color: AppOverlay.onVideo,
       ),
     );
