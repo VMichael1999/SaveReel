@@ -88,14 +88,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       showAppMessage(
         context,
         msg: AppStrings.galleryDone,
-        type: ToastType.success,
+        type: MessageType.success,
       );
     } catch (_) {
       if (!mounted) return;
       showAppMessage(
         context,
         msg: AppStrings.galleryFailed,
-        type: ToastType.error,
+        type: MessageType.error,
       );
     }
   }

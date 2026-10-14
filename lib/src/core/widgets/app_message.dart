@@ -6,12 +6,12 @@ import '../utils/app_enums.dart';
 void showAppMessage(
   BuildContext context, {
   required String msg,
-  required ToastType type,
+  required MessageType type,
   String? actionLabel,
   VoidCallback? onAction,
 }) {
   final colors = context.colors;
-  final isError = type == ToastType.error;
+  final isError = type == MessageType.error;
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(

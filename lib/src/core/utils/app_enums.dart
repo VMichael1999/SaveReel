@@ -1,3 +1,3 @@
-enum ToastType { error, success }
+enum MessageType { error, success }
 
 enum DownloadStatus { downloading, success, error }
