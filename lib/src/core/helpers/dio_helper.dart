@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../container_injector.dart';
 import '../api/interceptors.dart';
@@ -17,6 +18,12 @@ class DioHelper {
   final Dio _fileDio = Dio();
 
   DioHelper({required this.dio}) {
+    if (kDebugMode && _apiKey.isEmpty) {
+      debugPrint(
+        'AVISO: falta RAPIDAPI_KEY. Sin ella el servicio responde 401. '
+        'Ejecuta con --dart-define-from-file=env.json (ver env.example.json).',
+      );
+    }
     Map<String, dynamic> headers = {
       _contentType: _applicationJson,
       "X-RapidAPI-Key": _apiKey,
