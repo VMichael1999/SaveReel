@@ -5,9 +5,32 @@ import '../../../../config/theme/app_theme.dart';
 import '../../../../config/theme/app_tokens.dart';
 import '../../../../config/theme/savetic_colors.dart';
 import '../../../../core/widgets/savetic_mark.dart';
+import '../../../tiktok_downloader/domain/entities/tiktok_video.dart';
+import '../../../tiktok_downloader/domain/entities/video_data.dart';
+import '../../../tiktok_downloader/presentation/widgets/video_preview/video_preview_sheet.dart';
+import '../../../tiktok_downloader/presentation/widgets/video_preview/video_preview_skeleton.dart';
 
 /// Catálogo de componentes. Solo se abre en depuración:
 /// `flutter run --dart-define=CATALOG=true`.
+/// Video inventado para ver la vista previa sin llamar a la API.
+const _sampleVideo = TikTokVideo(
+  code: 0,
+  msg: 'success',
+  processedTime: 0.4,
+  videoData: VideoData(
+    id: 'ejemplo',
+    duration: 34,
+    title: 'Lomo saltado en 10 minutos, versión fácil',
+    originCover: 'https://ejemplo.invalid/portada.jpg',
+    playVideo: 'https://ejemplo.invalid/limpio',
+    wmPlayVideo: 'https://ejemplo.invalid/con-marca',
+    music: 'https://ejemplo.invalid/audio',
+    playCount: 1200000,
+    downloadCount: 18600,
+    authorHandle: 'cocinaconlucia',
+  ),
+);
+
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
 
@@ -168,6 +191,13 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   onSelected: (_) => setState(() => _chip = i),
                 ),
             ],
+          ),
+          const _Section('Marcador de posición'),
+          const VideoPreviewSkeleton(),
+          const _Section('Vista previa del video'),
+          OutlinedButton(
+            onPressed: () => showVideoPreviewSheet(context, _sampleVideo),
+            child: const Text('Abrir la vista previa'),
           ),
           const _Section('Mensajes y hojas'),
           Row(
