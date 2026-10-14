@@ -1,6 +1,6 @@
 class Authorized {
   static const String badRequest =
-      "No pudimos procesar ese enlace. Revisa que sea de un video de TikTok.";
+      "No pudimos procesar ese enlace. Revisa que sea de un video de TikTok o Instagram.";
   static const String unauthorized =
       "No tienes autorización para esta acción. Inténtalo más tarde.";
   static const String forbidden =
