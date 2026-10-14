@@ -30,8 +30,11 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
   }
 
   @override
-  Future<Either<Failure, String>> saveVideo(
-      {required String videoLink, required String savePath}) async {
+  Future<Either<Failure, String>> saveVideo({
+    required String videoLink,
+    required String savePath,
+    void Function(int received, int total)? onProgress,
+  }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NoInternetConnectionFailure());
     }
@@ -39,6 +42,7 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
       final String message = await remoteDataSource.saveVideo(
         savePath: savePath,
         videoLink: videoLink,
+        onProgress: onProgress,
       );
       return Right(message);
     } on DioException catch (error) {

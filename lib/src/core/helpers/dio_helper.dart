@@ -38,7 +38,12 @@ class DioHelper {
     required String downloadLink,
     required String savePath,
     Map<String, dynamic>? queryParams,
+    ProgressCallback? onReceiveProgress,
   }) async {
-    return await dio.download(downloadLink, savePath);
+    return await dio.download(
+      downloadLink,
+      savePath,
+      onReceiveProgress: onReceiveProgress,
+    );
   }
 }

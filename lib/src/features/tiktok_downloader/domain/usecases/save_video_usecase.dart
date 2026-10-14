@@ -13,6 +13,7 @@ class SaveVideoUseCase extends BaseUseCase<String, SaveVideoParams> {
     return await videoRepo.saveVideo(
       videoLink: params.videoLink,
       savePath: params.savePath,
+      onProgress: params.onProgress,
     );
   }
 }
@@ -20,6 +21,11 @@ class SaveVideoUseCase extends BaseUseCase<String, SaveVideoParams> {
 class SaveVideoParams {
   final String savePath;
   final String videoLink;
+  final void Function(int received, int total)? onProgress;
 
-  SaveVideoParams({required this.savePath, required this.videoLink});
+  SaveVideoParams({
+    required this.savePath,
+    required this.videoLink,
+    this.onProgress,
+  });
 }

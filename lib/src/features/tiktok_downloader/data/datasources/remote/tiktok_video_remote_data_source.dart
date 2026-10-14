@@ -9,6 +9,7 @@ abstract class TiktokVideoBaseRemoteDataSource {
   Future<String> saveVideo({
     required String videoLink,
     required String savePath,
+    void Function(int received, int total)? onProgress,
   });
 }
 
@@ -34,9 +35,14 @@ class TiktokVideoRemoteDataSource implements TiktokVideoBaseRemoteDataSource {
   Future<String> saveVideo({
     required String videoLink,
     required String savePath,
+    void Function(int received, int total)? onProgress,
   }) async {
     try {
-      await dioHelper.download(savePath: savePath, downloadLink: videoLink);
+      await dioHelper.download(
+        savePath: savePath,
+        downloadLink: videoLink,
+        onReceiveProgress: onProgress,
+      );
       return AppStrings.downloadSuccess;
     } catch (error) {
       rethrow;

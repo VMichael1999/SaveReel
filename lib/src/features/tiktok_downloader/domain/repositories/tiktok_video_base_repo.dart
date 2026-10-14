@@ -8,5 +8,6 @@ abstract class TiktokVideoBaseRepo {
   Future<Either<Failure, String>> saveVideo({
     required String videoLink,
     required String savePath,
+    void Function(int received, int total)? onProgress,
   });
 }
