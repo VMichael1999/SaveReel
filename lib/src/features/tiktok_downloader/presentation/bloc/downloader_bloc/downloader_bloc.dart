@@ -17,6 +17,7 @@ import '../../../domain/usecases/get_file_size_usecase.dart';
 import '../../../domain/usecases/get_video_usecase.dart';
 import '../../../domain/usecases/save_video_usecase.dart';
 import '../../models/download_format.dart';
+import '../../models/video_player_args.dart';
 
 part 'downloader_event.dart';
 
@@ -68,6 +69,19 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   final Set<String> _inGallery = {};
 
   bool isInGallery(String path) => _inGallery.contains(path);
+
+  /// Datos para abrir [path] en el reproductor, con título y autor si esta
+  /// sesión sabe de quién es.
+  VideoPlayerArgs playerArgsFor(String path) {
+    final item = newDownloads.where((d) => d.path == path).firstOrNull;
+    final data = item?.video.videoData;
+    return VideoPlayerArgs(
+      path: path,
+      title: data?.title,
+      authorHandle: data?.authorHandle,
+      inGallery: isInGallery(path),
+    );
+  }
 
   /// Formato con que se pidió la descarga de [path], si sigue en la lista.
   DownloadFormat? formatOf(String path) => _formats[path];
