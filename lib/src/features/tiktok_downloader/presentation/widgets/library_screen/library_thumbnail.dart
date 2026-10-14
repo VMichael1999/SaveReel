@@ -30,7 +30,7 @@ class LibraryThumbnail extends StatelessWidget {
     final colors = context.colors;
     final isAudio = path.toLowerCase().endsWith('.mp3');
     final placeholder = ColoredBox(
-      color: colors.raised,
+      color: colors.line,
       child: Icon(
         isAudio ? Icons.music_note_rounded : Icons.movie_outlined,
         color: colors.muted,

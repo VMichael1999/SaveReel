@@ -25,7 +25,7 @@ class DownloadThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final placeholder = ColoredBox(
-      color: colors.raised,
+      color: colors.line,
       child: Icon(icon ?? Icons.movie_outlined, color: colors.muted),
     );
 

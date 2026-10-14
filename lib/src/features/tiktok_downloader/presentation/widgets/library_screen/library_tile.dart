@@ -30,7 +30,7 @@ class LibraryTile extends StatelessWidget {
       closedElevation: 0,
       openElevation: 0,
       closedShape: shape,
-      closedColor: colors.raised,
+      closedColor: colors.line,
       openColor: AppOverlay.videoBackground,
       middleColor: AppOverlay.videoBackground,
       openBuilder:
