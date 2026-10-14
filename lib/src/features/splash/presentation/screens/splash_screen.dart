@@ -44,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final mark = SaveticMark(
-      size: 88,
+      size: AppSizes.markSplash,
       color: Theme.of(context).colorScheme.primary,
     );
 

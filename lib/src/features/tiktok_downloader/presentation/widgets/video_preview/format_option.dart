@@ -57,7 +57,10 @@ class FormatOption extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppRadii.md),
-                border: Border.all(color: borderColor, width: 1.5),
+                border: Border.all(
+                  color: borderColor,
+                  width: AppSizes.borderThin,
+                ),
               ),
               child: Row(
                 children: [

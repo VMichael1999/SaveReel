@@ -6,6 +6,13 @@ import '../../../../../config/theme/savetic_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
 
 /// Marcador de posición con la forma de la vista previa mientras se busca el video.
+/// Medidas del marcador de posición; reproducen las de la vista previa real.
+const double _coverWidth = 92;
+const double _titleLine = 16;
+const double _titleShort = 140;
+const double _statLine = 12;
+const double _statWidths = 100;
+
 class VideoPreviewSkeleton extends StatelessWidget {
   const VideoPreviewSkeleton({super.key});
 
@@ -27,21 +34,25 @@ class VideoPreviewSkeleton extends StatelessWidget {
     final content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        block(width: 92, height: 92 * 16 / 9, radius: AppRadii.md),
+        block(
+          width: _coverWidth,
+          height: _coverWidth * 16 / 9,
+          radius: AppRadii.md,
+        ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              block(height: 16),
+              block(height: _titleLine),
               const SizedBox(height: AppSpacing.sm),
-              block(width: 140, height: 16),
+              block(width: _titleShort, height: _titleLine),
               const SizedBox(height: AppSpacing.md),
-              block(width: 90, height: 12),
+              block(width: _statWidths - 10, height: _statLine),
               const SizedBox(height: AppSpacing.md),
-              block(width: 110, height: 12),
+              block(width: _statWidths + 10, height: _statLine),
               const SizedBox(height: AppSpacing.sm),
-              block(width: 100, height: 12),
+              block(width: _statWidths, height: _statLine),
             ],
           ),
         ),

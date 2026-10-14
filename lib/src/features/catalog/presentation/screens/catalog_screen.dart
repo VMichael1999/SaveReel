@@ -111,7 +111,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           const _Section('Marca'),
           Row(
             children: [
-              const SaveticMark(size: 48),
+              const SaveticMark(size: AppSizes.markLarge),
               const SizedBox(width: AppSpacing.lg),
               Text('SaveTic', style: text.titleLarge),
             ],
@@ -355,7 +355,7 @@ class _StateRow extends StatelessWidget {
     final c = color ?? context.colors.downloading;
     return Row(
       children: [
-        Icon(icon, size: 18, color: c),
+        Icon(icon, size: AppSizes.iconMd, color: c),
         const SizedBox(width: AppSpacing.sm),
         Text(
           label,
