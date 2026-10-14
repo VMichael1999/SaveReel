@@ -35,4 +35,25 @@ class AppStrings {
       "Ese enlace es de $platform, no de TikTok.";
   static String downloadsInProgress(int n) =>
       n == 1 ? "Tus descargas, 1 en curso" : "Tus descargas, $n en curso";
+
+  // Vista previa
+  static const String previewSheetLabel = "Vista previa del video";
+  static const String formatLabel = "Formato";
+  static const String formatWithCredits = "Video con créditos";
+  static const String formatNoWatermark = "Video sin marca de agua";
+  static const String formatAudio = "Solo el audio";
+  static const String formatNoWatermarkHint = "Para verlo tú, sin conexión";
+  static const String formatAudioHint = "Archivo de música";
+  static const String formatWithCreditsNoAuthor = "Incluye el nombre del autor";
+  static const String downloadVideo = "Descargar video";
+  static const String downloadAudio = "Descargar audio";
+  static const String durationLabel = "de duración";
+  static const String playsLabel = "reproducciones";
+  static const String downloadsLabel = "descargas";
+  static const String coverLabel = "Portada del video";
+  static const String untitledVideo = "Video sin título";
+  static String formatWithCreditsHint(String handle) =>
+      "Muestra @$handle al compartir";
+  static String creditNote(String handle) =>
+      "Si lo compartes, menciona a @$handle.";
 }
