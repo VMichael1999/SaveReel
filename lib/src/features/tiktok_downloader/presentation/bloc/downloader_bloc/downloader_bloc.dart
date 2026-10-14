@@ -13,6 +13,7 @@ import '../../../domain/entities/tiktok_video.dart';
 import '../../../domain/entities/video_item.dart';
 import '../../../domain/usecases/get_video_usecase.dart';
 import '../../../domain/usecases/save_video_usecase.dart';
+import '../../models/download_format.dart';
 
 part 'downloader_event.dart';
 
@@ -49,8 +50,12 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     DownloaderSaveVideo event,
     Emitter<DownloaderState> emit,
   ) async {
-    final path = await _getPathById(event.tikTokVideo.videoData!.id);
-    final link = _processLink(event.tikTokVideo.videoData!.playVideo);
+    final videoData = event.tikTokVideo.videoData!;
+    final format = event.format;
+    final path = await _getPathFor(videoData.id, format);
+    final link = format.isAudio
+        ? format.urlOf(videoData)
+        : _processLink(format.urlOf(videoData));
     DownloadItem item = DownloadItem(
       video: event.tikTokVideo,
       status: DownloadStatus.downloading,
@@ -89,7 +94,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       return;
     }
     _updateItem(index, item.copyWith(status: DownloadStatus.success));
-    await _saveToGallery(path);
+    if (!format.isAudio) await _saveToGallery(path);
     emit(DownloaderSaveVideoSuccess(
       message: result.fold((_) => '', (message) => message),
       path: path,
@@ -110,9 +115,9 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     return link;
   }
 
-  Future<String> _getPathById(String id) async {
+  Future<String> _getPathFor(String id, DownloadFormat format) async {
     final appPath = await DirHelper.getAppPath();
-    return "$appPath/$id.mp4";
+    return "$appPath/${format.fileNameFor(id)}";
   }
 
   _updateItem(int index, DownloadItem item) {

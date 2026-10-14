@@ -15,11 +15,15 @@ class DownloaderGetVideo extends DownloaderEvent {
 
 class DownloaderSaveVideo extends DownloaderEvent {
   final TikTokVideo tikTokVideo;
+  final DownloadFormat format;
 
-  const DownloaderSaveVideo({required this.tikTokVideo});
+  const DownloaderSaveVideo({
+    required this.tikTokVideo,
+    this.format = DownloadFormat.withCredits,
+  });
 
   @override
-  List<Object?> get props => [tikTokVideo];
+  List<Object?> get props => [tikTokVideo, format];
 }
 
 class LoadOldDownloads extends DownloaderEvent {
