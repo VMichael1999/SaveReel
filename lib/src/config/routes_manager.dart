@@ -6,6 +6,7 @@ import '../features/tiktok_downloader/presentation/screens/downloader_screen.dar
 import '../features/tiktok_downloader/presentation/models/video_player_args.dart';
 import '../features/tiktok_downloader/presentation/screens/downloads_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/library_screen.dart';
+import '../features/tiktok_downloader/presentation/screens/settings_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/video_player_screen.dart';
 
 class Routes {
@@ -15,6 +16,7 @@ class Routes {
   static const String viewVideo = "/viewVideo";
   static const String catalog = "/catalog";
   static const String library = "/library";
+  static const String settings = "/settings";
 }
 
 class AppRouter {
@@ -22,6 +24,9 @@ class AppRouter {
     switch (routeSettings.name) {
       case Routes.splash:
         return MaterialPageRoute(builder: (context) => const SplashScreen());
+
+      case Routes.settings:
+        return MaterialPageRoute(builder: (context) => const SettingsScreen());
 
       case Routes.library:
         return MaterialPageRoute(builder: (context) => const LibraryScreen());

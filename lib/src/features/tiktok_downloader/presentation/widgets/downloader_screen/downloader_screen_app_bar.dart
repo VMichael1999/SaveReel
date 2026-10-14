@@ -52,6 +52,11 @@ class DownloaderScreenAppBar extends StatelessWidget
             );
           },
         ),
+        IconButton(
+          tooltip: AppStrings.settingsOpen,
+          onPressed: () => Navigator.of(context).pushNamed(Routes.settings),
+          icon: const Icon(Icons.settings_outlined),
+        ),
         const SizedBox(width: AppSpacing.sm),
       ],
     );
