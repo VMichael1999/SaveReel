@@ -6,24 +6,14 @@ import '../../../../../config/theme/savetic_colors.dart';
 import '../../../../../core/utils/app_enums.dart';
 import '../../../../../core/utils/app_strings.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
+import '../../bloc/library_cubit/library_cubit.dart';
 import 'active_download_tile.dart';
 import 'downloads_empty_state.dart';
 import 'finished_download_tile.dart';
-import 'saved_video_tile.dart';
+import 'library_link_row.dart';
 
-class DownloadsScreenBody extends StatefulWidget {
+class DownloadsScreenBody extends StatelessWidget {
   const DownloadsScreenBody({super.key});
-
-  @override
-  State<DownloadsScreenBody> createState() => _DownloadsScreenBodyState();
-}
-
-class _DownloadsScreenBodyState extends State<DownloadsScreenBody> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<DownloaderBloc>().add(LoadOldDownloads());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +30,10 @@ class _DownloadsScreenBodyState extends State<DownloadsScreenBody> {
                 .toList()
                 .reversed
                 .toList();
-        final earlier = bloc.oldDownloads;
+        final hasLibrary =
+            context.watch<LibraryCubit>().state.videos.isNotEmpty;
 
-        if (active.isEmpty && finished.isEmpty && earlier.isEmpty) {
+        if (active.isEmpty && finished.isEmpty && !hasLibrary) {
           return const DownloadsEmptyState();
         }
 
@@ -64,11 +55,7 @@ class _DownloadsScreenBodyState extends State<DownloadsScreenBody> {
               for (final item in finished)
                 FinishedDownloadTile(key: ValueKey(item.path), item: item),
             ],
-            if (earlier.isNotEmpty) ...[
-              const _SectionLabel(AppStrings.savedBefore),
-              for (final video in earlier)
-                SavedVideoTile(key: ValueKey(video.path), video: video),
-            ],
+            const LibraryLinkRow(),
           ],
         );
       },

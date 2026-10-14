@@ -53,7 +53,6 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       }
     });
     _checkClipboard();
-    context.read<DownloaderBloc>().add(LoadOldDownloads());
   }
 
   @override

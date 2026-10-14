@@ -3,8 +3,6 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/helpers/dir_helper.dart';
@@ -12,7 +10,6 @@ import '../../../../../core/utils/app_enums.dart';
 import '../../../domain/entities/cancel_signal.dart';
 import '../../../domain/entities/download_item.dart';
 import '../../../domain/entities/tiktok_video.dart';
-import '../../../domain/entities/video_item.dart';
 import '../../../domain/usecases/get_file_size_usecase.dart';
 import '../../../domain/usecases/get_video_usecase.dart';
 import '../../../domain/usecases/save_video_usecase.dart';
@@ -33,7 +30,6 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     required this.saveVideoUseCase,
     required this.getFileSizeUseCase,
   }) : super(DownloaderInitial()) {
-    on<LoadOldDownloads>(_loadOldDownloads);
     on<DownloaderGetVideo>(_getVideo);
     on<DownloaderSaveVideo>(_saveVideo);
     on<DownloaderCancelVideo>(_cancelVideo);
@@ -193,7 +189,6 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     DownloaderDeleteVideo event,
     Emitter<DownloaderState> emit,
   ) async {
-    oldDownloads.removeWhere((v) => v.path == event.path);
     _inGallery.remove(event.path);
     await _discard(event.path);
     emit(DownloaderVideoDeleted(event.path));
@@ -244,35 +239,5 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   void _update(String path, DownloadItem Function(DownloadItem) change) {
     final index = newDownloads.indexWhere((d) => d.path == path);
     if (index != -1) newDownloads[index] = change(newDownloads[index]);
-  }
-
-  List<VideoItem> oldDownloads = [];
-
-  Future<void> _loadOldDownloads(
-    LoadOldDownloads event,
-    Emitter<DownloaderState> emit,
-  ) async {
-    emit(const OldDownloadsLoading());
-    oldDownloads.clear();
-    final path = await DirHelper.getAppPath();
-    final directory = Directory(path);
-    final files = await directory.list().toList();
-    final newDownloadedVideosPaths = newDownloads.map((e) => e.path);
-    for (final file in files) {
-      if (file is File && file.path.endsWith('.mp4')) {
-        final videoPath = file.path;
-        if (newDownloadedVideosPaths.contains(videoPath)) continue;
-        final thumbnailPath = await VideoThumbnail.thumbnailFile(
-          video: videoPath,
-          thumbnailPath: (await getTemporaryDirectory()).path,
-          imageFormat: ImageFormat.PNG,
-          quality: 30,
-        );
-        oldDownloads.add(
-          VideoItem(path: videoPath)..thumbnailPath = thumbnailPath,
-        );
-      }
-    }
-    emit(OldDownloadsLoadingSuccess(downloads: oldDownloads));
   }
 }

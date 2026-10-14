@@ -52,8 +52,3 @@ class DownloaderDeleteVideo extends DownloaderEvent {
   @override
   List<Object?> get props => [path];
 }
-
-class LoadOldDownloads extends DownloaderEvent {
-  @override
-  List<Object?> get props => [];
-}
