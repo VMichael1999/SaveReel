@@ -2,6 +2,7 @@ import '../../container_injector.dart';
 import '../../core/helpers/dir_helper.dart';
 import '../../core/helpers/onboarding_store.dart';
 import '../../core/helpers/settings_store.dart';
+import '../../core/helpers/shared_link_receiver.dart';
 import 'data/datasources/local/saved_videos_local_data_source.dart';
 import 'data/datasources/remote/tiktok_video_remote_data_source.dart';
 import 'data/repositories/saved_videos_repo.dart';
@@ -18,6 +19,7 @@ import 'domain/usecases/record_saved_video_usecase.dart';
 import 'presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'presentation/bloc/library_cubit/library_cubit.dart';
 import 'presentation/bloc/settings_cubit/settings_cubit.dart';
+import 'presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import 'domain/usecases/get_file_size_usecase.dart';
 import 'domain/usecases/get_video_usecase.dart';
 import 'domain/usecases/save_video_usecase.dart';
@@ -67,6 +69,9 @@ void initDownloader() {
       clearThumbnailCacheUseCase: sl(),
     ),
   );
+  // enlaces que llegan desde «Compartir»
+  sl.registerLazySingleton(() => SharedLinkReceiver());
+  sl.registerLazySingleton(() => SharedLinkCubit(receiver: sl()));
   // ajustes
   sl.registerLazySingleton(() => SettingsStore());
   sl.registerLazySingleton(() => SettingsCubit(store: sl()));
