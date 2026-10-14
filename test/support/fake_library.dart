@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/core/helpers/onboarding_store.dart';
 import 'package:savetic/src/core/helpers/settings_store.dart';
+import 'package:savetic/src/core/helpers/shared_link_receiver.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/saved_videos_base_repo.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/clear_thumbnail_cache_usecase.dart';
@@ -14,6 +17,7 @@ import 'package:savetic/src/features/tiktok_downloader/domain/usecases/record_sa
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/app_settings.dart';
 
 /// Biblioteca en memoria para las pruebas.
@@ -126,3 +130,22 @@ class MemorySettingsStore extends SettingsStore {
 /// Ajustes ya cargados, por omisión los de fábrica.
 SettingsCubit fakeSettingsCubit([AppSettings settings = const AppSettings()]) =>
     SettingsCubit(store: MemorySettingsStore(settings.toJson()))..load();
+
+/// Fuente de texto compartido que las pruebas controlan a mano.
+class FakeSharedSource implements SharedTextSource {
+  FakeSharedSource({this.initial});
+
+  final String? initial;
+  final StreamController<String> controller = StreamController.broadcast();
+
+  @override
+  Future<String?> initialText() async => initial;
+
+  @override
+  Stream<String> get texts => controller.stream;
+}
+
+SharedLinkCubit fakeSharedLinkCubit([FakeSharedSource? source]) =>
+    SharedLinkCubit(
+      receiver: SharedLinkReceiver(sources: [source ?? FakeSharedSource()]),
+    );

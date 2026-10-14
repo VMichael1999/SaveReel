@@ -19,6 +19,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_u
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/downloader_screen.dart';
 
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import '../support/fake_library.dart';
 
 class _Repo implements TiktokVideoBaseRepo {
@@ -95,6 +96,7 @@ Future<_Screen> _pump(
         ),
         BlocProvider<LibraryCubit>.value(value: libraryCubit),
         BlocProvider<FirstUseCubit>.value(value: firstUse),
+        BlocProvider<SharedLinkCubit>.value(value: fakeSharedLinkCubit()),
       ],
       child: MaterialApp(
         theme: AppTheme.dark,
