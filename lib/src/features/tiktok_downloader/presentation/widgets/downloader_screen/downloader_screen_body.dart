@@ -146,6 +146,12 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                 context,
               ).pushNamed(Routes.viewVideo, arguments: path),
         );
+      case DownloaderSaveVideoCancelled():
+        showAppMessage(
+          context,
+          msg: AppStrings.downloadCancelled,
+          type: ToastType.success,
+        );
       case DownloaderSaveVideoFailure():
         showAppMessage(context, msg: state.message, type: ToastType.error);
       default:
