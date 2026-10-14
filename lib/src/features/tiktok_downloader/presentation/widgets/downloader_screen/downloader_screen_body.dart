@@ -262,8 +262,10 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                   icon:
                       searching
                           ? const SizedBox.square(
-                            dimension: AppSpacing.xl,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                            dimension: AppSizes.loader,
+                            child: CircularProgressIndicator(
+                              strokeWidth: AppSizes.loaderStroke,
+                            ),
                           )
                           : const Icon(Icons.search_rounded),
                   label: Text(

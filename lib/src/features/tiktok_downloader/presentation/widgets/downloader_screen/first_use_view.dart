@@ -70,10 +70,10 @@ class FirstUseView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 2),
+                        padding: const EdgeInsets.only(top: AppSpacing.xs),
                         child: Icon(
                           Icons.photo_library_outlined,
-                          size: AppSpacing.lg,
+                          size: AppSizes.iconSm,
                           color: colors.muted,
                         ),
                       ),
@@ -120,7 +120,7 @@ class FirstUseView extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.error_outline_rounded,
-                        size: AppSpacing.lg,
+                        size: AppSizes.iconSm,
                         color: colors.failed,
                       ),
                       const SizedBox(width: AppSpacing.sm),
@@ -178,12 +178,15 @@ class _Step extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: AppSizes.stepBadge,
+              height: AppSizes.stepBadge,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: colors.line, width: 1.5),
+                border: Border.all(
+                  color: colors.line,
+                  width: AppSizes.borderThin,
+                ),
               ),
               child: Text(
                 '$number',

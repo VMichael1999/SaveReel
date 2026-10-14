@@ -81,7 +81,7 @@ class FinishedDownloadTile extends StatelessWidget {
                       _failed
                           ? Icons.error_outline_rounded
                           : Icons.check_circle_outline_rounded,
-                      size: AppSpacing.lg,
+                      size: AppSizes.iconSm,
                       color: statusColor,
                     ),
                     const SizedBox(width: AppSpacing.xs),
@@ -108,7 +108,7 @@ class FinishedDownloadTile extends StatelessWidget {
                     style: _pillStyle,
                     icon: const Icon(
                       Icons.refresh_rounded,
-                      size: AppSpacing.lg,
+                      size: AppSizes.iconSm,
                     ),
                     label: const Text(AppStrings.retry),
                     onPressed:
@@ -121,7 +121,7 @@ class FinishedDownloadTile extends StatelessWidget {
                     style: _pillStyle,
                     icon: const Icon(
                       Icons.play_arrow_rounded,
-                      size: AppSpacing.lg,
+                      size: AppSizes.iconSm,
                     ),
                     label: Text(
                       isAudio ? AppStrings.play : AppStrings.viewVideo,

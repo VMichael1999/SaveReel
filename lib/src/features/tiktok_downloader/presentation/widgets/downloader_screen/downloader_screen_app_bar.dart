@@ -22,7 +22,7 @@ class DownloaderScreenAppBar extends StatelessWidget
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SaveticMark(size: 26),
+          const SaveticMark(size: AppSizes.markBar),
           const SizedBox(width: AppSpacing.sm),
           Text(AppStrings.appName, style: theme.textTheme.titleLarge),
         ],

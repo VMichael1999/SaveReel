@@ -65,7 +65,7 @@ class DownloaderBodyInputField extends StatelessWidget {
                     onPressed: _paste,
                     icon: const Icon(
                       Icons.content_paste_rounded,
-                      size: AppSpacing.lg,
+                      size: AppSizes.iconSm,
                     ),
                     label: const Text(AppStrings.paste),
                   ),
