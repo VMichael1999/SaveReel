@@ -30,7 +30,7 @@ void initDownloader() {
   );
   // repository
   sl.registerLazySingleton<TiktokVideoBaseRepo>(
-    () => TiktokVideoRepo(remoteDataSource: sl(), networkInfo: sl()),
+    () => TiktokVideoRepo(remoteDataSource: sl()),
   );
   // use-case
   sl.registerLazySingleton<GetVideoUseCase>(

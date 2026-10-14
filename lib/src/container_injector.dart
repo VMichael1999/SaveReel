@@ -1,10 +1,8 @@
 import 'features/tiktok_downloader/downloader_injector.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'core/helpers/dio_helper.dart';
 import 'core/api/interceptors.dart';
-import 'core/network/network_info.dart';
 
 final sl = GetIt.instance;
 
@@ -24,17 +22,9 @@ void initCore() {
   );
 
   // Dio Factory
-  sl.registerLazySingleton<DioHelper>(
-    () => DioHelper(dio: sl<Dio>()),
-  );
+  sl.registerLazySingleton<DioHelper>(() => DioHelper(dio: sl<Dio>()));
   // Network info
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(connectionChecker: sl<InternetConnectionChecker>()),
-  );
   // Internet Connection Checker
-  sl.registerLazySingleton<InternetConnectionChecker>(
-    () => InternetConnectionChecker.createInstance(),
-  );
 }
 
 void initApp() {
