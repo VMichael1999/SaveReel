@@ -4,6 +4,7 @@ import '../../../../config/theme/app_text.dart';
 import '../../../../config/theme/app_theme.dart';
 import '../../../../config/theme/app_tokens.dart';
 import '../../../../config/theme/savetic_colors.dart';
+import '../../../../core/widgets/app_message.dart';
 import '../../../../core/widgets/savetic_mark.dart';
 import '../../../../core/utils/app_enums.dart';
 import '../../../tiktok_downloader/domain/entities/download_item.dart';
@@ -233,25 +234,55 @@ class _CatalogScreenState extends State<CatalogScreen> {
             onPressed: () => showVideoPreviewSheet(context, _sampleVideo),
             child: const Text('Abrir la vista previa'),
           ),
-          const _Section('Mensajes y hojas'),
+          const _Section('Avisos'),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              OutlinedButton(
+                onPressed:
+                    () => showAppMessage(
+                      context,
+                      msg: 'Guardado en tu galería',
+                      type: MessageType.success,
+                    ),
+                child: const Text('Éxito'),
+              ),
+              OutlinedButton(
+                onPressed:
+                    () => showAppMessage(
+                      context,
+                      msg:
+                          'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
+                      type: MessageType.error,
+                    ),
+                child: const Text('Error'),
+              ),
+              OutlinedButton(
+                onPressed:
+                    () => showAppMessage(
+                      context,
+                      msg: 'Descarga exitosa',
+                      type: MessageType.success,
+                      actionLabel: 'Reproducir',
+                      onAction: () {},
+                    ),
+                child: const Text('Con acción'),
+              ),
+              OutlinedButton(
+                onPressed:
+                    () => showAppMessage(
+                      context,
+                      msg: 'Video eliminado',
+                      type: MessageType.info,
+                    ),
+                child: const Text('Info'),
+              ),
+            ],
+          ),
+          const _Section('Hojas'),
           Row(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed:
-                      () => ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Video guardado'),
-                          action: SnackBarAction(
-                            label: 'Ver',
-                            onPressed: () {},
-                          ),
-                        ),
-                      ),
-                  child: const Text('SnackBar'),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: OutlinedButton(
                   onPressed:

@@ -44,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showAppMessage(
       context,
       msg: AppStrings.settingsCacheCleared,
-      type: MessageType.success,
+      type: MessageType.info,
     );
   }
 
