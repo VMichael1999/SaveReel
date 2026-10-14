@@ -8,6 +8,9 @@ abstract final class AppSpacing {
   static const double lg = 16;
   static const double xl = 24;
   static const double xxl = 32;
+
+  /// Para el aire sobre un bloque grande, como bajo la sombra del reproductor.
+  static const double xxxl = 64;
 }
 
 /// Radios de esquina.
@@ -26,6 +29,31 @@ abstract final class AppSizes {
   static const double button = 54;
   static const double input = 54;
   static const double progressBar = 6;
+
+  /// Íconos: pequeño (junto a texto), mediano y de insignia sobre miniaturas.
+  static const double iconSm = 16;
+  static const double iconMd = 18;
+  static const double iconBadge = 13;
+
+  /// Indicador de carga dentro de un botón y el grosor de su trazo.
+  static const double loader = 24;
+  static const double loaderStroke = 2.5;
+
+  /// Marca de SaveTic: en la barra, en el splash y en el catálogo.
+  static const double markBar = 26;
+  static const double markSplash = 88;
+  static const double markLarge = 48;
+
+  /// Círculo numerado de la guía de primer uso.
+  static const double stepBadge = 34;
+
+  /// Botón central y fondo de audio del reproductor.
+  static const double playButton = 68;
+  static const double playIcon = 36;
+  static const double backdropIcon = 96;
+
+  /// Grosor de los bordes finos.
+  static const double borderThin = 1.5;
 }
 
 /// Duraciones y curvas con nombre. Se sustituyen por [Duration.zero]
@@ -60,5 +88,8 @@ abstract final class AppOverlay {
   static const Color shadeTop = Color(0x73000000);
   static const Color shadeBottom = Color(0xD1000000);
   static const Color clear = Color(0x00000000);
+
+  /// Verde menta para el «listo» sobre el video, en ambos temas.
+  static const Color done = Color(0xFF99F2C8);
   static const Color videoBackground = Color(0xFF000000);
 }
