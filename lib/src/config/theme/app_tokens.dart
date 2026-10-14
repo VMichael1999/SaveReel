@@ -36,6 +36,9 @@ abstract final class AppMotion {
   static const Duration slow = Duration(milliseconds: 400);
   static const Duration sheet = Duration(milliseconds: 450);
 
+  /// Un barrido completo del brillo de los marcadores de posición.
+  static const Duration shimmer = Duration(milliseconds: 1200);
+
   /// Para cambios de estado pequeños.
   static const Curve standard = Curves.easeOutCubic;
 
