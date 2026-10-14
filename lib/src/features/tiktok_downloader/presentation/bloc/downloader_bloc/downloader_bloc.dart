@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/utils/video_link.dart';
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/helpers/dir_helper.dart';
 import '../../../../../core/utils/app_enums.dart';
@@ -100,7 +101,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     final format = event.format;
     final path = await _getPathFor(videoData.id, format);
     final link =
-        format.isAudio
+        format.isAudio || videoData.network != VideoNetwork.tiktok
             ? format.urlOf(videoData)
             : _processLink(format.urlOf(videoData));
 

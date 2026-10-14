@@ -161,8 +161,8 @@ const _reel = TikTokVideo(
     duration: 0,
     title: 'Mi reel',
     originCover: 'https://ejemplo.pe/reel.jpg',
-    playVideo: 'https://ejemplo.pe/reel.mp4',
-    wmPlayVideo: 'https://ejemplo.pe/reel.mp4',
+    playVideo: 'https://ejemplo.pe/reel.mp4?sig=abc&oe=1',
+    wmPlayVideo: 'https://ejemplo.pe/reel.mp4?sig=abc&oe=1',
     music: '',
     playCount: 0,
     downloadCount: 0,
@@ -186,7 +186,8 @@ void main() {
       await tester.tap(find.textContaining('Descargar video'));
       await tester.pump();
       await _settle(tester);
-      expect(repo.saved, ['https://ejemplo.pe/reel.mp4']);
+      // La firma de la URL no se toca: no se le pega «.mp4» al final.
+    expect(repo.saved, ['https://ejemplo.pe/reel.mp4?sig=abc&oe=1']);
       await drainToasts(tester);
     },
   );
