@@ -25,10 +25,20 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   final SaveVideoUseCase saveVideoUseCase;
   final GetFileSizeUseCase getFileSizeUseCase;
 
+  /// Si el ajuste «Guardar en la galería» está activo.
+  final bool Function() shouldSaveToGallery;
+
+  /// Cómo se copia un video a la galería; las pruebas lo reemplazan.
+  final Future<void> Function(String path) gallerySaver;
+
+  static bool _always() => true;
+
   DownloaderBloc({
     required this.getVideoUseCase,
     required this.saveVideoUseCase,
     required this.getFileSizeUseCase,
+    this.shouldSaveToGallery = _always,
+    this.gallerySaver = DirHelper.saveVideoToGallery,
   }) : super(DownloaderInitial()) {
     on<DownloaderGetVideo>(_getVideo);
     on<DownloaderSaveVideo>(_saveVideo);
@@ -158,7 +168,11 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
         clearFailure: true,
       ),
     );
-    if (!format.isAudio && await _saveToGallery(path)) _inGallery.add(path);
+    if (!format.isAudio &&
+        shouldSaveToGallery() &&
+        await _saveToGallery(path)) {
+      _inGallery.add(path);
+    }
     emit(
       DownloaderSaveVideoSuccess(
         message: result.fold((_) => '', (message) => message),
@@ -208,7 +222,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   /// el archivo sigue disponible dentro de la app.
   Future<bool> _saveToGallery(String path) async {
     try {
-      await DirHelper.saveVideoToGallery(path);
+      await gallerySaver(path);
       return true;
     } catch (_) {
       return false;

@@ -64,10 +64,16 @@ class _ScriptedRepo implements TiktokVideoBaseRepo {
   }
 }
 
-DownloaderBloc _bloc(_ScriptedRepo repo) => DownloaderBloc(
+DownloaderBloc _bloc(
+  _ScriptedRepo repo, {
+  bool Function()? saveToGallery,
+  Future<void> Function(String)? gallerySaver,
+}) => DownloaderBloc(
   getVideoUseCase: GetVideoUseCase(videoRepo: repo),
   saveVideoUseCase: SaveVideoUseCase(videoRepo: repo),
   getFileSizeUseCase: GetFileSizeUseCase(videoRepo: repo),
+  shouldSaveToGallery: saveToGallery ?? () => true,
+  gallerySaver: gallerySaver ?? (_) async {},
 );
 
 void main() {
@@ -200,6 +206,73 @@ void main() {
     expect(bloc.newDownloads, isEmpty);
     expect(await File(path).exists(), isFalse);
     expect(bloc.isInGallery(path), isFalse);
+    await bloc.close();
+  });
+
+  test(
+    'con «Guardar en la galería» activo copia el video a la galería',
+    () async {
+      final copied = <String>[];
+      final bloc = _bloc(
+        _ScriptedRepo((_, __) async => const Right('ok')),
+        gallerySaver: (path) async => copied.add(path),
+      );
+
+      bloc.add(const DownloaderSaveVideo(tikTokVideo: _video));
+      await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
+
+      expect(copied, [bloc.newDownloads.single.path]);
+      expect(bloc.isInGallery(bloc.newDownloads.single.path), isTrue);
+      await bloc.close();
+    },
+  );
+
+  test('con «Guardar en la galería» apagado no copia nada', () async {
+    final copied = <String>[];
+    final bloc = _bloc(
+      _ScriptedRepo((_, __) async => const Right('ok')),
+      saveToGallery: () => false,
+      gallerySaver: (path) async => copied.add(path),
+    );
+
+    bloc.add(const DownloaderSaveVideo(tikTokVideo: _video));
+    await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
+
+    expect(copied, isEmpty);
+    expect(bloc.isInGallery(bloc.newDownloads.single.path), isFalse);
+    await bloc.close();
+  });
+
+  test('si la galería falla la descarga igual termina bien', () async {
+    final bloc = _bloc(
+      _ScriptedRepo((_, __) async => const Right('ok')),
+      gallerySaver: (_) async => throw Exception('sin permiso'),
+    );
+
+    bloc.add(const DownloaderSaveVideo(tikTokVideo: _video));
+    await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
+
+    expect(bloc.newDownloads.single.status, DownloadStatus.success);
+    expect(bloc.isInGallery(bloc.newDownloads.single.path), isFalse);
+    await bloc.close();
+  });
+
+  test('un audio nunca se copia a la galería de videos', () async {
+    final copied = <String>[];
+    final bloc = _bloc(
+      _ScriptedRepo((_, __) async => const Right('ok')),
+      gallerySaver: (path) async => copied.add(path),
+    );
+
+    bloc.add(
+      const DownloaderSaveVideo(
+        tikTokVideo: _video,
+        format: DownloadFormat.audio,
+      ),
+    );
+    await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
+
+    expect(copied, isEmpty);
     await bloc.close();
   });
 }
