@@ -52,3 +52,16 @@ abstract final class AppMotion {
   static Duration resolve(Duration d, {required bool disableAnimations}) =>
       disableAnimations ? Duration.zero : d;
 }
+
+/// Colores de los controles dibujados sobre el video. Son iguales en el
+/// tema claro y en el oscuro, porque el video siempre es el fondo.
+abstract final class AppOverlay {
+  static const Color onVideo = Color(0xFFFFFFFF);
+  static const Color onVideoMuted = Color(0xCCFFFFFF);
+  static const Color controlFill = Color(0x66000000);
+  static const Color actionFill = Color(0x1FFFFFFF);
+  static const Color track = Color(0x47FFFFFF);
+  static const Color shadeTop = Color(0x73000000);
+  static const Color shadeBottom = Color(0xD1000000);
+  static const Color clear = Color(0x00000000);
+}
