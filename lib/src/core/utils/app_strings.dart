@@ -5,14 +5,9 @@ class AppStrings {
   static const String download = "Descargar";
   static const String downloading = "Descargando";
   static const String downloads = "Descargas";
-  static const String videoLinkRequired = "El enlace del video es requerido";
   static const String downloadSuccess = "Descarga exitosa";
   static const String play = "Reproducir";
-  static const String retryDownload = "Reintentar descarga";
   static const String downloadFall = "Error en la descarga";
-  static const String permissionsRequired =
-      "Se requieren permisos, por favor acepte los permisos e intente nuevamente";
-  static const String oldDownloads = "Descargas antiguas";
 
   // Inicio
   static const String homeTitle = "Pega el enlace del video";
@@ -60,7 +55,6 @@ class AppStrings {
   // Descargas
   static const String inProgress = "En curso";
   static const String today = "Hoy";
-  static const String savedBefore = "Guardados antes";
   static const String cancelDownload = "Cancelar descarga";
   static const String viewVideo = "Ver video";
   static const String retry = "Reintentar";
@@ -72,9 +66,7 @@ class AppStrings {
   static const String emptyDownloadsBody =
       "Cuando guardes un video, lo verás aquí.";
   static const String pasteALink = "Pegar un enlace";
-  static const String savedVideo = "Video guardado";
   static const String share = "Compartir";
-  static const String shareVideo = "Compartir video";
   static const String withCreditsShort = "con créditos";
   static const String noWatermarkShort = "sin marca";
   static const String audioShort = "solo audio";
@@ -84,7 +76,6 @@ class AppStrings {
   // Reproductor
   static const String back = "Volver";
   static const String playVideo = "Reproducir";
-  static const String pauseVideo = "Pausar";
   static const String saveToGallery = "Guardar en galería";
   static const String inGallery = "En galería";
   static const String delete = "Eliminar";
