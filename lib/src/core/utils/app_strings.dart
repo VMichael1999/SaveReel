@@ -80,4 +80,23 @@ class AppStrings {
   static const String audioShort = "solo audio";
   static String stoppedAt(int percent) => "se quedó en $percent %";
   static String shareText(String handle) => "Video de @$handle";
+
+  // Reproductor
+  static const String back = "Volver";
+  static const String playVideo = "Reproducir";
+  static const String pauseVideo = "Pausar";
+  static const String saveToGallery = "Guardar en galería";
+  static const String inGallery = "En galería";
+  static const String delete = "Eliminar";
+  static const String cancel = "Cancelar";
+  static const String deleteTitle = "¿Eliminar este video?";
+  static const String deleteBodyCopy =
+      "Se borrará de SaveTic. La copia que guardaste en tu galería no se toca.";
+  static const String deleteBody = "Se borrará de SaveTic para siempre.";
+  static const String videoDeleted = "Video eliminado";
+  static const String cannotPlay = "No pudimos reproducir este video.";
+  static const String galleryFailed =
+      "No pudimos guardarlo en la galería. Revisa el permiso de Fotos.";
+  static const String galleryDone = "Guardado en tu galería";
+  static String playerPosition(String now, String total) => "$now de $total";
 }
