@@ -142,9 +142,10 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
           type: ToastType.success,
           actionLabel: AppStrings.play,
           onAction:
-              () => Navigator.of(
-                context,
-              ).pushNamed(Routes.viewVideo, arguments: path),
+              () => Navigator.of(context).pushNamed(
+                Routes.viewVideo,
+                arguments: context.read<DownloaderBloc>().playerArgsFor(path),
+              ),
         );
       case DownloaderSaveVideoCancelled():
         showAppMessage(

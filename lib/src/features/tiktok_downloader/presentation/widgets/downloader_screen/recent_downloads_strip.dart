@@ -19,8 +19,10 @@ class RecentDownloadsStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DownloaderBloc, DownloaderState>(
-      buildWhen: (_, state) =>
-          state is OldDownloadsLoadingSuccess || state is DownloaderVideoDeleted,
+      buildWhen:
+          (_, state) =>
+              state is OldDownloadsLoadingSuccess ||
+              state is DownloaderVideoDeleted,
       builder: (context, _) {
         final recents = _latest(context.read<DownloaderBloc>().oldDownloads);
         if (recents.isEmpty) return const SizedBox.shrink();
@@ -85,9 +87,12 @@ class _RecentThumb extends StatelessWidget {
       label: 'Reproducir video guardado',
       child: GestureDetector(
         onTap:
-            () => Navigator.of(
-              context,
-            ).pushNamed(Routes.viewVideo, arguments: video.path),
+            () => Navigator.of(context).pushNamed(
+              Routes.viewVideo,
+              arguments: context.read<DownloaderBloc>().playerArgsFor(
+                video.path,
+              ),
+            ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppRadii.md),
           child: AspectRatio(

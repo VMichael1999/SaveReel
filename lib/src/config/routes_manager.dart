@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:savetic/src/features/tiktok_downloader/presentation/widgets/downloads_screen/video_player_view.dart';
 
 import '../features/catalog/presentation/screens/catalog_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/downloader_screen.dart';
+import '../features/tiktok_downloader/presentation/models/video_player_args.dart';
 import '../features/tiktok_downloader/presentation/screens/downloads_screen.dart';
+import '../features/tiktok_downloader/presentation/screens/video_player_screen.dart';
 
 class Routes {
   static const String splash = "/splash";
@@ -32,8 +33,9 @@ class AppRouter {
       case Routes.viewVideo:
         return MaterialPageRoute(
           builder:
-              (context) =>
-                  VideoPlayerView(videoPath: routeSettings.arguments as String),
+              (context) => VideoPlayerScreen(
+                args: routeSettings.arguments as VideoPlayerArgs,
+              ),
         );
     }
     return null;

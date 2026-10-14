@@ -127,9 +127,12 @@ class FinishedDownloadTile extends StatelessWidget {
                       isAudio ? AppStrings.play : AppStrings.viewVideo,
                     ),
                     onPressed:
-                        () => Navigator.of(
-                          context,
-                        ).pushNamed(Routes.viewVideo, arguments: item.path),
+                        () => Navigator.of(context).pushNamed(
+                          Routes.viewVideo,
+                          arguments: context
+                              .read<DownloaderBloc>()
+                              .playerArgsFor(item.path),
+                        ),
                   ),
               ],
             ),

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../../config/routes_manager.dart';
 import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../core/utils/app_strings.dart';
 import '../../../domain/entities/video_item.dart';
+import '../../bloc/downloader_bloc/downloader_bloc.dart';
 import 'download_thumbnail.dart';
 
 /// Un video que ya estaba guardado de antes. La biblioteca lo reemplaza.
@@ -42,9 +44,12 @@ class SavedVideoTile extends StatelessWidget {
                     ),
                     label: const Text(AppStrings.viewVideo),
                     onPressed:
-                        () => Navigator.of(
-                          context,
-                        ).pushNamed(Routes.viewVideo, arguments: video.path),
+                        () => Navigator.of(context).pushNamed(
+                          Routes.viewVideo,
+                          arguments: context
+                              .read<DownloaderBloc>()
+                              .playerArgsFor(video.path),
+                        ),
                   ),
                 ),
               ],
