@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/core/helpers/onboarding_store.dart';
+import 'package:savetic/src/core/helpers/settings_store.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/saved_videos_base_repo.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/forget_saved_video_usecase.dart';
@@ -10,6 +11,8 @@ import 'package:savetic/src/features/tiktok_downloader/domain/usecases/probe_vid
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/record_saved_video_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/models/app_settings.dart';
 
 /// Biblioteca en memoria para las pruebas.
 class FakeSavedVideosRepo implements SavedVideosBaseRepo {
@@ -88,3 +91,20 @@ class MemoryOnboardingStore extends OnboardingStore {
 /// Por omisión la guía ya está descartada, para no estorbar otras pruebas.
 FirstUseCubit fakeFirstUseCubit({bool dismissed = true}) =>
     FirstUseCubit(store: MemoryOnboardingStore(dismissed: dismissed))..load();
+
+/// Almacén de ajustes en memoria.
+class MemorySettingsStore extends SettingsStore {
+  MemorySettingsStore([Map<String, dynamic>? initial]) : saved = {...?initial};
+
+  Map<String, dynamic> saved;
+
+  @override
+  Future<Map<String, dynamic>> read() async => {...saved};
+
+  @override
+  Future<void> write(Map<String, dynamic> values) async => saved = {...values};
+}
+
+/// Ajustes ya cargados, por omisión los de fábrica.
+SettingsCubit fakeSettingsCubit([AppSettings settings = const AppSettings()]) =>
+    SettingsCubit(store: MemorySettingsStore(settings.toJson()))..load();
