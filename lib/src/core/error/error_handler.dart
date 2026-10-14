@@ -41,9 +41,9 @@ Failure _handleResponseError(Response? response) {
     case 400:
       return const BadRequestFailure();
     case 403:
-      return NotSubscribedFailure(message: response?.data['message']);
+      return const NotSubscribedFailure();
     case 429:
-      return TooManyRequestsFailure(message: response?.data['message']);
+      return const TooManyRequestsFailure();
     case 404:
       return const NotFoundFailure();
     case 500:

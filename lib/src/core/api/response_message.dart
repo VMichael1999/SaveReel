@@ -1,24 +1,25 @@
 class Authorized {
   static const String badRequest =
-      "Bad request, Try again later"; // failure, API rejected request
+      "No pudimos procesar ese enlace. Revisa que sea de un video de TikTok.";
   static const String unauthorized =
-      "User is unauthorized, Try again later"; // failure, user is not authorized
+      "No tienes autorización para esta acción. Inténtalo más tarde.";
   static const String forbidden =
-      "Forbidden request, Try again later"; //  failure, API rejected request
+      "El servicio rechazó la solicitud. Inténtalo más tarde.";
   static const String notFound =
-      "Content not found, Try again later"; //  failure, API rejected request
+      "No encontramos ese video. Puede ser privado o haber sido borrado.";
   static const String internalServerError =
-      "Something went wrong, Try again later"; // failure, crash in server side
+      "El servicio tuvo un problema. Inténtalo de nuevo en un rato.";
 
   // local status code
-  static const String connectTimeOut = "Time out error, Try again later";
-  static const String cancel = "Request was cancelled, Try again later";
+  static const String connectTimeOut =
+      "La conexión tardó demasiado. Revisa tu internet e inténtalo de nuevo.";
+  static const String cancel = "Se canceló la solicitud.";
   static const String noInternetConnection =
-      "Please check your internet connection, and try again";
-  static const String unexpected = "Some thing went wrong, Try again later";
+      "Sin conexión. Revisa tu internet e inténtalo de nuevo.";
+  static const String unexpected = "Algo salió mal. Inténtalo de nuevo.";
 
   static const String tooManyRequests =
-      "Too many requests today, Try again later";
+      "Se alcanzó el límite de descargas de hoy. Inténtalo mañana.";
   static const String notSubscribed =
-      "You are not subscribed, Subscribe now to download more videos.";
+      "El servicio no está disponible por ahora. Inténtalo más tarde.";
 }

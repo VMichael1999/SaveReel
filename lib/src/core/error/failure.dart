@@ -41,11 +41,9 @@ class CancelRequestFailure extends Failure {
 }
 
 class TooManyRequestsFailure extends Failure {
-  const TooManyRequestsFailure({required String? message})
-      : super(message: message ?? Authorized.tooManyRequests);
+  const TooManyRequestsFailure() : super(message: Authorized.tooManyRequests);
 }
 
 class NotSubscribedFailure extends Failure {
-  const NotSubscribedFailure({required String? message})
-      : super(message: message ?? Authorized.notSubscribed);
+  const NotSubscribedFailure() : super(message: Authorized.notSubscribed);
 }
