@@ -44,6 +44,15 @@ class DownloaderRetryVideo extends DownloaderEvent {
   List<Object?> get props => [path];
 }
 
+class DownloaderDeleteVideo extends DownloaderEvent {
+  final String path;
+
+  const DownloaderDeleteVideo(this.path);
+
+  @override
+  List<Object?> get props => [path];
+}
+
 class LoadOldDownloads extends DownloaderEvent {
   @override
   List<Object?> get props => [];

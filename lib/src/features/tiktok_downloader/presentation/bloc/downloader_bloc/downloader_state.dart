@@ -84,6 +84,15 @@ class DownloaderSaveVideoCancelled extends DownloaderState {
   List<Object?> get props => [path];
 }
 
+class DownloaderVideoDeleted extends DownloaderState {
+  final String path;
+
+  const DownloaderVideoDeleted(this.path);
+
+  @override
+  List<Object?> get props => [path];
+}
+
 class OldDownloadsLoading extends DownloaderState {
   const OldDownloadsLoading();
 

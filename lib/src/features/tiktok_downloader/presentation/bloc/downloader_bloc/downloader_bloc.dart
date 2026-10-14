@@ -37,6 +37,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     on<DownloaderSaveVideo>(_saveVideo);
     on<DownloaderCancelVideo>(_cancelVideo);
     on<DownloaderRetryVideo>(_retryVideo);
+    on<DownloaderDeleteVideo>(_deleteVideo);
   }
 
   /// Peso de un archivo en bytes, o nulo si no se pudo saber.
@@ -63,6 +64,11 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   final Map<String, CancelSignal> _signals = {};
   final Map<String, DownloadFormat> _formats = {};
 
+  /// Rutas de las descargas cuya copia en la galería se pudo guardar.
+  final Set<String> _inGallery = {};
+
+  bool isInGallery(String path) => _inGallery.contains(path);
+
   /// Formato con que se pidió la descarga de [path], si sigue en la lista.
   DownloadFormat? formatOf(String path) => _formats[path];
 
@@ -73,19 +79,22 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     final videoData = event.tikTokVideo.videoData!;
     final format = event.format;
     final path = await _getPathFor(videoData.id, format);
-    final link = format.isAudio
-        ? format.urlOf(videoData)
-        : _processLink(format.urlOf(videoData));
+    final link =
+        format.isAudio
+            ? format.urlOf(videoData)
+            : _processLink(format.urlOf(videoData));
 
     final signal = CancelSignal();
     _signals[path] = signal;
     _formats[path] = format;
-    _upsert(DownloadItem(
-      video: event.tikTokVideo,
-      status: DownloadStatus.downloading,
-      path: path,
-      startedAt: DateTime.now(),
-    ));
+    _upsert(
+      DownloadItem(
+        video: event.tikTokVideo,
+        status: DownloadStatus.downloading,
+        path: path,
+        startedAt: DateTime.now(),
+      ),
+    );
     emit(const DownloaderSaveVideoLoading());
 
     int lastPercent = -1;
@@ -102,11 +111,13 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
           path,
           (item) => item.copyWith(receivedBytes: received, totalBytes: total),
         );
-        emit(DownloaderSaveVideoProgress(
-          path: path,
-          receivedBytes: received,
-          totalBytes: total,
-        ));
+        emit(
+          DownloaderSaveVideoProgress(
+            path: path,
+            receivedBytes: received,
+            totalBytes: total,
+          ),
+        );
       },
     );
 
@@ -137,11 +148,13 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
         clearFailure: true,
       ),
     );
-    if (!format.isAudio) await _saveToGallery(path);
-    emit(DownloaderSaveVideoSuccess(
-      message: result.fold((_) => '', (message) => message),
-      path: path,
-    ));
+    if (!format.isAudio && await _saveToGallery(path)) _inGallery.add(path);
+    emit(
+      DownloaderSaveVideoSuccess(
+        message: result.fold((_) => '', (message) => message),
+        path: path,
+      ),
+    );
   }
 
   void _cancelVideo(
@@ -154,10 +167,22 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   void _retryVideo(DownloaderRetryVideo event, Emitter<DownloaderState> emit) {
     final item = newDownloads.where((d) => d.path == event.path).firstOrNull;
     if (item == null) return;
-    add(DownloaderSaveVideo(
-      tikTokVideo: item.video,
-      format: _formats[event.path] ?? DownloadFormat.withCredits,
-    ));
+    add(
+      DownloaderSaveVideo(
+        tikTokVideo: item.video,
+        format: _formats[event.path] ?? DownloadFormat.withCredits,
+      ),
+    );
+  }
+
+  Future<void> _deleteVideo(
+    DownloaderDeleteVideo event,
+    Emitter<DownloaderState> emit,
+  ) async {
+    oldDownloads.removeWhere((v) => v.path == event.path);
+    _inGallery.remove(event.path);
+    await _discard(event.path);
+    emit(DownloaderVideoDeleted(event.path));
   }
 
   /// Quita la descarga de la lista y borra lo que alcanzó a bajar.
@@ -172,10 +197,13 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
 
   /// Copia el video a la galería. Si falla (por ejemplo, sin permiso),
   /// el archivo sigue disponible dentro de la app.
-  Future<void> _saveToGallery(String path) async {
+  Future<bool> _saveToGallery(String path) async {
     try {
       await DirHelper.saveVideoToGallery(path);
-    } catch (_) {}
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   String _processLink(String link) {
@@ -226,8 +254,9 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
           imageFormat: ImageFormat.PNG,
           quality: 30,
         );
-        oldDownloads
-            .add(VideoItem(path: videoPath)..thumbnailPath = thumbnailPath);
+        oldDownloads.add(
+          VideoItem(path: videoPath)..thumbnailPath = thumbnailPath,
+        );
       }
     }
     emit(OldDownloadsLoadingSuccess(downloads: oldDownloads));
