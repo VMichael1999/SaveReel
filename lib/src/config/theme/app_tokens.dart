@@ -54,6 +54,10 @@ abstract final class AppSizes {
 
   /// Grosor de los bordes finos.
   static const double borderThin = 1.5;
+
+  /// Aviso: círculo del ícono de estado y ancho máximo en pantallas grandes.
+  static const double toastBadge = 36;
+  static const double toastMaxWidth = 520;
 }
 
 /// Duraciones y curvas con nombre. Se sustituyen por [Duration.zero]
