@@ -38,6 +38,10 @@ void main() {
       expect(formatMegabytes(524288), '0.5 MB');
     });
 
+    test('puede omitir la unidad para mostrar «4.7 de 7.6 MB»', () {
+      expect(formatMegabytes(4928307, withUnit: false), '4.7');
+    });
+
     test('nunca muestra 0.0 MB', () {
       expect(formatMegabytes(1000), '0.1 MB');
     });
