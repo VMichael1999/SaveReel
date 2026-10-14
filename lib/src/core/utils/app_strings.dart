@@ -56,4 +56,28 @@ class AppStrings {
       "Muestra @$handle al compartir";
   static String creditNote(String handle) =>
       "Si lo compartes, menciona a @$handle.";
+
+  // Descargas
+  static const String inProgress = "En curso";
+  static const String today = "Hoy";
+  static const String savedBefore = "Guardados antes";
+  static const String cancelDownload = "Cancelar descarga";
+  static const String viewVideo = "Ver video";
+  static const String retry = "Reintentar";
+  static const String savedInGallery = "En tu galería";
+  static const String savedInApp = "Guardado en la app";
+  static const String downloadingNow = "Descargando…";
+  static const String downloadCancelled = "Descarga cancelada";
+  static const String emptyDownloadsTitle = "Aún no has guardado nada";
+  static const String emptyDownloadsBody =
+      "Cuando guardes un video, lo verás aquí.";
+  static const String pasteALink = "Pegar un enlace";
+  static const String savedVideo = "Video guardado";
+  static const String share = "Compartir";
+  static const String shareVideo = "Compartir video";
+  static const String withCreditsShort = "con créditos";
+  static const String noWatermarkShort = "sin marca";
+  static const String audioShort = "solo audio";
+  static String stoppedAt(int percent) => "se quedó en $percent %";
+  static String shareText(String handle) => "Video de @$handle";
 }
