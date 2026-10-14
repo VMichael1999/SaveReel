@@ -48,31 +48,37 @@ class SaveticColors extends ThemeExtension<SaveticColors> {
   final Color scrim;
 
   static const SaveticColors dark = SaveticColors(
-    accent: Color(0xFF99F2C8),
-    onAccent: Color(0xFF06152D),
-    downloading: Color(0xFF99F2C8),
-    done: Color(0xFF99F2C8),
-    failed: Color(0xFFFF7A7A),
-    failedSoft: Color(0xFF3A1A24),
-    raised: Color(0xFF13294D),
-    line: Color(0xFF1C3356),
-    border: Color(0xFF4E6D9A),
-    muted: Color(0xFF93A3B8),
-    scrim: Color(0x9E020812),
+    accent: Color(0xFFFF4D8D),
+    onAccent: Color(0xFF1A0B1F),
+    downloading: Color(0xFF25F4EE),
+    done: Color(0xFF4DF0D8),
+    failed: Color(0xFFFF7A59),
+    failedSoft: Color(0xFF3A1A22),
+    raised: Color(0xFF211A42),
+    line: Color(0xFF2C2354),
+    border: Color(0xFF6B5F9E),
+    muted: Color(0xFFA59CC4),
+    scrim: Color(0x9E07041A),
   );
 
   static const SaveticColors light = SaveticColors(
-    accent: Color(0xFF06152D),
+    accent: Color(0xFFD81B60),
     onAccent: Color(0xFFFFFFFF),
-    downloading: Color(0xFF0B7A55),
-    done: Color(0xFF0B7A55),
-    failed: Color(0xFFC62828),
-    failedSoft: Color(0xFFFCE4E4),
-    raised: Color(0xFFEEF1F5),
-    line: Color(0xFFE1E6ED),
-    border: Color(0xFF7F8DA4),
-    muted: Color(0xFF53627A),
-    scrim: Color(0x9E020812),
+    downloading: Color(0xFF0A7F85),
+    done: Color(0xFF0B7A6E),
+    failed: Color(0xFFC2410C),
+    failedSoft: Color(0xFFFDEBE3),
+    raised: Color(0xFFF1ECFA),
+    line: Color(0xFFE4DCF2),
+    border: Color(0xFF8A7FB0),
+    muted: Color(0xFF5E5580),
+    scrim: Color(0x9E07041A),
+  );
+
+  /// Violeta → magenta → naranja: el barrido de Instagram sobre el rosa de
+  /// TikTok. Solo decora (logo, insignias, progreso); nunca lleva texto.
+  static const LinearGradient brandGradient = LinearGradient(
+    colors: [Color(0xFF8134AF), Color(0xFFFF4D8D), Color(0xFFFF9A3C)],
   );
 
   @override
