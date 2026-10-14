@@ -1,78 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Importa el paquete de servicios
+import 'package:flutter/services.dart';
 
+import '../../../../../config/theme/app_tokens.dart';
+import '../../../../../config/theme/savetic_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
 
+/// Campo del enlace: un solo lugar para escribir, pegar y borrar.
 class DownloaderBodyInputField extends StatelessWidget {
-  final TextEditingController videoLinkController;
-  final GlobalKey<FormState> formKey;
-  final VoidCallback onSearch;
-
   const DownloaderBodyInputField({
     super.key,
-    required this.videoLinkController,
-    required this.formKey,
-    required this.onSearch,
+    required this.controller,
+    required this.focusNode,
+    required this.errorText,
+    required this.onSubmit,
+    required this.onPasted,
   });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final String? errorText;
+  final VoidCallback onSubmit;
+  final VoidCallback onPasted;
+
+  Future<void> _paste() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim();
+    if (text == null || text.isEmpty) return;
+    controller.text = text;
+    onPasted();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Form(
-            key: formKey,
-            child: TextFormField(
-              controller: videoLinkController,
-              keyboardType: TextInputType.url,
-              validator: (String? value) {
-                if (value!.isEmpty) return AppStrings.videoLinkRequired;
-                return null;
-              },
-              decoration: const InputDecoration(
-                hintText: AppStrings.inputLinkFieldText,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16), // Espacio entre el TextFormField y los IconButton
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(12),
+    final hasText = controller.text.isNotEmpty;
+    final colors = context.colors;
+
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      keyboardType: TextInputType.url,
+      textInputAction: TextInputAction.go,
+      autocorrect: false,
+      enableSuggestions: false,
+      onSubmitted: (_) => onSubmit(),
+      decoration: InputDecoration(
+        labelText: AppStrings.videoLink,
+        hintText: AppStrings.inputLinkFieldText,
+        errorText: errorText,
+        errorMaxLines: 3,
+        prefixIcon: Icon(
+          Icons.link_rounded,
+          color: errorText != null ? colors.failed : colors.muted,
+        ),
+        suffixIcon:
+            hasText
+                ? IconButton(
+                  tooltip: AppStrings.clearField,
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: controller.clear,
+                )
+                : Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.sm),
+                  child: TextButton.icon(
+                    onPressed: _paste,
+                    icon: const Icon(
+                      Icons.content_paste_rounded,
+                      size: AppSpacing.lg,
+                    ),
+                    label: const Text(AppStrings.paste),
+                  ),
                 ),
-                child: IconButton(
-                  onPressed: onSearch,
-                  icon: const Icon(Icons.search),
-                  tooltip: 'Buscar',
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  onPressed: () async {
-                    ClipboardData? clipboardData = await Clipboard.getData('text/plain');
-                    if (clipboardData != null) {
-                      videoLinkController.text = clipboardData.text ?? '';
-                    }
-                  },
-                  icon: const Icon(Icons.paste),
-                  tooltip: 'Pegar',
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
