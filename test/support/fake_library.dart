@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:savetic/src/core/error/failure.dart';
+import 'package:savetic/src/core/helpers/onboarding_store.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/saved_videos_base_repo.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/forget_saved_video_usecase.dart';
@@ -7,6 +8,7 @@ import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_saved
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_video_thumbnail_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/probe_video_duration_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/record_saved_video_usecase.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 
 /// Biblioteca en memoria para las pruebas.
@@ -69,3 +71,20 @@ LibraryCubit fakeLibraryCubit([FakeSavedVideosRepo? repo]) {
     forgetSavedVideo: ForgetSavedVideoUseCase(repo: r),
   );
 }
+
+/// Almacén de la guía de primer uso que vive solo en memoria.
+class MemoryOnboardingStore extends OnboardingStore {
+  MemoryOnboardingStore({bool dismissed = false}) : _dismissed = dismissed;
+
+  bool _dismissed;
+
+  @override
+  Future<bool> isDismissed() async => _dismissed;
+
+  @override
+  Future<void> dismiss() async => _dismissed = true;
+}
+
+/// Por omisión la guía ya está descartada, para no estorbar otras pruebas.
+FirstUseCubit fakeFirstUseCubit({bool dismissed = true}) =>
+    FirstUseCubit(store: MemoryOnboardingStore(dismissed: dismissed))..load();

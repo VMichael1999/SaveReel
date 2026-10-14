@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
@@ -66,8 +67,11 @@ Future<void> _pumpHome(WidgetTester tester) async {
             saveVideoUseCase: SaveVideoUseCase(videoRepo: repo),
             getFileSizeUseCase: GetFileSizeUseCase(videoRepo: repo),
           ),
-      child: BlocProvider<LibraryCubit>.value(
-        value: fakeLibraryCubit(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<LibraryCubit>.value(value: fakeLibraryCubit()),
+          BlocProvider<FirstUseCubit>.value(value: fakeFirstUseCubit()),
+        ],
         child: MaterialApp(
           theme: AppTheme.dark,
           home: const DownloaderScreen(),
