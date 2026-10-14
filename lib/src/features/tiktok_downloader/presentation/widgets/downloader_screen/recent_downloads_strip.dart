@@ -19,7 +19,8 @@ class RecentDownloadsStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DownloaderBloc, DownloaderState>(
-      buildWhen: (_, state) => state is OldDownloadsLoadingSuccess,
+      buildWhen: (_, state) =>
+          state is OldDownloadsLoadingSuccess || state is DownloaderVideoDeleted,
       builder: (context, _) {
         final recents = _latest(context.read<DownloaderBloc>().oldDownloads);
         if (recents.isEmpty) return const SizedBox.shrink();
