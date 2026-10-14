@@ -6,10 +6,16 @@ App Flutter para Android e iOS. SaveTic no está afiliada a TikTok.
 
 ## Cómo correrla
 
+Usa **Flutter 3.47.5** (ver `.fvmrc`). Con [fvm](https://fvm.app):
+
 ```bash
-flutter pub get
-flutter run
+fvm use 3.47.5
+fvm flutter pub get
+fvm flutter run
 ```
+
+Las versiones anteriores de Flutter no compilan para iOS con Xcode 26 o 27: su
+herramienta llama a `lipo -verify_arch` con una sintaxis que ese Xcode ya no acepta.
 
 Por omisión consulta el servicio público de [tikwm.com](https://www.tikwm.com), que no pide clave.
 
