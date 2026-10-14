@@ -1,3 +1,4 @@
+import '../../../../core/utils/video_link.dart';
 import '../../domain/entities/video_data.dart';
 
 /// Lee la página pública de inserción de Instagram (`/p/<código>/embed/`) y
@@ -27,6 +28,7 @@ abstract final class InstagramEmbedParser {
       music: '',
       playCount: 0,
       downloadCount: 0,
+      network: VideoNetwork.instagram,
       authorHandle: handle,
     );
   }

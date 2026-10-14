@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/video_link.dart';
+
 class VideoData extends Equatable {
   final String id;
   final int duration;
@@ -18,6 +20,9 @@ class VideoData extends Equatable {
   final int? playBytes;
   final int? wmPlayBytes;
 
+  /// Red de la que viene el video.
+  final VideoNetwork network;
+
   const VideoData({
     required this.id,
     required this.duration,
@@ -31,6 +36,7 @@ class VideoData extends Equatable {
     this.authorHandle,
     this.playBytes,
     this.wmPlayBytes,
+    this.network = VideoNetwork.tiktok,
   });
 
   @override
@@ -47,5 +53,6 @@ class VideoData extends Equatable {
     authorHandle,
     playBytes,
     wmPlayBytes,
+    network,
   ];
 }

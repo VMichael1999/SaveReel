@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../../core/utils/video_link.dart';
 import '../../domain/entities/video_data.dart';
 
 /// Pide el video a una instancia de Cobalt (https://github.com/imputnet/cobalt),
@@ -46,6 +47,7 @@ class InstagramCobaltClient {
       music: '',
       playCount: 0,
       downloadCount: 0,
+      network: VideoNetwork.instagram,
     );
   }
 
