@@ -151,4 +151,22 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('al eliminar un video avisa «Video eliminado»', (tester) async {
+    _mockPlatform();
+    await _pumpHome(tester);
+
+    final bloc =
+        tester.element(find.byType(DownloaderScreen)).read<DownloaderBloc>();
+    bloc.add(const DownloaderDeleteVideo('/app/video.mp4'));
+    // Borrar usa E/S real de archivos; se alternan los dos relojes.
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump();
+    }
+
+    expect(find.text('Video eliminado'), findsOneWidget);
+  });
 }

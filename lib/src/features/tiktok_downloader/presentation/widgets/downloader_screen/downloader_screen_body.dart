@@ -171,7 +171,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
         showAppMessage(
           context,
           msg: AppStrings.downloadSuccess,
-          type: ToastType.success,
+          type: MessageType.success,
           actionLabel: AppStrings.play,
           onAction:
               () => Navigator.of(context).pushNamed(
@@ -179,14 +179,20 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                 arguments: context.read<DownloaderBloc>().playerArgsFor(path),
               ),
         );
+      case DownloaderVideoDeleted():
+        showAppMessage(
+          context,
+          msg: AppStrings.videoDeleted,
+          type: MessageType.success,
+        );
       case DownloaderSaveVideoCancelled():
         showAppMessage(
           context,
           msg: AppStrings.downloadCancelled,
-          type: ToastType.success,
+          type: MessageType.success,
         );
       case DownloaderSaveVideoFailure():
-        showAppMessage(context, msg: state.message, type: ToastType.error);
+        showAppMessage(context, msg: state.message, type: MessageType.error);
       default:
         break;
     }
