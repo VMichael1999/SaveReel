@@ -37,26 +37,30 @@ class DownloadsScreenBody extends StatelessWidget {
           return const DownloadsEmptyState();
         }
 
-        return ListView(
+        // Las filas se construyen al desplazarse, no todas de golpe.
+        final rows = <Widget Function()>[
+          if (active.isNotEmpty) ...[
+            () => const _SectionLabel(AppStrings.inProgress),
+            for (final item in active)
+              () => ActiveDownloadTile(key: ValueKey(item.path), item: item),
+          ],
+          if (finished.isNotEmpty) ...[
+            () => const _SectionLabel(AppStrings.today),
+            for (final item in finished)
+              () => FinishedDownloadTile(key: ValueKey(item.path), item: item),
+          ],
+          () => const LibraryLinkRow(),
+        ];
+
+        return ListView.builder(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
             0,
             AppSpacing.lg,
             AppSpacing.xl,
           ),
-          children: [
-            if (active.isNotEmpty) ...[
-              const _SectionLabel(AppStrings.inProgress),
-              for (final item in active)
-                ActiveDownloadTile(key: ValueKey(item.path), item: item),
-            ],
-            if (finished.isNotEmpty) ...[
-              const _SectionLabel(AppStrings.today),
-              for (final item in finished)
-                FinishedDownloadTile(key: ValueKey(item.path), item: item),
-            ],
-            const LibraryLinkRow(),
-          ],
+          itemCount: rows.length,
+          itemBuilder: (context, i) => rows[i](),
         );
       },
     );
