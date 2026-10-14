@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
+
 import '../../../../../core/helpers/dio_helper.dart';
 import '../../../../../core/utils/app_constants.dart';
 import '../../../../../core/utils/app_strings.dart';
+import '../../../domain/entities/cancel_signal.dart';
 import '../../models/tiktok_video_model.dart';
 
 abstract class TiktokVideoBaseRemoteDataSource {
@@ -12,6 +15,7 @@ abstract class TiktokVideoBaseRemoteDataSource {
     required String videoLink,
     required String savePath,
     void Function(int received, int total)? onProgress,
+    CancelSignal? cancelSignal,
   });
 }
 
@@ -41,12 +45,16 @@ class TiktokVideoRemoteDataSource implements TiktokVideoBaseRemoteDataSource {
     required String videoLink,
     required String savePath,
     void Function(int received, int total)? onProgress,
+    CancelSignal? cancelSignal,
   }) async {
     try {
+      final cancelToken = CancelToken();
+      cancelSignal?.onCancel(cancelToken.cancel);
       await dioHelper.download(
         savePath: savePath,
         downloadLink: videoLink,
         onReceiveProgress: onProgress,
+        cancelToken: cancelToken,
       );
       return AppStrings.downloadSuccess;
     } catch (error) {

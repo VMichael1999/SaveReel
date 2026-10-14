@@ -1,4 +1,5 @@
 import '../../../../core/error/failure.dart';
+import '../entities/cancel_signal.dart';
 import '../entities/tiktok_video.dart';
 import 'package:dartz/dartz.dart';
 
@@ -12,5 +13,6 @@ abstract class TiktokVideoBaseRepo {
     required String videoLink,
     required String savePath,
     void Function(int received, int total)? onProgress,
+    CancelSignal? cancelSignal,
   });
 }

@@ -51,11 +51,13 @@ class DioHelper {
     required String savePath,
     Map<String, dynamic>? queryParams,
     ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
   }) async {
     return await _fileDio.download(
       downloadLink,
       savePath,
       onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
     );
   }
 }

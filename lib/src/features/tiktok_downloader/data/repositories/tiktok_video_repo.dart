@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/error_handler.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/network/network_info.dart';
+import '../../domain/entities/cancel_signal.dart';
 import '../../domain/entities/tiktok_video.dart';
 import '../../domain/mappers.dart';
 import '../../domain/repositories/tiktok_video_base_repo.dart';
@@ -46,6 +47,7 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
     required String videoLink,
     required String savePath,
     void Function(int received, int total)? onProgress,
+    CancelSignal? cancelSignal,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NoInternetConnectionFailure());
@@ -55,6 +57,7 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
         savePath: savePath,
         videoLink: videoLink,
         onProgress: onProgress,
+        cancelSignal: cancelSignal,
       );
       return Right(message);
     } on DioException catch (error) {
