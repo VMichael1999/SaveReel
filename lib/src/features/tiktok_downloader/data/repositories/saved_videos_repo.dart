@@ -38,6 +38,16 @@ class SavedVideosRepo implements SavedVideosBaseRepo {
       });
 
   @override
+  Future<Either<Failure, int>> thumbnailCacheSize() =>
+      _guard(localDataSource.thumbnailCacheSize);
+
+  @override
+  Future<Either<Failure, Unit>> clearThumbnailCache() => _guard(() async {
+        await localDataSource.clearThumbnailCache();
+        return unit;
+      });
+
+  @override
   Future<Either<Failure, Unit>> forget(String path) => _guard(() async {
     await localDataSource.forget(path);
     return unit;

@@ -17,4 +17,8 @@ abstract class SavedVideosBaseRepo {
 
   /// Quita los datos anotados del archivo (el archivo ya se borró aparte).
   Future<Either<Failure, Unit>> forget(String path);
+
+  Future<Either<Failure, int>> thumbnailCacheSize();
+
+  Future<Either<Failure, Unit>> clearThumbnailCache();
 }
