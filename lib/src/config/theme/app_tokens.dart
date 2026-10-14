@@ -47,10 +47,6 @@ abstract final class AppMotion {
 
   /// Para salidas, que deben ser más rápidas que las entradas.
   static const Curve exit = Curves.easeInCubic;
-
-  /// Devuelve [d] o cero si el usuario desactivó las animaciones.
-  static Duration resolve(Duration d, {required bool disableAnimations}) =>
-      disableAnimations ? Duration.zero : d;
 }
 
 /// Colores de los controles dibujados sobre el video. Son iguales en el
