@@ -42,7 +42,12 @@ void main() {
       expect(formatMegabytes(4928307, withUnit: false), '4.7');
     });
 
-    test('nunca muestra 0.0 MB', () {
+    test('un archivo vacío o ninguno pesa 0 MB, no 0.1', () {
+      expect(formatMegabytes(0), '0 MB');
+      expect(formatMegabytes(0, withUnit: false), '0');
+    });
+
+    test('un archivo diminuto no se redondea a 0.0 MB', () {
       expect(formatMegabytes(1000), '0.1 MB');
     });
   });

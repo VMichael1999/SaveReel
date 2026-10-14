@@ -20,6 +20,7 @@ String _oneDecimal(double v) {
 
 /// Peso de un archivo, siempre en MB con un decimal: `9.1 MB`.
 String formatMegabytes(int bytes, {bool withUnit = true}) {
+  if (bytes <= 0) return withUnit ? '0 MB' : '0';
   final mb = bytes / (1024 * 1024);
   final number = (mb < 0.1 ? 0.1 : mb).toStringAsFixed(1);
   return withUnit ? '$number MB' : number;
