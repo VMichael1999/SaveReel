@@ -65,6 +65,16 @@ abstract final class VideoLink {
     return const VideoLinkCheck(VideoLinkStatus.notTikTok);
   }
 
+  /// El enlace sin parámetros de seguimiento (`?is_from_webapp=1&…`) ni
+  /// fragmento, que el servicio no necesita y a veces le estorban. Si no es
+  /// un enlace válido, lo devuelve tal cual, sin espacios sobrantes.
+  static String normalize(String input) {
+    final text = input.trim();
+    if (!check(text).isValid) return text;
+    final uri = Uri.parse(text.contains('://') ? text : 'https://$text');
+    return Uri(scheme: uri.scheme, host: uri.host, path: uri.path).toString();
+  }
+
   /// Busca un enlace de TikTok válido dentro de un texto más largo, como el
   /// que queda en el portapapeles al copiar desde la app. Devuelve nulo si no hay.
   static String? find(String text) {

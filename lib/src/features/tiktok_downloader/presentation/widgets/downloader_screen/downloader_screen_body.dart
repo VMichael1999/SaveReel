@@ -151,7 +151,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     _focusNode.unfocus();
     context.read<FirstUseCubit>().dismiss();
     context.read<DownloaderBloc>().add(
-      DownloaderGetVideo(_controller.text.trim()),
+      DownloaderGetVideo(VideoLink.normalize(_controller.text)),
     );
   }
 
