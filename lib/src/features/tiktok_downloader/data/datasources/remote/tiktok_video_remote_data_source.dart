@@ -6,6 +6,8 @@ import '../../models/tiktok_video_model.dart';
 abstract class TiktokVideoBaseRemoteDataSource {
   Future<TiktokVideoModel> getVideo(String videoLink);
 
+  Future<int?> getFileSize(String url);
+
   Future<String> saveVideo({
     required String videoLink,
     required String savePath,
@@ -30,6 +32,9 @@ class TiktokVideoRemoteDataSource implements TiktokVideoBaseRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<int?> getFileSize(String url) => dioHelper.contentLength(url);
 
   @override
   Future<String> saveVideo({

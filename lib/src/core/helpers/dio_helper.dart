@@ -38,6 +38,14 @@ class DioHelper {
     return await dio.get(path, queryParameters: queryParams);
   }
 
+  /// Tamaño en bytes que informa el servidor, o nulo si no lo dice.
+  Future<int?> contentLength(String url) async {
+    final response = await _fileDio.head(url);
+    return int.tryParse(
+      response.headers.value(Headers.contentLengthHeader) ?? '',
+    );
+  }
+
   Future<Response> download({
     required String downloadLink,
     required String savePath,

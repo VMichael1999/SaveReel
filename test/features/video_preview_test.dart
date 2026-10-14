@@ -10,6 +10,7 @@ import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/video_data.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/tiktok_video_base_repo.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_file_size_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_video_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/save_video_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
@@ -36,9 +37,20 @@ const _video = TikTokVideo(
 class _FakeRepo implements TiktokVideoBaseRepo {
   final List<String> saved = [];
 
+  /// Pesos simulados por enlace, en bytes.
+  final Map<String, int?> sizes = {
+    'https://ejemplo.pe/con-marca': 9542041, // 9.1 MB
+    'https://ejemplo.pe/limpio': 8808038, // 8.4 MB
+    'https://ejemplo.pe/audio.mp3': 524288, // 0.5 MB
+  };
+
   @override
   Future<Either<Failure, TikTokVideo>> getVideo(String videoLink) async =>
       const Right(_video);
+
+  @override
+  Future<Either<Failure, int?>> getFileSize(String url) async =>
+      Right(sizes[url]);
 
   @override
   Future<Either<Failure, String>> saveVideo({
@@ -74,6 +86,7 @@ Future<_FakeRepo> _openPreview(WidgetTester tester) async {
           (_) => DownloaderBloc(
             getVideoUseCase: GetVideoUseCase(videoRepo: repo),
             saveVideoUseCase: SaveVideoUseCase(videoRepo: repo),
+            getFileSizeUseCase: GetFileSizeUseCase(videoRepo: repo),
           ),
       child: MaterialApp(
         theme: AppTheme.dark,

@@ -30,6 +30,18 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
   }
 
   @override
+  Future<Either<Failure, int?>> getFileSize(String url) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NoInternetConnectionFailure());
+    }
+    try {
+      return Right(await remoteDataSource.getFileSize(url));
+    } on DioException catch (error) {
+      return Left(ErrorHandler.handle(error).failure);
+    }
+  }
+
+  @override
   Future<Either<Failure, String>> saveVideo({
     required String videoLink,
     required String savePath,

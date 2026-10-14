@@ -11,6 +11,7 @@ import '../../../../../core/utils/app_enums.dart';
 import '../../../domain/entities/download_item.dart';
 import '../../../domain/entities/tiktok_video.dart';
 import '../../../domain/entities/video_item.dart';
+import '../../../domain/usecases/get_file_size_usecase.dart';
 import '../../../domain/usecases/get_video_usecase.dart';
 import '../../../domain/usecases/save_video_usecase.dart';
 import '../../models/download_format.dart';
@@ -22,14 +23,22 @@ part 'downloader_state.dart';
 class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   final GetVideoUseCase getVideoUseCase;
   final SaveVideoUseCase saveVideoUseCase;
+  final GetFileSizeUseCase getFileSizeUseCase;
 
   DownloaderBloc({
     required this.getVideoUseCase,
     required this.saveVideoUseCase,
+    required this.getFileSizeUseCase,
   }) : super(DownloaderInitial()) {
     on<LoadOldDownloads>(_loadOldDownloads);
     on<DownloaderGetVideo>(_getVideo);
     on<DownloaderSaveVideo>(_saveVideo);
+  }
+
+  /// Peso de un archivo en bytes, o nulo si no se pudo saber.
+  Future<int?> fileSizeOf(String url) async {
+    final result = await getFileSizeUseCase(url);
+    return result.fold((_) => null, (size) => size);
   }
 
   List<DownloadItem> newDownloads = [];

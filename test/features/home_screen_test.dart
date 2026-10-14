@@ -9,6 +9,7 @@ import 'package:savetic/src/config/theme/app_theme.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/tiktok_video_base_repo.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_file_size_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_video_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/save_video_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
@@ -18,6 +19,10 @@ class _FakeRepo implements TiktokVideoBaseRepo {
   @override
   Future<Either<Failure, TikTokVideo>> getVideo(String videoLink) async =>
       const Left(NotFoundFailure());
+
+  @override
+  Future<Either<Failure, int?>> getFileSize(String url) async =>
+      const Right(null);
 
   @override
   Future<Either<Failure, String>> saveVideo({
@@ -55,6 +60,7 @@ Future<void> _pumpHome(WidgetTester tester) async {
           (_) => DownloaderBloc(
             getVideoUseCase: GetVideoUseCase(videoRepo: repo),
             saveVideoUseCase: SaveVideoUseCase(videoRepo: repo),
+            getFileSizeUseCase: GetFileSizeUseCase(videoRepo: repo),
           ),
       child: MaterialApp(theme: AppTheme.dark, home: const DownloaderScreen()),
     ),
