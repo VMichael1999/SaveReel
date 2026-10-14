@@ -11,6 +11,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library
 import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/video_data.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/tiktok_video_base_repo.dart';
@@ -75,7 +76,11 @@ Future<void> _settle(WidgetTester tester) async {
   }
 }
 
-Future<DownloaderBloc> _pump(WidgetTester tester, _Repo repo) async {
+Future<DownloaderBloc> _pump(
+  WidgetTester tester,
+  _Repo repo, {
+  List<SavedVideo> library = const [],
+}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
@@ -97,11 +102,13 @@ Future<DownloaderBloc> _pump(WidgetTester tester, _Repo repo) async {
     getFileSizeUseCase: GetFileSizeUseCase(videoRepo: repo),
   );
 
+  final libraryCubit = fakeLibraryCubit(FakeSavedVideosRepo(videos: library));
+  await tester.runAsync(libraryCubit.load);
   await tester.pumpWidget(
     MultiBlocProvider(
       providers: [
         BlocProvider.value(value: bloc),
-        BlocProvider<LibraryCubit>.value(value: fakeLibraryCubit()),
+        BlocProvider<LibraryCubit>.value(value: libraryCubit),
       ],
       child: MaterialApp(
         theme: AppTheme.dark,
@@ -189,4 +196,26 @@ void main() {
     expect(find.text('Ver video'), findsOneWidget);
     expect(find.textContaining('En tu galería'), findsOneWidget);
   });
+
+  testWidgets(
+    'con videos de antes pero nada bajando lo aclara y ofrece la biblioteca',
+    (tester) async {
+      await _pump(
+        tester,
+        _Repo((_, __) async => const Right('ok')),
+        library: [
+          SavedVideo(
+            path: '/app/a.mp4',
+            sizeBytes: 1048576,
+            modified: DateTime(2026, 1, 1),
+            durationSeconds: 10,
+          ),
+        ],
+      );
+
+      expect(find.text('No hay descargas en curso.'), findsOneWidget);
+      expect(find.text('Tu biblioteca'), findsOneWidget);
+      expect(find.text('1 archivo · 1.0 MB'), findsOneWidget);
+    },
+  );
 }

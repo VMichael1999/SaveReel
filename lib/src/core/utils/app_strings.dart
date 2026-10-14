@@ -158,4 +158,5 @@ class AppStrings {
   static const String legalNotice =
       "SaveTic no está afiliada a TikTok. Descarga solo videos que tengas "
       "permiso de guardar y respeta a sus autores.";
+  static const String noActiveDownloads = "No hay descargas en curso.";
 }

@@ -39,6 +39,7 @@ class DownloadsScreenBody extends StatelessWidget {
 
         // Las filas se construyen al desplazarse, no todas de golpe.
         final rows = <Widget Function()>[
+          if (active.isEmpty && finished.isEmpty) () => const _NoActiveNote(),
           if (active.isNotEmpty) ...[
             () => const _SectionLabel(AppStrings.inProgress),
             for (final item in active)
@@ -84,6 +85,24 @@ class _SectionLabel extends StatelessWidget {
             context,
           ).textTheme.labelSmall?.copyWith(color: context.colors.muted),
         ),
+      ),
+    );
+  }
+}
+
+/// Cuando solo hay videos de antes, aclara que no hay nada bajando.
+class _NoActiveNote extends StatelessWidget {
+  const _NoActiveNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: Text(
+        AppStrings.noActiveDownloads,
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: context.colors.muted),
       ),
     );
   }
