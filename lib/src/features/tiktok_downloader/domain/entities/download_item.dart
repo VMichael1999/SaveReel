@@ -11,12 +11,20 @@ class DownloadItem extends Equatable {
   final int receivedBytes;
   final int totalBytes;
 
+  /// Momento en que empezó la descarga, para estimar el tiempo restante.
+  final DateTime? startedAt;
+
+  /// Qué falló, si la descarga terminó con error.
+  final String? failureMessage;
+
   const DownloadItem({
     required this.video,
     required this.status,
     required this.path,
     this.receivedBytes = 0,
     this.totalBytes = 0,
+    this.startedAt,
+    this.failureMessage,
   });
 
   /// Avance de 0 a 1, o nulo si el servidor no informó el tamaño.
@@ -29,6 +37,9 @@ class DownloadItem extends Equatable {
     String? path,
     int? receivedBytes,
     int? totalBytes,
+    DateTime? startedAt,
+    String? failureMessage,
+    bool clearFailure = false,
   }) {
     return DownloadItem(
       video: video ?? this.video,
@@ -36,9 +47,20 @@ class DownloadItem extends Equatable {
       path: path ?? this.path,
       receivedBytes: receivedBytes ?? this.receivedBytes,
       totalBytes: totalBytes ?? this.totalBytes,
+      startedAt: startedAt ?? this.startedAt,
+      failureMessage:
+          clearFailure ? null : (failureMessage ?? this.failureMessage),
     );
   }
 
   @override
-  List<Object> get props => [video, status, path, receivedBytes, totalBytes];
+  List<Object?> get props => [
+        video,
+        status,
+        path,
+        receivedBytes,
+        totalBytes,
+        startedAt,
+        failureMessage,
+      ];
 }
