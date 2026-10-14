@@ -141,4 +141,30 @@ class AppStrings {
   static const String haveALink = "Ya tengo un enlace";
   static const String tikTokNotFound = "No encontramos TikTok en tu teléfono.";
   static String stepLabel(int n, String title) => "Paso $n: $title";
+
+  // Ajustes
+  static const String settingsTitle = "Ajustes";
+  static const String settingsOpen = "Ajustes";
+  static const String sectionOnDownload = "Al descargar";
+  static const String sectionSpace = "Espacio";
+  static const String sectionAppearance = "Apariencia";
+  static const String settingsFormat = "Formato";
+  static const String settingsFormatValueCredits = "Con créditos";
+  static const String settingsFormatValueNoWatermark = "Sin marca de agua";
+  static const String settingsFormatValueAudio = "Solo audio";
+  static const String settingsFormatHintCredits =
+      "Muestra al autor al compartir";
+  static const String settingsGallery = "Guardar en la Galería";
+  static const String settingsGalleryHint = 'Álbum "SaveTic"';
+  static const String settingsDownloads = "Descargas";
+  static const String settingsClearCache = "Borrar miniaturas en caché";
+  static const String settingsCacheCleared = "Miniaturas borradas";
+  static const String settingsTheme = "Tema";
+  static const String themeSystem = "Sistema";
+  static const String themeSystemHint = "Sigue el tema de tu teléfono";
+  static const String themeLight = "Claro";
+  static const String themeDark = "Oscuro";
+  static const String legalNotice =
+      "SaveTic no está afiliada a TikTok. Descarga solo videos que tengas "
+      "permiso de guardar y respeta a sus autores.";
 }
