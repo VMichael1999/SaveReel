@@ -37,6 +37,9 @@ class AppStrings {
   static const String formatLabel = "Formato";
   static const String formatWithCredits = "Video con créditos";
   static const String formatNoWatermark = "Video sin marca de agua";
+  static const String formatInstagramVideo = "Video";
+  static const String formatInstagramVideoHint =
+      "En la mejor calidad que entrega Instagram";
   static const String formatAudio = "Solo el audio";
   static const String formatNoWatermarkHint = "Para verlo tú, sin conexión";
   static const String formatAudioHint = "Archivo de música";

@@ -30,6 +30,8 @@ class ValidLinksHint extends StatelessWidget {
           Text('vm.tiktok.com/ZMh7K2pQx/', style: mono),
           const SizedBox(height: AppSpacing.xs),
           Text('tiktok.com/@autor/video/7412…', style: mono),
+          const SizedBox(height: AppSpacing.xs),
+          Text('instagram.com/reel/C9xQ2…', style: mono),
         ],
       ),
     );

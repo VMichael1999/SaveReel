@@ -14,6 +14,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/models/downl
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
+import 'package:savetic/src/core/utils/video_link.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/video_data.dart';
@@ -151,7 +152,45 @@ Future<void> _settle(WidgetTester tester) async {
   }
 }
 
+const _reel = TikTokVideo(
+  code: 0,
+  msg: 'success',
+  processedTime: 0,
+  videoData: VideoData(
+    id: 'C9xQ2',
+    duration: 0,
+    title: 'Mi reel',
+    originCover: 'https://ejemplo.pe/reel.jpg',
+    playVideo: 'https://ejemplo.pe/reel.mp4',
+    wmPlayVideo: 'https://ejemplo.pe/reel.mp4',
+    music: '',
+    playCount: 0,
+    downloadCount: 0,
+    authorHandle: 'viajes.peru',
+    network: VideoNetwork.instagram,
+  ),
+);
+
 void main() {
+  testWidgets(
+    'un video de Instagram ofrece un solo formato y sin cifras en 0',
+    (tester) async {
+      final repo = await _openPreview(tester, video: _reel);
+
+      expect(find.text('Video'), findsOneWidget);
+      expect(find.text('Video con créditos'), findsNothing);
+      expect(find.text('Solo el audio'), findsNothing);
+      expect(find.text('Instagram'), findsOneWidget);
+      expect(find.textContaining('reproducciones'), findsNothing);
+
+      await tester.tap(find.textContaining('Descargar video'));
+      await tester.pump();
+      await _settle(tester);
+      expect(repo.saved, ['https://ejemplo.pe/reel.mp4']);
+      await drainToasts(tester);
+    },
+  );
+
   testWidgets('la vista previa muestra autor, duración y cifras con etiqueta', (
     tester,
   ) async {
