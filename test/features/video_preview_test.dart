@@ -182,6 +182,7 @@ void main() {
       await _settle(tester);
 
       expect(repo.saved, ['https://ejemplo.pe/con-marca.mp4']);
+      await drainToasts(tester);
     },
   );
 
@@ -199,6 +200,7 @@ void main() {
     await _settle(tester);
 
     expect(repo.saved, ['https://ejemplo.pe/audio.mp3']);
+    await drainToasts(tester);
   });
 
   testWidgets('el formato predeterminado de los ajustes viene elegido', (

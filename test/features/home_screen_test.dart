@@ -169,6 +169,10 @@ void main() {
       await tester.pump();
     }
 
+    // El aviso se dibuja un par de cuadros después de pedirlo.
+    await tester.pump(const Duration(milliseconds: 300));
+
     expect(find.text('Video eliminado'), findsOneWidget);
+    await drainToasts(tester);
   });
 }

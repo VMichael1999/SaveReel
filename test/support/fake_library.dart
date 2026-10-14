@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/core/helpers/onboarding_store.dart';
 import 'package:savetic/src/core/helpers/settings_store.dart';
@@ -149,3 +150,8 @@ SharedLinkCubit fakeSharedLinkCubit([FakeSharedSource? source]) =>
     SharedLinkCubit(
       receiver: SharedLinkReceiver(sources: [source ?? FakeSharedSource()]),
     );
+
+/// Deja pasar el tiempo que un aviso tarda en cerrarse solo. Una prueba que
+/// termina con un aviso en pantalla deja su temporizador pendiente y falla.
+Future<void> drainToasts(WidgetTester tester) =>
+    tester.pump(const Duration(seconds: 7));
