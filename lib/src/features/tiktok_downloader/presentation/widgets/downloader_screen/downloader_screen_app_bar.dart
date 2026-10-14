@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../config/routes_manager.dart';
-import '../../../../../core/utils/app_assets.dart';
-import '../../../../../core/utils/app_colors.dart';
+import '../../../../../config/theme/app_tokens.dart';
+import '../../../../../core/utils/app_enums.dart';
 import '../../../../../core/utils/app_strings.dart';
+import '../../../../../core/widgets/savetic_mark.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
 
 class DownloaderScreenAppBar extends StatelessWidget
@@ -13,51 +14,49 @@ class DownloaderScreenAppBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return AppBar(
-      title: const Text(AppStrings.appName, style: TextStyle(fontSize: 20, color: AppColors.white)),
+      centerTitle: false,
+      titleSpacing: AppSpacing.lg,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SaveticMark(size: 26),
+          const SizedBox(width: AppSpacing.sm),
+          Text(AppStrings.appName, style: theme.textTheme.titleLarge),
+        ],
+      ),
       actions: [
         BlocBuilder<DownloaderBloc, DownloaderState>(
           builder: (context, state) {
-            final allDownloads = context.read<DownloaderBloc>().newDownloads;
+            final active =
+                context
+                    .read<DownloaderBloc>()
+                    .newDownloads
+                    .where((d) => d.status == DownloadStatus.downloading)
+                    .length;
 
-            return ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed(Routes.downloads);
-              },
-              child: allDownloads.isNotEmpty
-                  ? Stack(
-                      alignment: Alignment.topLeft,
-                      children: [
-                        _buildDownloadsIcons(),
-                        CircleAvatar(
-                          backgroundColor: AppColors.primaryColor,
-                          radius: 10,
-                          child: Text(
-                            allDownloads.length.toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(color: AppColors.white),
-                          ),
-                        ),
-                      ],
-                    )
-                  : _buildDownloadsIcons(),
+            return IconButton(
+              tooltip:
+                  active > 0
+                      ? AppStrings.downloadsInProgress(active)
+                      : AppStrings.openDownloads,
+              onPressed:
+                  () => Navigator.of(context).pushNamed(Routes.downloads),
+              icon: Badge(
+                isLabelVisible: active > 0,
+                label: Text('$active'),
+                child: const Icon(Icons.video_library_outlined),
+              ),
             );
           },
         ),
+        const SizedBox(width: AppSpacing.sm),
       ],
     );
   }
 
-  Image _buildDownloadsIcons() {
-    return const Image(
-      width: 40,
-      height: 40,
-      image: AssetImage(AppAssets.downloadsIcon),
-    );
-  }
-
   @override
-  Size get preferredSize => const Size.fromHeight(60);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
