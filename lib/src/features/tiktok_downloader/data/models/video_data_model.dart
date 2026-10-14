@@ -11,6 +11,7 @@ class VideoDataModel extends VideoData {
     required super.music,
     required super.playCount,
     required super.downloadCount,
+    super.authorHandle,
   });
 
   factory VideoDataModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,13 @@ class VideoDataModel extends VideoData {
       music: json["music"],
       playCount: json["play_count"],
       downloadCount: json["download_count"],
+      authorHandle: _readAuthorHandle(json["author"]),
     );
+  }
+
+  static String? _readAuthorHandle(dynamic author) {
+    if (author is! Map) return null;
+    final handle = author["unique_id"];
+    return handle is String && handle.isNotEmpty ? handle : null;
   }
 }

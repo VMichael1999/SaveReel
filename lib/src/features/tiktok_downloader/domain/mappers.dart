@@ -23,5 +23,6 @@ extension VideoDataExtension on VideoDataModel {
         music: music,
         playCount: playCount,
         downloadCount: downloadCount,
+        authorHandle: authorHandle,
       );
 }
