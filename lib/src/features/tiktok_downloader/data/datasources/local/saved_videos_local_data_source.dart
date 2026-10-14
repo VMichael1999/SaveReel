@@ -10,6 +10,7 @@ import '../../../domain/entities/saved_video.dart';
 typedef RootPathProvider = Future<String> Function();
 typedef ThumbnailMaker = Future<String?> Function(String videoPath);
 typedef DurationReader = Future<int?> Function(String videoPath);
+typedef CacheDirectoryProvider = Future<Directory> Function();
 
 abstract class SavedVideosBaseLocalDataSource {
   Future<List<SavedVideo>> list();
@@ -21,6 +22,11 @@ abstract class SavedVideosBaseLocalDataSource {
   Future<void> record(SavedVideoMetadata metadata);
 
   Future<void> forget(String path);
+
+  /// Peso en bytes de las portadas guardadas en caché.
+  Future<int> thumbnailCacheSize();
+
+  Future<void> clearThumbnailCache();
 }
 
 /// Lee la carpeta de descargas. Los datos de cada video viven en un archivo
@@ -30,11 +36,15 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
     required this.rootPath,
     ThumbnailMaker? makeThumbnail,
     DurationReader? readDuration,
-  }) : _makeThumbnail = makeThumbnail ?? _defaultThumbnail,
-       _readDuration = readDuration ?? _defaultDuration;
+    CacheDirectoryProvider? cacheDirectory,
+  }) : _cacheDirectory = cacheDirectory ?? _defaultCacheDirectory,
+       _readDuration = readDuration ?? _defaultDuration {
+    _makeThumbnail = makeThumbnail ?? _defaultThumbnail;
+  }
 
   final RootPathProvider rootPath;
-  final ThumbnailMaker _makeThumbnail;
+  late final ThumbnailMaker _makeThumbnail;
+  final CacheDirectoryProvider _cacheDirectory;
   final DurationReader _readDuration;
 
   static const _extensions = ['.mp4', '.mp3'];
@@ -113,9 +123,29 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
   @override
   Future<String?> thumbnailFor(String path) => _makeThumbnail(path);
 
-  static Future<String?> _defaultThumbnail(String videoPath) async {
+  static Future<Directory> _defaultCacheDirectory() async =>
+      Directory('${(await getTemporaryDirectory()).path}/portadas');
+
+  @override
+  Future<int> thumbnailCacheSize() async {
+    final dir = await _cacheDirectory();
+    if (!await dir.exists()) return 0;
+    var total = 0;
+    await for (final entity in dir.list(recursive: true)) {
+      if (entity is File) total += await entity.length();
+    }
+    return total;
+  }
+
+  @override
+  Future<void> clearThumbnailCache() async {
+    final dir = await _cacheDirectory();
+    if (await dir.exists()) await dir.delete(recursive: true);
+  }
+
+  Future<String?> _defaultThumbnail(String videoPath) async {
     if (videoPath.toLowerCase().endsWith('.mp3')) return null;
-    final cache = Directory('${(await getTemporaryDirectory()).path}/portadas');
+    final cache = await _cacheDirectory();
     if (!await cache.exists()) await cache.create(recursive: true);
     final name = videoPath.split(Platform.pathSeparator).last;
     final target = File('${cache.path}/$name.png');

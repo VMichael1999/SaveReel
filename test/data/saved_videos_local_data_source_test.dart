@@ -6,20 +6,26 @@ import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_vid
 
 void main() {
   late Directory dir;
+  late Directory cache;
   late SavedVideosLocalDataSource source;
   int? probedSeconds = 34;
 
   setUp(() async {
     dir = await Directory.systemTemp.createTemp('biblioteca');
+    cache = Directory('${dir.path}_portadas');
     probedSeconds = 34;
     source = SavedVideosLocalDataSource(
       rootPath: () async => dir.path,
       makeThumbnail: (path) async => '$path.png',
       readDuration: (_) async => probedSeconds,
+      cacheDirectory: () async => cache,
     );
   });
 
-  tearDown(() => dir.delete(recursive: true));
+  tearDown(() async {
+    await dir.delete(recursive: true);
+    if (await cache.exists()) await cache.delete(recursive: true);
+  });
 
   Future<File> touch(String name, {DateTime? modified}) async {
     final file = await File('${dir.path}/$name').create();
@@ -109,5 +115,28 @@ void main() {
 
     expect(File('${file.path}.json').existsSync(), isFalse);
     expect(file.existsSync(), isTrue);
+  });
+
+  test('sin portadas el caché pesa cero', () async {
+    expect(await source.thumbnailCacheSize(), 0);
+  });
+
+  test('suma el peso de las portadas y se puede vaciar', () async {
+    await cache.create(recursive: true);
+    await File('${cache.path}/a.png').writeAsBytes(List.filled(1000, 1));
+    await File('${cache.path}/b.png').writeAsBytes(List.filled(500, 1));
+
+    expect(await source.thumbnailCacheSize(), 1500);
+
+    await source.clearThumbnailCache();
+
+    expect(await source.thumbnailCacheSize(), 0);
+    expect(cache.existsSync(), isFalse);
+  });
+
+  test('vaciar un caché que no existe no falla', () async {
+    await source.clearThumbnailCache();
+
+    expect(await source.thumbnailCacheSize(), 0);
   });
 }
