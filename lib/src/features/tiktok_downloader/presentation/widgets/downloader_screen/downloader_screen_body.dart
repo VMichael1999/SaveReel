@@ -10,7 +10,8 @@ import '../../../../../core/utils/video_link.dart';
 import '../../../../../core/widgets/app_message.dart';
 import '../../../../../core/widgets/motion.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
-import '../download_bottom_sheet.dart';
+import '../video_preview/video_preview_sheet.dart';
+import '../video_preview/video_preview_skeleton.dart';
 import 'clipboard_link_card.dart';
 import 'downloader_body_input_field.dart';
 import 'recent_downloads_strip.dart';
@@ -132,7 +133,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
         if (tikTokVideo.videoData == null) {
           setState(() => _serviceError = AppStrings.videoUnavailable);
         } else {
-          buildDownloadBottomSheet(context, tikTokVideo);
+          showVideoPreviewSheet(context, tikTokVideo);
         }
       case DownloaderSaveVideoSuccess(:final path):
         showAppMessage(
@@ -217,6 +218,10 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                     searching ? AppStrings.searching : AppStrings.searchVideo,
                   ),
                 ),
+                if (searching) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  const VideoPreviewSkeleton(),
+                ],
                 const SizedBox(height: AppSpacing.xl),
                 const RecentDownloadsStrip(),
               ],
