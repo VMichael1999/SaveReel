@@ -17,3 +17,28 @@ String _oneDecimal(double v) {
   final text = v.toStringAsFixed(1);
   return text.endsWith('.0') ? text.substring(0, text.length - 2) : text;
 }
+
+/// Peso de un archivo, siempre en MB con un decimal: `9.1 MB`.
+String formatMegabytes(int bytes) {
+  final mb = bytes / (1024 * 1024);
+  final shown = mb < 0.1 ? 0.1 : mb;
+  return '${shown.toStringAsFixed(1)} MB';
+}
+
+/// Tiempo restante estimado: `faltan 3 s`, `faltan 1 min 20 s`.
+/// Devuelve nulo mientras no hay datos suficientes para estimarlo.
+String? formatRemaining({
+  required Duration elapsed,
+  required int receivedBytes,
+  required int totalBytes,
+}) {
+  if (receivedBytes <= 0 || totalBytes <= receivedBytes) return null;
+  if (elapsed.inMilliseconds < 500) return null;
+  final remainingMs =
+      elapsed.inMilliseconds * (totalBytes - receivedBytes) / receivedBytes;
+  final seconds = (remainingMs / 1000).ceil();
+  if (seconds < 60) return 'faltan $seconds s';
+  final minutes = seconds ~/ 60;
+  final rest = seconds % 60;
+  return rest == 0 ? 'faltan $minutes min' : 'faltan $minutes min $rest s';
+}

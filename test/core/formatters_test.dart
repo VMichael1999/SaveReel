@@ -31,4 +31,59 @@ void main() {
       expect(formatCount(3000000), '3 M');
     });
   });
+
+  group('formatMegabytes', () {
+    test('muestra MB con un decimal', () {
+      expect(formatMegabytes(9542041), '9.1 MB');
+      expect(formatMegabytes(524288), '0.5 MB');
+    });
+
+    test('nunca muestra 0.0 MB', () {
+      expect(formatMegabytes(1000), '0.1 MB');
+    });
+  });
+
+  group('formatRemaining', () {
+    test('estima los segundos que faltan según el ritmo', () {
+      // 25 % en 1 s: faltan 3 s.
+      expect(
+        formatRemaining(
+          elapsed: const Duration(seconds: 1),
+          receivedBytes: 25,
+          totalBytes: 100,
+        ),
+        'faltan 3 s',
+      );
+    });
+
+    test('pasa a minutos cuando falta más de un minuto', () {
+      expect(
+        formatRemaining(
+          elapsed: const Duration(seconds: 10),
+          receivedBytes: 10,
+          totalBytes: 100,
+        ),
+        'faltan 1 min 30 s',
+      );
+    });
+
+    test('no estima sin datos suficientes', () {
+      expect(
+        formatRemaining(
+          elapsed: const Duration(milliseconds: 100),
+          receivedBytes: 10,
+          totalBytes: 100,
+        ),
+        isNull,
+      );
+      expect(
+        formatRemaining(
+          elapsed: const Duration(seconds: 2),
+          receivedBytes: 0,
+          totalBytes: 100,
+        ),
+        isNull,
+      );
+    });
+  });
 }
