@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../config/theme/app_text.dart';
 import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../config/theme/savetic_colors.dart';
 
@@ -11,12 +12,16 @@ class FormatOption extends StatelessWidget {
     required this.subtitle,
     required this.selected,
     required this.onTap,
+    this.size,
   });
 
   final String title;
   final String subtitle;
   final bool selected;
   final VoidCallback? onTap;
+
+  /// Peso del archivo ya formateado, si se conoce.
+  final String? size;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +34,7 @@ class FormatOption extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       checked: selected,
       enabled: enabled,
-      label: '$title. $subtitle',
+      label: size == null ? '$title. $subtitle' : '$title. $subtitle. $size',
       excludeSemantics: true,
       onTap: onTap,
       child: Opacity(
@@ -73,6 +78,15 @@ class FormatOption extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (size != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      size!,
+                      style: theme.textTheme.labelMedium?.tabular.copyWith(
+                        color: colors.muted,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
