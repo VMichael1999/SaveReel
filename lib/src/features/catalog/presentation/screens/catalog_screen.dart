@@ -5,8 +5,12 @@ import '../../../../config/theme/app_theme.dart';
 import '../../../../config/theme/app_tokens.dart';
 import '../../../../config/theme/savetic_colors.dart';
 import '../../../../core/widgets/savetic_mark.dart';
+import '../../../../core/utils/app_enums.dart';
+import '../../../tiktok_downloader/domain/entities/download_item.dart';
 import '../../../tiktok_downloader/domain/entities/tiktok_video.dart';
 import '../../../tiktok_downloader/domain/entities/video_data.dart';
+import '../../../tiktok_downloader/presentation/widgets/downloads_screen/active_download_tile.dart';
+import '../../../tiktok_downloader/presentation/widgets/downloads_screen/finished_download_tile.dart';
 import '../../../tiktok_downloader/presentation/widgets/video_preview/video_preview_sheet.dart';
 import '../../../tiktok_downloader/presentation/widgets/video_preview/video_preview_skeleton.dart';
 
@@ -29,6 +33,32 @@ const _sampleVideo = TikTokVideo(
     downloadCount: 18600,
     authorHandle: 'cocinaconlucia',
   ),
+);
+
+final _activeItem = DownloadItem(
+  video: _sampleVideo,
+  status: DownloadStatus.downloading,
+  path: 'ejemplo/en-curso.mp4',
+  receivedBytes: 4928307,
+  totalBytes: 7969177,
+  startedAt: DateTime.now().subtract(const Duration(seconds: 6)),
+);
+
+const _doneItem = DownloadItem(
+  video: _sampleVideo,
+  status: DownloadStatus.success,
+  path: 'ejemplo/listo.mp4',
+  receivedBytes: 9542041,
+  totalBytes: 9542041,
+);
+
+const _failedItem = DownloadItem(
+  video: _sampleVideo,
+  status: DownloadStatus.error,
+  path: 'ejemplo/fallida.mp4',
+  receivedBytes: 34,
+  totalBytes: 100,
+  failureMessage: 'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
 );
 
 class CatalogScreen extends StatefulWidget {
@@ -194,6 +224,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ),
           const _Section('Marcador de posición'),
           const VideoPreviewSkeleton(),
+          const _Section('Descargas'),
+          ActiveDownloadTile(item: _activeItem),
+          const FinishedDownloadTile(item: _doneItem),
+          const FinishedDownloadTile(item: _failedItem),
           const _Section('Vista previa del video'),
           OutlinedButton(
             onPressed: () => showVideoPreviewSheet(context, _sampleVideo),
