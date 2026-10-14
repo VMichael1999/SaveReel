@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
 import 'package:savetic/src/core/error/failure.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/tiktok_video_base_repo.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_file_size_usecase.dart';
@@ -29,6 +30,7 @@ class _FakeRepo implements TiktokVideoBaseRepo {
     required String videoLink,
     required String savePath,
     void Function(int received, int total)? onProgress,
+    CancelSignal? cancelSignal,
   }) async => const Right('ok');
 }
 
