@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
@@ -96,8 +98,11 @@ Future<DownloaderBloc> _pump(WidgetTester tester, _Repo repo) async {
   );
 
   await tester.pumpWidget(
-    BlocProvider.value(
-      value: bloc,
+    MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: bloc),
+        BlocProvider<LibraryCubit>.value(value: fakeLibraryCubit()),
+      ],
       child: MaterialApp(
         theme: AppTheme.dark,
         home: const DownloadsScreen(),
