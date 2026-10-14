@@ -123,4 +123,22 @@ class AppStrings {
       if (duration != null) duration,
     ].join(", ");
   }
+
+  // Primer uso
+  static const String firstUseTitle = "Guarda cualquier video en 3 pasos";
+  static const String step1Title = "En TikTok, toca Compartir";
+  static const String step1Body = "Es la flecha en el lado derecho del video.";
+  static const String step2Title = "Elige «Copiar enlace»";
+  static const String step2Body = "Aparece en la fila de opciones que se abre.";
+  static const String step3Title = "Vuelve aquí";
+  static const String step3Body =
+      "Detectamos el enlace copiado y te lo ofrecemos.";
+  static const String galleryTipLead = "Los videos van a tu ";
+  static const String galleryTipBold = "Galería";
+  static const String galleryTipTail =
+      ', al álbum "SaveTic". No pedimos acceso a tus archivos.';
+  static const String openTikTok = "Abrir TikTok";
+  static const String haveALink = "Ya tengo un enlace";
+  static const String tikTokNotFound = "No encontramos TikTok en tu teléfono.";
+  static String stepLabel(int n, String title) => "Paso $n: $title";
 }
