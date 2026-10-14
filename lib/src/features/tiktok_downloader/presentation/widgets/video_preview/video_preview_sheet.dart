@@ -145,7 +145,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
                 subtitle: AppStrings.formatInstagramVideoHint,
                 selected: true,
                 size: _sizeText(DownloadFormat.noWatermark),
-                onTap: null,
+                onTap: () {},
               )
             else ...[
               FormatOption(
