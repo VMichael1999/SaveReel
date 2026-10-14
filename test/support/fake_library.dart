@@ -4,8 +4,10 @@ import 'package:savetic/src/core/helpers/onboarding_store.dart';
 import 'package:savetic/src/core/helpers/settings_store.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/saved_videos_base_repo.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/usecases/clear_thumbnail_cache_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/forget_saved_video_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_saved_videos_usecase.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_thumbnail_cache_size_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_video_thumbnail_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/probe_video_duration_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/record_saved_video_usecase.dart';
@@ -57,6 +59,20 @@ class FakeSavedVideosRepo implements SavedVideosBaseRepo {
     return const Right(unit);
   }
 
+  /// Peso simulado de las portadas en caché.
+  int cacheBytes = 0;
+  int cacheClears = 0;
+
+  @override
+  Future<Either<Failure, int>> thumbnailCacheSize() async => Right(cacheBytes);
+
+  @override
+  Future<Either<Failure, Unit>> clearThumbnailCache() async {
+    cacheClears++;
+    cacheBytes = 0;
+    return const Right(unit);
+  }
+
   @override
   Future<Either<Failure, Unit>> forget(String path) async {
     forgotten.add(path);
@@ -72,6 +88,8 @@ LibraryCubit fakeLibraryCubit([FakeSavedVideosRepo? repo]) {
     probeDuration: ProbeVideoDurationUseCase(repo: r),
     recordSavedVideo: RecordSavedVideoUseCase(repo: r),
     forgetSavedVideo: ForgetSavedVideoUseCase(repo: r),
+    getThumbnailCacheSize: GetThumbnailCacheSizeUseCase(repo: r),
+    clearThumbnailCacheUseCase: ClearThumbnailCacheUseCase(repo: r),
   );
 }
 

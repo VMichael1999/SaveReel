@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/usecase/base_usecase.dart';
 import '../../../domain/entities/saved_video.dart';
+import '../../../domain/usecases/clear_thumbnail_cache_usecase.dart';
 import '../../../domain/usecases/forget_saved_video_usecase.dart';
 import '../../../domain/usecases/get_saved_videos_usecase.dart';
+import '../../../domain/usecases/get_thumbnail_cache_size_usecase.dart';
 import '../../../domain/usecases/get_video_thumbnail_usecase.dart';
 import '../../../domain/usecases/probe_video_duration_usecase.dart';
 import '../../../domain/usecases/record_saved_video_usecase.dart';
@@ -20,6 +22,8 @@ class LibraryCubit extends Cubit<LibraryState> {
     required this.probeDuration,
     required this.recordSavedVideo,
     required this.forgetSavedVideo,
+    required this.getThumbnailCacheSize,
+    required this.clearThumbnailCacheUseCase,
   }) : super(const LibraryState());
 
   final GetSavedVideosUseCase getSavedVideos;
@@ -27,6 +31,8 @@ class LibraryCubit extends Cubit<LibraryState> {
   final ProbeVideoDurationUseCase probeDuration;
   final RecordSavedVideoUseCase recordSavedVideo;
   final ForgetSavedVideoUseCase forgetSavedVideo;
+  final GetThumbnailCacheSizeUseCase getThumbnailCacheSize;
+  final ClearThumbnailCacheUseCase clearThumbnailCacheUseCase;
 
   /// Cada carga nueva invalida el recorrido de duraciones de la anterior.
   int _generation = 0;
@@ -83,6 +89,16 @@ class LibraryCubit extends Cubit<LibraryState> {
         videos: state.videos.where((v) => v.path != path).toList(),
       ),
     );
+  }
+
+  /// Peso en bytes de las portadas guardadas en caché.
+  Future<int> thumbnailCacheBytes() async =>
+      (await getThumbnailCacheSize(NoParams())).fold((_) => 0, (bytes) => bytes);
+
+  /// Borra las portadas en caché; se vuelven a crear cuando hacen falta.
+  Future<void> clearThumbnailCache() async {
+    await clearThumbnailCacheUseCase(NoParams());
+    _thumbnails.clear();
   }
 
   /// Portada del video; se calcula una sola vez por archivo.

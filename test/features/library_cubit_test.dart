@@ -94,4 +94,17 @@ void main() {
     expect(repo.forgotten, ['/app/a.mp4']);
     await cubit.close();
   });
+
+  test('informa el peso de las portadas y las borra', () async {
+    final repo = FakeSavedVideosRepo()..cacheBytes = 3200000;
+    final cubit = fakeLibraryCubit(repo);
+
+    expect(await cubit.thumbnailCacheBytes(), 3200000);
+
+    await cubit.clearThumbnailCache();
+
+    expect(repo.cacheClears, 1);
+    expect(await cubit.thumbnailCacheBytes(), 0);
+    await cubit.close();
+  });
 }

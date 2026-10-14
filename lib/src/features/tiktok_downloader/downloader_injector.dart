@@ -8,8 +8,10 @@ import 'data/repositories/saved_videos_repo.dart';
 import 'data/repositories/tiktok_video_repo.dart';
 import 'domain/repositories/saved_videos_base_repo.dart';
 import 'domain/repositories/tiktok_video_base_repo.dart';
+import 'domain/usecases/clear_thumbnail_cache_usecase.dart';
 import 'domain/usecases/forget_saved_video_usecase.dart';
 import 'domain/usecases/get_saved_videos_usecase.dart';
+import 'domain/usecases/get_thumbnail_cache_size_usecase.dart';
 import 'domain/usecases/get_video_thumbnail_usecase.dart';
 import 'domain/usecases/probe_video_duration_usecase.dart';
 import 'domain/usecases/record_saved_video_usecase.dart';
@@ -52,6 +54,8 @@ void initDownloader() {
   sl.registerLazySingleton(() => ProbeVideoDurationUseCase(repo: sl()));
   sl.registerLazySingleton(() => RecordSavedVideoUseCase(repo: sl()));
   sl.registerLazySingleton(() => ForgetSavedVideoUseCase(repo: sl()));
+  sl.registerLazySingleton(() => GetThumbnailCacheSizeUseCase(repo: sl()));
+  sl.registerLazySingleton(() => ClearThumbnailCacheUseCase(repo: sl()));
   sl.registerLazySingleton(
     () => LibraryCubit(
       getSavedVideos: sl(),
@@ -59,6 +63,8 @@ void initDownloader() {
       probeDuration: sl(),
       recordSavedVideo: sl(),
       forgetSavedVideo: sl(),
+      getThumbnailCacheSize: sl(),
+      clearThumbnailCacheUseCase: sl(),
     ),
   );
   // ajustes
