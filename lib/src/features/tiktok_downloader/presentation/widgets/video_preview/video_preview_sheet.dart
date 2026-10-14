@@ -44,6 +44,9 @@ class VideoPreviewSheet extends StatefulWidget {
 class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
   late DownloadFormat _format;
 
+  /// Peso en bytes de cada formato; falta el que aún no responde.
+  final Map<DownloadFormat, int> _sizes = {};
+
   VideoData get _data => widget.video.videoData!;
 
   @override
@@ -53,12 +56,37 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
       (f) => f.isAvailableIn(_data),
       orElse: () => DownloadFormat.withCredits,
     );
+    _loadSizes();
+  }
+
+  Future<void> _loadSizes() async {
+    final bloc = context.read<DownloaderBloc>();
+    for (final format in DownloadFormat.values) {
+      if (!format.isAvailableIn(_data)) continue;
+      bloc.fileSizeOf(format.urlOf(_data)).then((bytes) {
+        if (bytes != null && mounted) {
+          setState(() => _sizes[format] = bytes);
+        }
+      });
+    }
+  }
+
+  String? _sizeText(DownloadFormat format) {
+    final bytes = _sizes[format];
+    return bytes == null ? null : formatMegabytes(bytes);
   }
 
   void _download() {
     context.read<DownloaderBloc>().add(
       DownloaderSaveVideo(tikTokVideo: widget.video, format: _format),
     );
+  }
+
+  String get _buttonLabel {
+    final base =
+        _format.isAudio ? AppStrings.downloadAudio : AppStrings.downloadVideo;
+    final size = _sizeText(_format);
+    return size == null ? base : '$base · $size';
   }
 
   @override
@@ -97,6 +125,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
                       ? AppStrings.formatWithCreditsNoAuthor
                       : AppStrings.formatWithCreditsHint(handle),
               selected: _format == DownloadFormat.withCredits,
+              size: _sizeText(DownloadFormat.withCredits),
               onTap:
                   DownloadFormat.withCredits.isAvailableIn(_data)
                       ? () =>
@@ -108,6 +137,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               title: AppStrings.formatNoWatermark,
               subtitle: AppStrings.formatNoWatermarkHint,
               selected: _format == DownloadFormat.noWatermark,
+              size: _sizeText(DownloadFormat.noWatermark),
               onTap:
                   DownloadFormat.noWatermark.isAvailableIn(_data)
                       ? () =>
@@ -119,6 +149,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               title: AppStrings.formatAudio,
               subtitle: AppStrings.formatAudioHint,
               selected: _format == DownloadFormat.audio,
+              size: _sizeText(DownloadFormat.audio),
               onTap:
                   DownloadFormat.audio.isAvailableIn(_data)
                       ? () => setState(() => _format = DownloadFormat.audio)
@@ -128,11 +159,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
             FilledButton.icon(
               onPressed: canDownload ? _download : null,
               icon: const Icon(Icons.download_rounded),
-              label: Text(
-                _format.isAudio
-                    ? AppStrings.downloadAudio
-                    : AppStrings.downloadVideo,
-              ),
+              label: Text(_buttonLabel),
             ),
             if (handle != null) ...[
               const SizedBox(height: AppSpacing.md),

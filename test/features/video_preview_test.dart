@@ -107,6 +107,8 @@ Future<_FakeRepo> _openPreview(WidgetTester tester) async {
   await tester.tap(find.byWidgetPredicate((w) => w is FilledButton));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 600));
+  // Los pesos llegan después de que la hoja se abre.
+  await tester.pump();
   return repo;
 }
 
@@ -146,8 +148,8 @@ void main() {
     (tester) async {
       final repo = await _openPreview(tester);
 
-      expect(find.text('Descargar video'), findsOneWidget);
-      await tester.tap(find.text('Descargar video'));
+      expect(find.text('Descargar video · 9.1 MB'), findsOneWidget);
+      await tester.tap(find.text('Descargar video · 9.1 MB'));
       await tester.pump();
       await _settle(tester);
 
@@ -163,8 +165,8 @@ void main() {
     await tester.tap(find.text('Solo el audio'));
     await tester.pump();
 
-    expect(find.text('Descargar audio'), findsOneWidget);
-    await tester.tap(find.text('Descargar audio'));
+    expect(find.text('Descargar audio · 0.5 MB'), findsOneWidget);
+    await tester.tap(find.text('Descargar audio · 0.5 MB'));
     await tester.pump();
     await _settle(tester);
 
