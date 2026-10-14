@@ -1,34 +1,34 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../container_injector.dart';
 import '../api/interceptors.dart';
 import '../utils/app_constants.dart';
 
-const String _contentType = "Content-Type";
-const String _applicationJson = "application/json";
 const String _apiKey = String.fromEnvironment('RAPIDAPI_KEY');
-const String _apiHost = "tiktok-download-without-watermark.p.rapidapi.com";
+const String _apiHost = String.fromEnvironment(
+  'RAPIDAPI_HOST',
+  defaultValue: "tiktok-download-without-watermark.p.rapidapi.com",
+);
 
 class DioHelper {
   final Dio dio;
 
-  /// Cliente sin las cabeceras de RapidAPI, para bajar los archivos de los
-  /// servidores de video: esos no deben recibir la clave.
+  /// Cliente sin las cabeceras del servicio, para bajar los archivos de los
+  /// servidores de video: esos no deben recibir ninguna clave.
   final Dio _fileDio = Dio();
 
-  DioHelper({required this.dio}) {
-    if (kDebugMode && _apiKey.isEmpty) {
-      debugPrint(
-        'AVISO: falta RAPIDAPI_KEY. Sin ella el servicio responde 401. '
-        'Ejecuta con --dart-define-from-file=env.json (ver env.example.json).',
-      );
-    }
-    Map<String, dynamic> headers = {
-      _contentType: _applicationJson,
-      "X-RapidAPI-Key": _apiKey,
+  /// Cabeceras para el servicio de análisis. Solo se envían las de RapidAPI
+  /// cuando se compila con una clave; el servicio público no las necesita.
+  static Map<String, dynamic> serviceHeaders({String apiKey = _apiKey}) => {
+    "Content-Type": "application/json",
+    if (apiKey.isNotEmpty) ...{
+      "X-RapidAPI-Key": apiKey,
       "X-RapidAPI-Host": _apiHost,
-    };
+    },
+  };
+
+  DioHelper({required this.dio}) {
+    final headers = serviceHeaders();
     dio.options = BaseOptions(
       baseUrl: AppConstants.baseUrl,
       receiveDataWhenStatusError: true,
