@@ -10,15 +10,20 @@ import '../../../../../core/utils/video_link.dart';
 import '../../../../../core/widgets/app_message.dart';
 import '../../../../../core/widgets/motion.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
+import '../../bloc/first_use_cubit/first_use_cubit.dart';
+import '../../bloc/library_cubit/library_cubit.dart';
 import '../video_preview/video_preview_sheet.dart';
 import '../video_preview/video_preview_skeleton.dart';
 import 'clipboard_link_card.dart';
 import 'downloader_body_input_field.dart';
+import 'first_use_view.dart';
 import 'recent_downloads_strip.dart';
 import 'valid_links_hint.dart';
 
 class DownloaderScreenBody extends StatefulWidget {
-  const DownloaderScreenBody({super.key});
+  const DownloaderScreenBody({super.key, required this.openTikTok});
+
+  final Future<bool> Function() openTikTok;
 
   @override
   State<DownloaderScreenBody> createState() => _DownloaderScreenBodyState();
@@ -38,6 +43,9 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
   /// Se muestra el error del enlace solo cuando el usuario ya terminó de
   /// escribir o pegó algo, para no regañarlo a mitad de camino.
   bool _touched = false;
+
+  /// Aviso de la guía cuando TikTok no se pudo abrir.
+  String? _firstUseError;
 
   /// Error devuelto por el servicio al buscar el video.
   String? _serviceError;
@@ -92,6 +100,30 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     });
   }
 
+  Future<void> _openTikTok() async {
+    setState(() => _firstUseError = null);
+    final opened = await widget.openTikTok();
+    if (!opened && mounted) {
+      setState(() => _firstUseError = AppStrings.tikTokNotFound);
+    }
+  }
+
+  /// La guía solo aparece a quien aún no ha guardado nada y no trae un
+  /// enlace a la mano.
+  bool _showFirstUse(BuildContext context) {
+    final firstUse = context.watch<FirstUseCubit>().state;
+    final library = context.watch<LibraryCubit>().state;
+    final hasSessionDownloads =
+        context.read<DownloaderBloc>().newDownloads.isNotEmpty;
+    return firstUse.loaded &&
+        !firstUse.dismissed &&
+        library.status == LibraryStatus.ready &&
+        library.videos.isEmpty &&
+        !hasSessionDownloads &&
+        _clipboardLink == null &&
+        _controller.text.isEmpty;
+  }
+
   VideoLinkCheck get _check => VideoLink.check(_controller.text);
 
   String? get _errorText {
@@ -117,6 +149,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       return;
     }
     _focusNode.unfocus();
+    context.read<FirstUseCubit>().dismiss();
     context.read<DownloaderBloc>().add(
       DownloaderGetVideo(_controller.text.trim()),
     );
@@ -166,6 +199,13 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     return BlocConsumer<DownloaderBloc, DownloaderState>(
       listener: _onBlocState,
       builder: (context, state) {
+        if (_showFirstUse(context)) {
+          return FirstUseView(
+            onOpenTikTok: _openTikTok,
+            errorText: _firstUseError,
+            onHaveLink: () => context.read<FirstUseCubit>().dismiss(),
+          );
+        }
         final searching = state is DownloaderGetVideoLoading;
         final canSearch = _check.isValid && !searching;
         final errorText = _errorText;
