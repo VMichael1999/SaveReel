@@ -9,6 +9,8 @@ import 'features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
 import 'features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
+import 'features/tiktok_downloader/presentation/models/app_settings.dart';
 
 /// En depuración, `--dart-define=CATALOG=true` abre el catálogo de componentes.
 const bool _showCatalog = kDebugMode && bool.fromEnvironment('CATALOG');
@@ -23,16 +25,21 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => sl<DownloaderBloc>()),
         BlocProvider(create: (context) => sl<LibraryCubit>()..load()),
         BlocProvider(create: (context) => sl<FirstUseCubit>()..load()),
+        BlocProvider(create: (context) => sl<SettingsCubit>()..load()),
       ],
       child: BlocListener<DownloaderBloc, DownloaderState>(
         listener: _syncLibrary,
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
-          onGenerateRoute: AppRouter.getRoute,
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: ThemeMode.dark,
+        child: BlocBuilder<SettingsCubit, AppSettings>(
+          buildWhen: (a, b) => a.theme != b.theme,
+          builder:
+              (context, settings) => MaterialApp(
+                debugShowCheckedModeBanner: false,
+                initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
+                onGenerateRoute: AppRouter.getRoute,
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                themeMode: settings.theme.themeMode,
+              ),
         ),
       ),
     );
