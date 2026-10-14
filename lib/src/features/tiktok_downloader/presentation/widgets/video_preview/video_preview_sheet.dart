@@ -9,6 +9,7 @@ import '../../../../../core/utils/formatters.dart';
 import '../../../domain/entities/tiktok_video.dart';
 import '../../../domain/entities/video_data.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
+import '../../bloc/settings_cubit/settings_cubit.dart';
 import '../../models/download_format.dart';
 import 'format_option.dart';
 
@@ -52,10 +53,14 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
   @override
   void initState() {
     super.initState();
-    _format = DownloadFormat.values.firstWhere(
-      (f) => f.isAvailableIn(_data),
-      orElse: () => DownloadFormat.withCredits,
-    );
+    final preferred = context.read<SettingsCubit>().state.defaultFormat;
+    _format =
+        preferred.isAvailableIn(_data)
+            ? preferred
+            : DownloadFormat.values.firstWhere(
+              (f) => f.isAvailableIn(_data),
+              orElse: () => DownloadFormat.withCredits,
+            );
     _loadSizes();
   }
 

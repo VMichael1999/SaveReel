@@ -8,6 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/models/app_settings.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/models/download_format.dart';
 import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
@@ -68,7 +71,10 @@ class _FakeRepo implements TiktokVideoBaseRepo {
   }
 }
 
-Future<_FakeRepo> _openPreview(WidgetTester tester) async {
+Future<_FakeRepo> _openPreview(
+  WidgetTester tester, {
+  AppSettings settings = const AppSettings(),
+}) async {
   // Pantalla de teléfono: con la de prueba por defecto el botón queda fuera.
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 3;
@@ -97,6 +103,7 @@ Future<_FakeRepo> _openPreview(WidgetTester tester) async {
         providers: [
           BlocProvider<LibraryCubit>.value(value: fakeLibraryCubit()),
           BlocProvider<FirstUseCubit>.value(value: fakeFirstUseCubit()),
+          BlocProvider<SettingsCubit>.value(value: fakeSettingsCubit(settings)),
         ],
         child: MaterialApp(
           theme: AppTheme.dark,
@@ -180,5 +187,27 @@ void main() {
     await _settle(tester);
 
     expect(repo.saved, ['https://ejemplo.pe/audio.mp3']);
+  });
+
+  testWidgets('el formato predeterminado de los ajustes viene elegido', (
+    tester,
+  ) async {
+    await _openPreview(
+      tester,
+      settings: const AppSettings(defaultFormat: DownloadFormat.noWatermark),
+    );
+
+    expect(find.text('Descargar video · 8.4 MB'), findsOneWidget);
+  });
+
+  testWidgets('si el predeterminado es solo audio, el botón lo dice', (
+    tester,
+  ) async {
+    await _openPreview(
+      tester,
+      settings: const AppSettings(defaultFormat: DownloadFormat.audio),
+    );
+
+    expect(find.text('Descargar audio · 0.5 MB'), findsOneWidget);
   });
 }
