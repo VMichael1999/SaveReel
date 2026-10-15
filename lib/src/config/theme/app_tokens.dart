@@ -94,6 +94,6 @@ abstract final class AppOverlay {
   static const Color clear = Color(0x00000000);
 
   /// Verde menta para el «listo» sobre el video, en ambos temas.
-  static const Color done = Color(0xFF99F2C8);
+  static const Color done = Color(0xFF4DF0D8);
   static const Color videoBackground = Color(0xFF000000);
 }

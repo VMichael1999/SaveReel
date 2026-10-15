@@ -1,12 +1,17 @@
+import 'package:dio/dio.dart';
+
 import '../../container_injector.dart';
 import '../../core/helpers/dir_helper.dart';
 import '../../core/helpers/onboarding_store.dart';
 import '../../core/helpers/settings_store.dart';
 import '../../core/helpers/shared_link_receiver.dart';
+import '../../core/utils/app_constants.dart';
 import 'data/datasources/local/saved_videos_local_data_source.dart';
 import 'data/datasources/remote/tiktok_video_remote_data_source.dart';
 import 'data/repositories/saved_videos_repo.dart';
 import 'data/repositories/tiktok_video_repo.dart';
+import 'data/sources/instagram_cobalt_client.dart';
+import 'data/sources/instagram_video_source.dart';
 import 'domain/repositories/saved_videos_base_repo.dart';
 import 'domain/repositories/tiktok_video_base_repo.dart';
 import 'domain/usecases/clear_thumbnail_cache_usecase.dart';
@@ -30,9 +35,20 @@ void initDownloader() {
   sl.registerLazySingleton<TiktokVideoBaseRemoteDataSource>(
     () => TiktokVideoRemoteDataSource(dioHelper: sl()),
   );
+  // Instagram: cliente propio, sin las cabeceras del servicio de TikTok
+  sl.registerLazySingleton(
+    () => InstagramVideoSource(
+      dio: Dio(),
+      cobalt: InstagramCobaltClient(
+        dio: Dio(),
+        baseUrl: AppConstants.cobaltUrl,
+        apiKey: AppConstants.cobaltKey,
+      ),
+    ),
+  );
   // repository
   sl.registerLazySingleton<TiktokVideoBaseRepo>(
-    () => TiktokVideoRepo(remoteDataSource: sl()),
+    () => TiktokVideoRepo(remoteDataSource: sl(), instagramSource: sl()),
   );
   // use-case
   sl.registerLazySingleton<GetVideoUseCase>(

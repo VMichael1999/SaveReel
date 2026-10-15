@@ -117,15 +117,19 @@ void main() {
     expect(find.text('Tienes un enlace copiado'), findsNothing);
   });
 
-  testWidgets('avisa cuando el enlace es de otra plataforma', (tester) async {
+  testWidgets('avisa cuando el enlace es de otra plataforma no compatible', (
+    tester,
+  ) async {
     _mockPlatform();
     await _pumpHome(tester);
 
-    await tester.enterText(find.byType(TextField), 'instagram.com/reel/C9xQ2');
+    await tester.enterText(find.byType(TextField), 'youtu.be/abc123');
     await tester.pump();
 
     expect(
-      find.text('Ese enlace es de Instagram, no de TikTok.'),
+      find.text(
+        'Ese enlace es de YouTube, y por ahora solo bajamos de TikTok e Instagram.',
+      ),
       findsOneWidget,
     );
     expect(_searchButton(tester).onPressed, isNull);

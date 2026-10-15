@@ -26,5 +26,6 @@ extension VideoDataExtension on VideoDataModel {
     authorHandle: authorHandle,
     playBytes: playBytes,
     wmPlayBytes: wmPlayBytes,
+    network: network,
   );
 }

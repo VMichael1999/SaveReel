@@ -14,6 +14,7 @@ class VideoDataModel extends VideoData {
     super.authorHandle,
     super.playBytes,
     super.wmPlayBytes,
+    super.network,
   });
 
   /// Servidor al que apuntan las rutas relativas que a veces devuelve el servicio.

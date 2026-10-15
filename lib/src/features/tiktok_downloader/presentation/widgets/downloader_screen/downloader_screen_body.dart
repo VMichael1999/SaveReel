@@ -162,7 +162,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       VideoLinkStatus.otherPlatform => AppStrings.linkOtherPlatform(
         check.platform!,
       ),
-      VideoLinkStatus.notTikTok => AppStrings.linkNotTikTok,
+      VideoLinkStatus.unsupported => AppStrings.linkUnsupported,
     };
   }
 
@@ -278,7 +278,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                         ),
                   ),
                   if (errorText != null &&
-                      _check.status == VideoLinkStatus.notTikTok) ...[
+                      _check.status == VideoLinkStatus.unsupported) ...[
                     const SizedBox(height: AppSpacing.md),
                     const ValidLinksHint().enter(context),
                   ],

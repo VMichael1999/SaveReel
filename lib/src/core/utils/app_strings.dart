@@ -1,7 +1,7 @@
 class AppStrings {
   static const String appName = "SaveTic";
   static const String videoLink = "Enlace del video";
-  static const String inputLinkFieldText = "tiktok.com/@autor/video/…";
+  static const String inputLinkFieldText = "Enlace de TikTok o Instagram";
   static const String download = "Descargar";
   static const String downloading = "Descargando";
   static const String downloads = "Descargas";
@@ -22,12 +22,13 @@ class AppStrings {
   static const String validLinksLook = "Un enlace que sí funciona se ve así:";
   static const String openDownloads = "Tus descargas";
   static const String linkNotAVideo =
-      "Ese enlace es de TikTok, pero no es de un video.";
-  static const String linkNotTikTok = "Ese enlace no es de un video de TikTok.";
+      "Ese enlace es de TikTok o Instagram, pero no es de un video.";
+  static const String linkUnsupported =
+      "Ese enlace no es de un video de TikTok ni de Instagram.";
   static const String videoUnavailable =
       "No pudimos obtener el video. Puede ser privado o haber sido borrado.";
   static String linkOtherPlatform(String platform) =>
-      "Ese enlace es de $platform, no de TikTok.";
+      "Ese enlace es de $platform, y por ahora solo bajamos de TikTok e Instagram.";
   static String downloadsInProgress(int n) =>
       n == 1 ? "Tus descargas, 1 en curso" : "Tus descargas, $n en curso";
 
@@ -36,6 +37,9 @@ class AppStrings {
   static const String formatLabel = "Formato";
   static const String formatWithCredits = "Video con créditos";
   static const String formatNoWatermark = "Video sin marca de agua";
+  static const String formatInstagramVideo = "Video";
+  static const String formatInstagramVideoHint =
+      "En la mejor calidad que entrega Instagram";
   static const String formatAudio = "Solo el audio";
   static const String formatNoWatermarkHint = "Para verlo tú, sin conexión";
   static const String formatAudioHint = "Archivo de música";

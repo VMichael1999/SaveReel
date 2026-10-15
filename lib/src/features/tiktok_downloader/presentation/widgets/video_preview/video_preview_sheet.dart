@@ -6,6 +6,8 @@ import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../config/theme/savetic_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
 import '../../../../../core/utils/formatters.dart';
+import '../../../../../core/utils/video_link.dart';
+import '../../../../../core/widgets/network_mark.dart';
 import '../../../domain/entities/tiktok_video.dart';
 import '../../../domain/entities/video_data.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
@@ -137,43 +139,53 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               style: theme.textTheme.labelSmall?.copyWith(color: colors.muted),
             ),
             const SizedBox(height: AppSpacing.sm),
-            FormatOption(
-              title: AppStrings.formatWithCredits,
-              subtitle:
-                  handle == null
-                      ? AppStrings.formatWithCreditsNoAuthor
-                      : AppStrings.formatWithCreditsHint(handle),
-              selected: _format == DownloadFormat.withCredits,
-              size: _sizeText(DownloadFormat.withCredits),
-              onTap:
-                  DownloadFormat.withCredits.isAvailableIn(_data)
-                      ? () =>
-                          setState(() => _format = DownloadFormat.withCredits)
-                      : null,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            FormatOption(
-              title: AppStrings.formatNoWatermark,
-              subtitle: AppStrings.formatNoWatermarkHint,
-              selected: _format == DownloadFormat.noWatermark,
-              size: _sizeText(DownloadFormat.noWatermark),
-              onTap:
-                  DownloadFormat.noWatermark.isAvailableIn(_data)
-                      ? () =>
-                          setState(() => _format = DownloadFormat.noWatermark)
-                      : null,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            FormatOption(
-              title: AppStrings.formatAudio,
-              subtitle: AppStrings.formatAudioHint,
-              selected: _format == DownloadFormat.audio,
-              size: _sizeText(DownloadFormat.audio),
-              onTap:
-                  DownloadFormat.audio.isAvailableIn(_data)
-                      ? () => setState(() => _format = DownloadFormat.audio)
-                      : null,
-            ),
+            if (_data.network == VideoNetwork.instagram)
+              FormatOption(
+                title: AppStrings.formatInstagramVideo,
+                subtitle: AppStrings.formatInstagramVideoHint,
+                selected: true,
+                size: _sizeText(DownloadFormat.noWatermark),
+                onTap: () {},
+              )
+            else ...[
+              FormatOption(
+                title: AppStrings.formatWithCredits,
+                subtitle:
+                    handle == null
+                        ? AppStrings.formatWithCreditsNoAuthor
+                        : AppStrings.formatWithCreditsHint(handle),
+                selected: _format == DownloadFormat.withCredits,
+                size: _sizeText(DownloadFormat.withCredits),
+                onTap:
+                    DownloadFormat.withCredits.isAvailableIn(_data)
+                        ? () =>
+                            setState(() => _format = DownloadFormat.withCredits)
+                        : null,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              FormatOption(
+                title: AppStrings.formatNoWatermark,
+                subtitle: AppStrings.formatNoWatermarkHint,
+                selected: _format == DownloadFormat.noWatermark,
+                size: _sizeText(DownloadFormat.noWatermark),
+                onTap:
+                    DownloadFormat.noWatermark.isAvailableIn(_data)
+                        ? () =>
+                            setState(() => _format = DownloadFormat.noWatermark)
+                        : null,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              FormatOption(
+                title: AppStrings.formatAudio,
+                subtitle: AppStrings.formatAudioHint,
+                selected: _format == DownloadFormat.audio,
+                size: _sizeText(DownloadFormat.audio),
+                onTap:
+                    DownloadFormat.audio.isAvailableIn(_data)
+                        ? () => setState(() => _format = DownloadFormat.audio)
+                        : null,
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             FilledButton.icon(
               onPressed: canDownload ? _download : null,
@@ -264,11 +276,29 @@ class _Header extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: AppSpacing.md),
-              stat(formatDuration(data.duration), AppStrings.durationLabel),
-              const SizedBox(height: AppSpacing.xs),
-              stat(formatCount(data.playCount), AppStrings.playsLabel),
-              const SizedBox(height: AppSpacing.xs),
-              stat(formatCount(data.downloadCount), AppStrings.downloadsLabel),
+              if (data.duration > 0) ...[
+                stat(formatDuration(data.duration), AppStrings.durationLabel),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              if (data.playCount > 0) ...[
+                stat(formatCount(data.playCount), AppStrings.playsLabel),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              if (data.downloadCount > 0)
+                stat(
+                  formatCount(data.downloadCount),
+                  AppStrings.downloadsLabel,
+                ),
+              if (data.duration <= 0 &&
+                  data.playCount <= 0 &&
+                  data.downloadCount <= 0)
+                Row(
+                  children: [
+                    NetworkMark(network: data.network, size: AppSizes.iconSm),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(NetworkMark.labelOf(data.network), style: label),
+                  ],
+                ),
             ],
           ),
         ),

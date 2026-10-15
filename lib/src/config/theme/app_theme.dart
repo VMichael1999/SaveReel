@@ -5,50 +5,51 @@ import 'app_text.dart';
 import 'app_tokens.dart';
 import 'savetic_colors.dart';
 
-/// Temas claro y oscuro de SaveTic (dirección «Marcador»).
+/// Temas claro y oscuro de SaveTic (paleta fusión TikTok + Instagram).
 abstract final class AppTheme {
-  static const _marino = Color(0xFF06152D);
+  static const _ciruela = Color(0xFF0E0A1F);
+  static const _tinta = Color(0xFF1A1330);
 
   static final ColorScheme _darkScheme = const ColorScheme.dark(
-    primary: Color(0xFF99F2C8),
-    onPrimary: _marino,
-    secondary: Color(0xFF99F2C8),
-    onSecondary: _marino,
-    surface: Color(0xFF0D2140),
-    onSurface: Color(0xFFEEF3F8),
-    onSurfaceVariant: Color(0xFF93A3B8),
-    surfaceContainerHighest: Color(0xFF13294D),
-    outline: Color(0xFF1C3356),
-    outlineVariant: Color(0xFF1C3356),
-    error: Color(0xFFFF7A7A),
-    onError: _marino,
+    primary: Color(0xFFFF4D8D),
+    onPrimary: Color(0xFF1A0B1F),
+    secondary: Color(0xFF25F4EE),
+    onSecondary: _ciruela,
+    surface: Color(0xFF171230),
+    onSurface: Color(0xFFF3F0FA),
+    onSurfaceVariant: Color(0xFFA59CC4),
+    surfaceContainerHighest: Color(0xFF211A42),
+    outline: Color(0xFF2C2354),
+    outlineVariant: Color(0xFF2C2354),
+    error: Color(0xFFFF7A59),
+    onError: _ciruela,
   );
 
   static final ColorScheme _lightScheme = const ColorScheme.light(
-    primary: _marino,
+    primary: Color(0xFFD81B60),
     onPrimary: Color(0xFFFFFFFF),
-    secondary: Color(0xFF0B7A55),
+    secondary: Color(0xFF0A7F85),
     onSecondary: Color(0xFFFFFFFF),
     surface: Color(0xFFFFFFFF),
-    onSurface: _marino,
-    onSurfaceVariant: Color(0xFF53627A),
-    surfaceContainerHighest: Color(0xFFEEF1F5),
-    outline: Color(0xFFE1E6ED),
-    outlineVariant: Color(0xFFE1E6ED),
-    error: Color(0xFFC62828),
+    onSurface: _tinta,
+    onSurfaceVariant: Color(0xFF5E5580),
+    surfaceContainerHighest: Color(0xFFF1ECFA),
+    outline: Color(0xFFE4DCF2),
+    outlineVariant: Color(0xFFE4DCF2),
+    error: Color(0xFFC2410C),
     onError: Color(0xFFFFFFFF),
   );
 
   static ThemeData get dark => _build(
     scheme: _darkScheme,
     extension: SaveticColors.dark,
-    scaffold: _marino,
+    scaffold: _ciruela,
   );
 
   static ThemeData get light => _build(
     scheme: _lightScheme,
     extension: SaveticColors.light,
-    scaffold: const Color(0xFFF4F6F9),
+    scaffold: const Color(0xFFFAF7FF),
   );
 
   static ThemeData _build({

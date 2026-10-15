@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../config/theme/savetic_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
+import '../../../../../core/utils/video_link.dart';
+import '../../../../../core/widgets/network_mark.dart';
 
 /// Campo del enlace: un solo lugar para escribir, pegar y borrar.
 class DownloaderBodyInputField extends StatelessWidget {
@@ -34,6 +36,7 @@ class DownloaderBodyInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasText = controller.text.isNotEmpty;
     final colors = context.colors;
+    final network = VideoLink.networkOf(controller.text);
 
     return TextField(
       controller: controller,
@@ -48,10 +51,16 @@ class DownloaderBodyInputField extends StatelessWidget {
         hintText: AppStrings.inputLinkFieldText,
         errorText: errorText,
         errorMaxLines: 3,
-        prefixIcon: Icon(
-          Icons.link_rounded,
-          color: errorText != null ? colors.failed : colors.muted,
-        ),
+        prefixIcon:
+            network != null && errorText == null
+                ? Center(
+                  widthFactor: 1,
+                  child: NetworkMark(network: network, size: AppSizes.iconMd),
+                )
+                : Icon(
+                  Icons.link_rounded,
+                  color: errorText != null ? colors.failed : colors.muted,
+                ),
         suffixIcon:
             hasText
                 ? IconButton(

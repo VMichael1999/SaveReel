@@ -27,11 +27,8 @@ void main() {
       );
     });
 
-    test('devuelve nulo si no hay un enlace de TikTok', () {
-      expect(
-        SharedLinkReceiver.linkIn('https://instagram.com/reel/C9x/'),
-        isNull,
-      );
+    test('devuelve nulo si no hay un enlace compatible', () {
+      expect(SharedLinkReceiver.linkIn('https://youtu.be/abc123'), isNull);
       expect(SharedLinkReceiver.linkIn('solo texto'), isNull);
       expect(SharedLinkReceiver.linkIn(null), isNull);
     });

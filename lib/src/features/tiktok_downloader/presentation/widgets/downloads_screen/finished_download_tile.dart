@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/utils/video_link.dart';
+import '../../../../../core/widgets/network_mark.dart';
 import '../../../../../config/routes_manager.dart';
 import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../config/theme/savetic_colors.dart';
@@ -49,6 +51,8 @@ class FinishedDownloadTile extends StatelessWidget {
       if (data.authorHandle != null) '@${data.authorHandle}',
       if (_failed && percent > 0)
         AppStrings.stoppedAt(percent)
+      else if (data.network == VideoNetwork.instagram)
+        NetworkMark.labelOf(data.network)
       else if (_formatName(format).isNotEmpty)
         _formatName(format),
     ].join(' · ');

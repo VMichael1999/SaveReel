@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../config/theme/savetic_colors.dart';
+
 /// Marca de SaveTic: un marcador con una flecha hacia abajo.
 class SaveticMark extends StatelessWidget {
   const SaveticMark({super.key, this.size = 24, this.color});
 
   final double size;
 
-  /// Por defecto, el color primario del tema.
+  /// Si se omite, la marca se pinta con el degradado de SaveTic.
   final Color? color;
 
   @override
@@ -16,7 +18,7 @@ class SaveticMark extends StatelessWidget {
       image: true,
       child: CustomPaint(
         size: Size.square(size),
-        painter: _MarkPainter(color ?? Theme.of(context).colorScheme.primary),
+        painter: _MarkPainter(color),
       ),
     );
   }
@@ -25,13 +27,16 @@ class SaveticMark extends StatelessWidget {
 class _MarkPainter extends CustomPainter {
   _MarkPainter(this.color);
 
-  final Color color;
+  final Color? color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final s = size.width / 24;
     final paint = Paint()
-      ..color = color
+      ..shader = color == null
+          ? SaveticColors.brandGradient.createShader(Offset.zero & size)
+          : null
+      ..color = color ?? const Color(0xFFFFFFFF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2 * s
       ..strokeCap = StrokeCap.round

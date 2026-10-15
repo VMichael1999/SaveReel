@@ -185,7 +185,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           const TextField(
             decoration: InputDecoration(
               labelText: 'Enlace del video',
-              errorText: 'Ese enlace es de Instagram, no de TikTok.',
+              errorText: 'Ese enlace es de YouTube, y por ahora solo bajamos de TikTok e Instagram.',
               prefixIcon: Icon(Icons.link),
             ),
           ),
