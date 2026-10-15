@@ -1,8 +1,87 @@
-# SaveReel
+<p align="center">
+  <img src="docs/iconos/icon-redondeado-256.png" width="132" alt="Ícono de SaveReel">
+</p>
 
-Guarda videos cortos de TikTok e Instagram en tu teléfono a partir de su enlace, para verlos sin conexión.
+<h1 align="center">SaveReel</h1>
 
-App Flutter para Android e iOS. SaveReel no está afiliada a TikTok ni a Instagram.
+<p align="center"><b>Guarda videos de TikTok e Instagram en tu teléfono, con solo su enlace.</b></p>
+
+<table align="center">
+  <tr>
+    <td align="center"><b>TikTok</b><br><sub>Con créditos, sin marca de agua<br>o solo el audio.</sub></td>
+    <td align="center"><b>Instagram</b><br><sub>Reels, publicaciones e IGTV<br>públicos, sin iniciar sesión.</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <a href="https://github.com/VMichael1999/SaveTic/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/VMichael1999/SaveTic/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Flutter 3.47.5" src="https://img.shields.io/badge/Flutter-3.47.5-02569B?logo=flutter&logoColor=white">
+  <img alt="Dart 3.13" src="https://img.shields.io/badge/Dart-3.13-0175C2?logo=dart&logoColor=white">
+  <img alt="Plataformas: Android e iOS" src="https://img.shields.io/badge/plataformas-Android%20%7C%20iOS-3DDC84">
+  <img alt="Tema claro y oscuro" src="https://img.shields.io/badge/tema-claro%20%2B%20oscuro-0E0A1F">
+  <br>
+  <img alt="167 pruebas pasan" src="https://img.shields.io/badge/pruebas-167%20pasan-13895A">
+  <img alt="Cobertura 78 %" src="https://img.shields.io/badge/cobertura-78%25-13895A">
+  <img alt="Estado: en desarrollo" src="https://img.shields.io/badge/estado-en%20desarrollo-FF4D8D">
+  <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-C81B60">
+</p>
+
+Pega un enlace, mira el video y elige cómo guardarlo: queda en tu galería, en un álbum
+propio, y se puede volver a ver sin conexión. Desde TikTok o Instagram basta con tocar
+**Compartir** y elegir SaveReel: la app se abre con el enlace ya puesto, busca el video y
+muestra los formatos. SaveReel no está afiliada a TikTok ni a Instagram: descarga solo
+videos que tengas permiso de guardar y respeta a sus autores.
+
+## Estado
+
+La app está **completa y probada de punta a punta** en un iPhone 15, en el simulador de
+iPhone y en un emulador de Android: pegar o compartir un enlace de TikTok o Instagram,
+descargar, ver el progreso, guardar en la galería y volver a verlo desde la biblioteca.
+Todavía **no está publicada** en las tiendas.
+
+| Parte | Estado |
+| --- | --- |
+| Pantallas: inicio, primer uso, vista previa, descargas, biblioteca, reproductor, ajustes | Hecho, con pruebas |
+| Sistema visual: tokens, paleta fusión TikTok + Instagram, tema claro y oscuro, avisos propios | Hecho |
+| Descargas de TikTok | Hecho; usa el servicio de terceros [tikwm.com](https://www.tikwm.com) |
+| Descargas de Instagram (reels, `/p/` e IGTV) | Hecho; usa la página pública de inserción, una fuente no oficial |
+| Compartir desde otras apps (extensión en iOS, intent en Android) | Hecho |
+| Biblioteca con filtros por red, tipo y audio | Hecho |
+| Servidor propio que reemplace a los servicios de terceros | Pendiente |
+| Publicar en App Store y Google Play | Pendiente (nombre, cuenta de Apple de pago y política de privacidad) |
+| Reemplazar `video_thumbnail`, que está abandonado | Pendiente |
+
+## Métricas
+
+Medidas el 14 de octubre de 2026 sobre el proyecto completo.
+
+| Métrica | Valor |
+| --- | --- |
+| Pruebas | **167** en 25 archivos |
+| Cobertura de líneas | **78,5 %** (`core` 84 %, `presentation` 82 %, `config` 72 %, `data` 72 %, `domain` 69 %) |
+| Código Dart | 7 051 líneas en `lib` (102 archivos) y 3 139 en pruebas, sin líneas en blanco |
+| Pantallas | **7** (inicio, primer uso, vista previa, descargas, biblioteca, reproductor y ajustes) |
+| Redes compatibles | **2** (TikTok e Instagram) |
+| Versiones | Flutter 3.47.5 (estable), Dart 3.13, iOS 15 o superior, Android con Gradle 8.14 |
+
+La cobertura cuenta las líneas ejecutables que cargan las pruebas. No se prueban de forma
+automática la descarga real de archivos, la galería ni la extensión de Compartir (dependen
+del dispositivo); esos caminos se verifican a mano. Los valores de las insignias son
+fijos: hay que actualizarlos a mano al volver a medir.
+
+```bash
+flutter test --coverage
+```
+
+## Capturas
+
+Tomadas en el simulador de iPhone 17 Pro con videos públicos reales, en el tema oscuro, que
+es el que trae la app por defecto.
+
+<table>
+<tr><td align="center"><img src="docs/capturas/01-inicio.png" width="170"><br><sub>Inicio</sub></td><td align="center"><img src="docs/capturas/02-primer-uso.png" width="170"><br><sub>Primer uso</sub></td><td align="center"><img src="docs/capturas/03-vista-previa-tiktok.png" width="170"><br><sub>Vista previa, TikTok</sub></td><td align="center"><img src="docs/capturas/04-vista-previa-instagram.png" width="170"><br><sub>Vista previa, Instagram</sub></td></tr>
+<tr><td align="center"><img src="docs/capturas/05-descargando.png" width="170"><br><sub>Descargando</sub></td><td align="center"><img src="docs/capturas/06-aviso-exito.png" width="170"><br><sub>Aviso de éxito</sub></td><td align="center"><img src="docs/capturas/07-biblioteca.png" width="170"><br><sub>Biblioteca por red</sub></td><td align="center"><img src="docs/capturas/08-ajustes.png" width="170"><br><sub>Ajustes</sub></td></tr>
+</table>
 
 ## Cómo correrla
 
@@ -14,25 +93,43 @@ fvm flutter pub get
 fvm flutter run
 ```
 
-Las versiones anteriores de Flutter no compilan para iOS con Xcode 26 o 27: su
-herramienta llama a `lipo -verify_arch` con una sintaxis que ese Xcode ya no acepta.
+Las versiones anteriores de Flutter no compilan para iOS con Xcode 26 o 27: su herramienta
+llama a `lipo -verify_arch` con una sintaxis que ese Xcode ya no acepta.
 
-Por omisión consulta el servicio público de [tikwm.com](https://www.tikwm.com), que no pide clave.
+Para ver el catálogo de componentes (botones, avisos, hojas, colores) sin recorrer la app:
+
+```bash
+fvm flutter run --dart-define=CATALOG=true
+```
+
+### En un iPhone real
+
+Hay que elegir tu equipo de desarrollo en Xcode (*Signing & Capabilities*) tanto en `Runner`
+como en `ShareExtension`. Con una cuenta de Apple gratuita la app caduca a los 7 días y hay
+que volver a instalarla.
+
+```bash
+fvm flutter run --release -d <id-del-iphone>
+```
 
 ## Recibir enlaces desde «Compartir»
 
-SaveReel aparece en la hoja de Compartir de las demás apps (por ejemplo TikTok o Instagram). Al
-elegirla, la app se abre con el enlace ya puesto, busca el video y muestra los formatos.
+SaveReel aparece en la hoja de Compartir de las demás apps (por ejemplo TikTok o Instagram).
+Al elegirla, la app se abre con el enlace ya puesto, busca el video y muestra los formatos.
 
 - **Android:** `MainActivity.kt` recibe el texto compartido (`ACTION_SEND`) y se lo pasa a
   Flutter por el canal `savetic/share`. Se prueba con
   `adb shell am start -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT "https://vm.tiktok.com/ZMh7K2pQx/" -n com.michaeldevtool.savetic/.MainActivity`.
 - **iPhone:** la extensión `ios/ShareExtension` recibe el enlace y abre `savetic://share?text=…`.
-  No usa grupos de app, así que funciona con una cuenta de desarrollo gratuita. Para correr
-  en un iPhone real hay que elegir tu equipo de desarrollo (Signing & Capabilities) tanto en
-  `Runner` como en `ShareExtension`.
+  No usa grupos de app, así que funciona con una cuenta de desarrollo gratuita.
 - En TikTok e Instagram, el menú propio de Compartir no siempre lista SaveReel: hay que
   tocar «Más» o «…» para abrir la hoja del sistema, donde sí aparece.
+
+Para probarlo sin salir de la terminal, en el simulador de iPhone:
+
+```bash
+xcrun simctl openurl booted 'savetic://share?text=https%3A%2F%2Fvm.tiktok.com%2FZMh7K2pQx%2F'
+```
 
 ## Instagram
 
@@ -44,7 +141,9 @@ funcionar si Instagram la cambia. Como respaldo se puede apuntar a una instancia
 
 ## Servicio de descargas
 
-La URL del servicio se cambia al compilar, sin tocar el código:
+Para TikTok, por omisión se consulta el servicio público de
+[tikwm.com](https://www.tikwm.com), que no pide clave. La URL del servicio se cambia al
+compilar, sin tocar el código:
 
 | Opción | Para qué |
 |---|---|
@@ -52,9 +151,29 @@ La URL del servicio se cambia al compilar, sin tocar el código:
 | `--dart-define=API_ENDPOINT=/analysis` | Ruta del servicio (por omisión `/api/`). |
 | `--dart-define-from-file=env.json` | Pasar `RAPIDAPI_KEY` si usas un servicio de RapidAPI (copia `env.example.json`; `env.json` no se sube a git). |
 
-Las cabeceras de RapidAPI solo se envían cuando hay `RAPIDAPI_KEY`. Los archivos de video se bajan con un cliente aparte que nunca recibe ninguna clave.
+Las cabeceras de RapidAPI solo se envían cuando hay `RAPIDAPI_KEY`. Los archivos de video se
+bajan con un cliente aparte que nunca recibe ninguna clave.
 
-**Antes de publicar en las tiendas** conviene un backend propio: el servicio público de terceros no tiene garantías y puede cambiar o limitar el acceso.
+**Antes de publicar en las tiendas** conviene un backend propio: los servicios públicos de
+terceros no tienen garantías y pueden cambiar o limitar el acceso.
+
+## Cómo está organizada
+
+Arquitectura limpia con `flutter_bloc` y `get_it`:
+
+```text
+lib/src/
+├── config/        tema (colores, texto, tokens de tamaño y movimiento) y rutas
+├── core/          enlaces, errores, red, almacenamiento y widgets comunes
+└── features/
+    └── tiktok_downloader/
+        ├── data/          fuentes de TikTok e Instagram, biblioteca en disco
+        ├── domain/        entidades, repositorios y casos de uso
+        └── presentation/  bloques, pantallas y widgets
+```
+
+Los colores y las medidas salen de `SaveticColors` y de los tokens de `app_tokens.dart`;
+los widgets no usan valores sueltos.
 
 ## Pruebas
 
@@ -62,3 +181,11 @@ Las cabeceras de RapidAPI solo se envían cuando hay `RAPIDAPI_KEY`. Los archivo
 flutter analyze
 flutter test
 ```
+
+## Contribuir
+
+Lee [CONTRIBUTING.md](CONTRIBUTING.md). Las ideas y los errores se reportan en los issues.
+
+## Licencia
+
+[MIT](LICENSE)
