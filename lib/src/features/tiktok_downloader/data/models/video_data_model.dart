@@ -1,3 +1,4 @@
+import '../../domain/entities/media_item.dart';
 import '../../domain/entities/video_data.dart';
 
 class VideoDataModel extends VideoData {
@@ -15,6 +16,7 @@ class VideoDataModel extends VideoData {
     super.playBytes,
     super.wmPlayBytes,
     super.network,
+    super.gallery,
   });
 
   /// Servidor al que apuntan las rutas relativas que a veces devuelve el servicio.
@@ -34,6 +36,7 @@ class VideoDataModel extends VideoData {
       authorHandle: _readAuthorHandle(json["author"]),
       playBytes: _asInt(json["size"]),
       wmPlayBytes: _asInt(json["wm_size"]),
+      gallery: _readImages(json["images"]),
     );
   }
 
@@ -48,6 +51,17 @@ class VideoDataModel extends VideoData {
   static String _absolute(dynamic url) {
     if (url is! String || url.isEmpty) return '';
     return url.startsWith('/') ? '$_relativeBase$url' : url;
+  }
+
+  /// Fotos de un slideshow: una lista de enlaces, o de objetos con `url`.
+  static List<MediaItem> _readImages(dynamic images) {
+    if (images is! List) return const [];
+    return [
+      for (final image in images)
+        if (_absolute(image is Map ? image['url'] : image) case final url
+            when url.isNotEmpty)
+          MediaItem(url: url),
+    ];
   }
 
   static String? _readAuthorHandle(dynamic author) {

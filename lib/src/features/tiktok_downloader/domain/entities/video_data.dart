@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/utils/video_link.dart';
+import 'media_item.dart';
 
 class VideoData extends Equatable {
   final String id;
@@ -23,6 +24,10 @@ class VideoData extends Equatable {
   /// Red de la que viene el video.
   final VideoNetwork network;
 
+  /// Las piezas, cuando la publicación es un slideshow de fotos o un
+  /// carrusel. Vacío en un video suelto.
+  final List<MediaItem> gallery;
+
   const VideoData({
     required this.id,
     required this.duration,
@@ -37,7 +42,11 @@ class VideoData extends Equatable {
     this.playBytes,
     this.wmPlayBytes,
     this.network = VideoNetwork.tiktok,
+    this.gallery = const [],
   });
+
+  bool get isGallery => gallery.isNotEmpty;
+  int get photoCount => gallery.where((m) => !m.isVideo).length;
 
   @override
   List<Object?> get props => [
@@ -54,5 +63,6 @@ class VideoData extends Equatable {
     playBytes,
     wmPlayBytes,
     network,
+    gallery,
   ];
 }
