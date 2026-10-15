@@ -85,4 +85,50 @@ void main() {
     expect(cubit.state.pending, isNull);
     await cubit.close();
   });
+
+  test(
+    'pedir usar el enlace copiado sin que haya cuenta como faltante',
+    () async {
+      final source = _MissingSource();
+      final cubit = SharedLinkCubit(
+        receiver: SharedLinkReceiver(sources: [source]),
+      );
+      await cubit.start();
+      expect(cubit.state.missingSerial, 0);
+
+      source.missingController.add(null);
+      await Future<void>.delayed(Duration.zero);
+      source.missingController.add(null);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state.missingSerial, 2);
+      expect(cubit.state.pending, isNull);
+      await cubit.close();
+    },
+  );
+
+  test('usar el enlace pendiente no borra la cuenta de faltantes', () async {
+    final source = _MissingSource();
+    final cubit = SharedLinkCubit(
+      receiver: SharedLinkReceiver(sources: [source]),
+    );
+    await cubit.start();
+    source.missingController.add(null);
+    await Future<void>.delayed(Duration.zero);
+    source.controller.add('https://vm.tiktok.com/ZMabc123/');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(cubit.consume(), 'https://vm.tiktok.com/ZMabc123/');
+
+    expect(cubit.state.missingSerial, 1);
+    expect(cubit.state.pending, isNull);
+    await cubit.close();
+  });
+}
+
+class _MissingSource extends _Source implements MissingLinkSource {
+  final StreamController<void> missingController = StreamController.broadcast();
+
+  @override
+  Stream<void> get missing => missingController.stream;
 }

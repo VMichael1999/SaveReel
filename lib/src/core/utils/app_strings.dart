@@ -16,6 +16,8 @@ class AppStrings {
   static const String clipboardFound = "Tienes un enlace copiado";
   static const String useThisLink = "Usar este enlace";
   static const String paste = "Pegar";
+  static const String clipboardNoLink =
+      "No hay un enlace de TikTok o Instagram copiado.";
   static const String clearField = "Borrar el enlace";
   static const String searchVideo = "Buscar video";
   static const String searching = "Buscando el video…";
