@@ -125,6 +125,26 @@ class AppStrings {
   static const String libraryTitle = "Tus descargas";
   static const String libraryAll = "Todo";
   static const String libraryVideos = "Videos";
+  static const String search = "Buscar";
+  static const String searchHint = "Buscar por título o autor";
+  static const String closeSearch = "Cerrar la búsqueda";
+  static const String clearSearch = "Borrar lo escrito";
+  static String noMatches(String query) => "Nada coincide con «$query».";
+  static const String sort = "Ordenar";
+  static const String sortNewest = "Más nuevos";
+  static const String sortOldest = "Más antiguos";
+  static const String sortBiggest = "Más pesados";
+  static const String sortTitle = "Título (A–Z)";
+  static const String select = "Seleccionar";
+  static const String galleryShort = "Galería";
+  static const String selectAll = "Seleccionar todo";
+  static const String cancelSelection = "Cancelar la selección";
+  static String selectedCount(int n) =>
+      n == 1 ? "1 seleccionado" : "$n seleccionados";
+  static String deleteManyTitle(int n) =>
+      n == 1 ? "¿Eliminar este elemento?" : "¿Eliminar $n elementos?";
+  static const String deleteManyBody =
+      "Se borrarán de SaveReel. Las copias que guardaste en tu galería no se tocan.";
   static const String libraryPhotos = "Fotos";
   static const String libraryAudio = "Audio";
   static const String libraryFilterEmpty = "No hay nada en este filtro.";

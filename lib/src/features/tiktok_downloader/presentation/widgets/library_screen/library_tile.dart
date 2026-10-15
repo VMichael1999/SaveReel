@@ -22,9 +22,27 @@ Widget openerFor(VideoPlayerArgs args) =>
 
 /// Una miniatura de la cuadrícula. Se expande al reproductor al tocarla.
 class LibraryTile extends StatelessWidget {
-  const LibraryTile({super.key, required this.video});
+  const LibraryTile({
+    super.key,
+    required this.video,
+    this.selecting = false,
+    this.selected = false,
+    this.onToggle,
+    this.onStartSelecting,
+  });
 
   final SavedVideo video;
+
+  /// Modo selección: tocar marca o desmarca en lugar de abrir el video.
+  final bool selecting;
+  final bool selected;
+  final VoidCallback? onToggle;
+
+  /// Para empezar a seleccionar desde la hoja de acciones, con este elegido.
+  final VoidCallback? onStartSelecting;
+
+  void _openActions(BuildContext context) =>
+      showLibraryActionsSheet(context, video, onSelect: onStartSelecting);
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +66,7 @@ class LibraryTile extends StatelessWidget {
       closedBuilder:
           (context, open) => Semantics(
             button: true,
+            selected: selecting ? selected : null,
             label: AppStrings.libraryTile(
               video.title,
               isAudio: video.isAudio,
@@ -58,11 +77,11 @@ class LibraryTile extends StatelessWidget {
                       : formatDuration(video.durationSeconds!),
             ),
             excludeSemantics: true,
-            onTap: open,
-            onLongPress: () => showLibraryActionsSheet(context, video),
+            onTap: selecting ? onToggle : open,
+            onLongPress: selecting ? onToggle : () => _openActions(context),
             child: InkWell(
-              onTap: open,
-              onLongPress: () => showLibraryActionsSheet(context, video),
+              onTap: selecting ? onToggle : open,
+              onLongPress: selecting ? onToggle : () => _openActions(context),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -93,7 +112,9 @@ class LibraryTile extends StatelessWidget {
                             const SizedBox(width: AppSpacing.xs),
                             Text(
                               '${video.files.length}',
-                              style: Theme.of(context).textTheme.labelSmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
                                   ?.tabular
                                   .copyWith(color: AppOverlay.onVideo),
                             ),
@@ -113,6 +134,23 @@ class LibraryTile extends StatelessWidget {
                         ),
                       ),
                     ),
+                  if (selecting)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: ColoredBox(
+                          color:
+                              selected
+                                  ? AppOverlay.controlFill
+                                  : AppOverlay.clear,
+                        ),
+                      ),
+                    ),
+                  if (selecting)
+                    Positioned(
+                      right: AppSpacing.sm,
+                      bottom: AppSpacing.sm,
+                      child: _SelectionMark(selected: selected),
+                    ),
                   if (video.isAudio)
                     const Positioned(
                       right: AppSpacing.sm,
@@ -130,6 +168,39 @@ class LibraryTile extends StatelessWidget {
               ),
             ),
           ),
+    );
+  }
+}
+
+/// Círculo de la esquina: vacío si no está elegido, con visto si lo está.
+class _SelectionMark extends StatelessWidget {
+  const _SelectionMark({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? colors.accent : AppOverlay.controlFill,
+        border: Border.all(
+          color: selected ? colors.accent : AppOverlay.onVideo,
+          width: 2,
+        ),
+      ),
+      child: SizedBox.square(
+        dimension: AppSizes.selectMark,
+        child:
+            selected
+                ? Icon(
+                  Icons.check_rounded,
+                  size: AppSizes.iconSm,
+                  color: colors.onAccent,
+                )
+                : null,
+      ),
     );
   }
 }
