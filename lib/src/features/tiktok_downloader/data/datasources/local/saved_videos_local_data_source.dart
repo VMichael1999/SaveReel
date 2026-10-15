@@ -66,6 +66,10 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
       }
       if (entity is! File) continue;
       final lower = entity.path.toLowerCase();
+      if (lower.endsWith('.part')) {
+        await _dropStalePartial(entity);
+        continue;
+      }
       if (!_extensions.any(lower.endsWith)) continue;
       final stat = await entity.stat();
       final meta = await _readMetadata(entity.path);
@@ -84,6 +88,15 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
     videos.sort((a, b) => b.modified.compareTo(a.modified));
     return videos;
   }
+
+  /// Una descarga a medias que nadie retomó en días ya no sirve: el enlace
+  /// habrá caducado. Se borra para no ocupar espacio.
+  Future<void> _dropStalePartial(File partial) async {
+    final age = DateTime.now().difference((await partial.stat()).modified);
+    if (age > _partialLifetime) await partial.delete();
+  }
+
+  static const _partialLifetime = Duration(days: 3);
 
   /// Una carpeta con fotos o videos de un slideshow o carrusel se lista como
   /// un solo elemento. Una carpeta sin piezas no cuenta.
