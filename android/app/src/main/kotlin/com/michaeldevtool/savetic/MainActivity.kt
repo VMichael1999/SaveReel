@@ -1,6 +1,8 @@
 package com.michaeldevtool.savetic
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -8,6 +10,7 @@ import io.flutter.plugin.common.MethodChannel
 /**
  * Recibe el texto que otra app comparte hacia SaveReel (por ejemplo el enlace de
  * un video desde «Compartir») y se lo pasa a Flutter por el canal `savetic/share`.
+ * También responde por el canal `savetic/network` si la red actual es de pago.
  */
 class MainActivity : FlutterActivity() {
     private var channel: MethodChannel? = null
@@ -18,6 +21,13 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         initialText = sharedText(intent)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NETWORK_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isMetered" -> result.success(isMetered())
+                    else -> result.notImplemented()
+                }
+            }
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).also {
             it.setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -44,7 +54,14 @@ class MainActivity : FlutterActivity() {
         return intent.getStringExtra(Intent.EXTRA_TEXT)
     }
 
+    /** Datos móviles, o un Wi-Fi que el sistema marca como de pago. */
+    private fun isMetered(): Boolean {
+        val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        return manager?.isActiveNetworkMetered ?: false
+    }
+
     private companion object {
         const val CHANNEL = "savetic/share"
+        const val NETWORK_CHANNEL = "savetic/network"
     }
 }
