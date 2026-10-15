@@ -20,4 +20,4 @@ jobs:
       - name: Análisis estático
         run: flutter analyze
       - name: Pruebas
-        run: flutter test
+        run: flutter test --reporter github
