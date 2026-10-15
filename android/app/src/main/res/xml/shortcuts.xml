@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Mantener pulsado el ícono de la app: abre SaveReel con el enlace copiado. -->
+    <shortcut
+        android:shortcutId="guardar_enlace"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_save"
+        android:shortcutShortLabel="@string/shortcut_save_link_short"
+        android:shortcutLongLabel="@string/shortcut_save_link_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="savetic://clipboard"
+            android:targetPackage="com.michaeldevtool.savetic"
+            android:targetClass="com.michaeldevtool.savetic.MainActivity" />
+    </shortcut>
+</shortcuts>
