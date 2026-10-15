@@ -48,6 +48,7 @@ Todavía **no está publicada** en las tiendas.
 | Slideshows de TikTok y carruseles o fotos de Instagram | Hecho con pruebas; **el formato de las fuentes está supuesto y falta verificarlo con publicaciones reales** |
 | Compartir desde otras apps (extensión en iOS, intent en Android) | Hecho |
 | Biblioteca con filtros por red, tipo y audio | Hecho |
+| Reanudar descargas cortadas y cuidar los datos móviles | Hecho con pruebas; la detección de la red usa código nativo y no se probó en un teléfono con datos móviles |
 | Servidor propio que reemplace a los servicios de terceros | Pendiente |
 | Publicar en App Store y Google Play | Pendiente (nombre, cuenta de Apple de pago y política de privacidad) |
 | Reemplazar `video_thumbnail`, que está abandonado | Pendiente |
@@ -152,6 +153,18 @@ Los lectores de las fuentes (`images` en el servicio de TikTok y `edge_sidecar_t
 la página de inserción de Instagram) se escribieron a partir del formato conocido y se prueban
 con páginas de ejemplo: si alguna publicación real no se reconoce, hay que ajustar
 `video_data_model.dart` o `instagram_embed_parser.dart`.
+
+### Descargas cortadas y datos móviles
+
+Si una descarga se corta (se va la señal, se cierra la app), lo bajado queda en un archivo
+`.part` y, al reintentar, SaveReel pide al servidor solo lo que falta (cabecera `Range`; TikTok e
+Instagram la aceptan). Una galería retoma pieza por pieza. Lo que nadie retoma en 3 días se
+borra solo, porque los enlaces caducan.
+
+En **Ajustes → Datos móviles** se elige qué hacer cuando la red es de pago (datos móviles,
+punto de acceso o ahorro de datos): *Preguntar si pesa mucho* (50 MB o más, por omisión),
+*Solo con Wi-Fi* (pregunta siempre) o *Descargar siempre*. La red se consulta con código nativo
+(`ConnectivityManager` en Android y `NWPathMonitor` en iOS), sin paquetes extra.
 
 ## Servicio de descargas
 

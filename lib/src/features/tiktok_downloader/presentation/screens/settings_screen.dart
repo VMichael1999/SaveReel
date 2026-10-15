@@ -55,6 +55,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
     DownloadFormat.gallery => AppStrings.settingsFormatValueCredits,
   };
 
+  String _mobileDataName(MobileDataPolicy policy) => switch (policy) {
+    MobileDataPolicy.ask => AppStrings.settingsMobileDataAskShort,
+    MobileDataPolicy.allow => AppStrings.settingsMobileDataAllowShort,
+    MobileDataPolicy.wifiOnly => AppStrings.settingsMobileDataWifiOnlyShort,
+  };
+
+  Future<void> _pickMobileData(AppSettings settings) async {
+    final cubit = context.read<SettingsCubit>();
+    final chosen = await showChoiceSheet<MobileDataPolicy>(
+      context,
+      title: AppStrings.settingsMobileData,
+      selected: settings.mobileData,
+      options: const [
+        ChoiceOption(
+          value: MobileDataPolicy.ask,
+          title: AppStrings.settingsMobileDataAsk,
+          subtitle: AppStrings.settingsMobileDataAskHint,
+        ),
+        ChoiceOption(
+          value: MobileDataPolicy.wifiOnly,
+          title: AppStrings.settingsMobileDataWifiOnly,
+          subtitle: AppStrings.settingsMobileDataWifiOnlyHint,
+        ),
+        ChoiceOption(
+          value: MobileDataPolicy.allow,
+          title: AppStrings.settingsMobileDataAllow,
+          subtitle: AppStrings.settingsMobileDataAllowHint,
+        ),
+      ],
+    );
+    if (chosen != null) await cubit.setMobileData(chosen);
+  }
+
   String _themeName(AppThemeChoice theme) => switch (theme) {
     AppThemeChoice.system => AppStrings.themeSystem,
     AppThemeChoice.light => AppStrings.themeLight,
@@ -133,6 +166,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: _formatName(settings.defaultFormat),
                 showChevron: true,
                 onTap: () => _pickFormat(settings),
+              ),
+              SettingsRow(
+                icon: Icons.signal_cellular_alt_rounded,
+                title: AppStrings.settingsMobileData,
+                value: _mobileDataName(settings.mobileData),
+                showChevron: true,
+                onTap: () => _pickMobileData(settings),
               ),
               // Mismo ritmo que las demás filas: ícono, 12 de espacio y texto.
               ListTileTheme(

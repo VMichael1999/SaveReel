@@ -95,7 +95,8 @@ class AppStrings {
   static const String withCreditsShort = "con créditos";
   static const String noWatermarkShort = "sin marca";
   static const String audioShort = "solo audio";
-  static String stoppedAt(int percent) => "se quedó en $percent %";
+  static String stoppedAt(int percent) =>
+      "se quedó en $percent %; al reintentar sigue desde ahí";
   static String shareText(String handle) => "Video de @$handle";
 
   // Reproductor
@@ -178,6 +179,25 @@ class AppStrings {
   static const String settingsFormatValueAudio = "Solo audio";
   static const String settingsFormatHintCredits =
       "Muestra al autor al compartir";
+  static const String settingsMobileData = "Datos móviles";
+  static const String settingsMobileDataAsk = "Preguntar si pesa mucho";
+  static const String settingsMobileDataAskShort = "Preguntar";
+  static const String settingsMobileDataAllowShort = "Siempre";
+  static const String settingsMobileDataWifiOnlyShort = "Solo Wi-Fi";
+  static const String settingsMobileDataAskHint =
+      "Te avisa antes de bajar más de 50 MB con datos móviles";
+  static const String settingsMobileDataAllow = "Descargar siempre";
+  static const String settingsMobileDataAllowHint =
+      "No te pregunta, aunque uses datos móviles";
+  static const String settingsMobileDataWifiOnly = "Solo con Wi-Fi";
+  static const String settingsMobileDataWifiOnlyHint =
+      "Con datos móviles te pregunta antes de cada descarga";
+  static const String mobileDataTitle = "Estás con datos móviles";
+  static const String mobileDataBodyWifiOnly =
+      "Tienes activado «Solo con Wi-Fi». ¿Quieres descargar igual con tus datos?";
+  static String mobileDataBodyHeavy(String size) =>
+      "Este archivo pesa $size y se bajará con tus datos móviles. ¿Quieres descargarlo?";
+  static const String downloadAnyway = "Descargar igual";
   static const String settingsGallery = "Guardar en la Galería";
   static const String settingsGalleryHint = 'Álbum "SaveReel"';
   static const String settingsDownloads = "Descargas";

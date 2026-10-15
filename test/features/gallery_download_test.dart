@@ -190,10 +190,32 @@ void main() {
       await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
 
       expect(bloc.newDownloads.single.status, DownloadStatus.success);
-      expect(repo.links.length, 5); // 2 del primer intento y 3 del segundo
+      // La pieza 1 ya estaba completa: el segundo intento sigue en la 2.
+      expect(repo.links, [
+        'https://cdn.ig/uno.jpg?a=1',
+        'https://cdn.ig/dos.mp4',
+        'https://cdn.ig/dos.mp4',
+        'https://cdn.ig/tres.webp',
+      ]);
       await bloc.close();
     },
   );
+
+  test('una descarga nueva de una galería ya bajada empieza limpia', () async {
+    final repo = _GalleryRepo();
+    final bloc = _bloc(repo);
+    bloc.add(event);
+    await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
+    final folder = bloc.newDownloads.single.path;
+    await File('$folder/sobra.jpg').writeAsString('x');
+
+    bloc.add(event); // no es un reintento: el usuario la pide otra vez
+    await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoSuccess);
+
+    expect(repo.links.length, 6); // las tres piezas, otra vez
+    expect(File('$folder/sobra.jpg').existsSync(), isFalse);
+    await bloc.close();
+  });
 
   test('cancelar borra la carpeta entera', () async {
     final hold = Completer<void>();

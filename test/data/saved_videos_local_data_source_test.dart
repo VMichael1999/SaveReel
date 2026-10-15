@@ -182,6 +182,21 @@ void main() {
     expect(await real.thumbnailFor('/x/musica.mp3'), isNull);
   });
 
+  test('limpia los .part viejos y respeta los recientes', () async {
+    final viejo = await touch(
+      'a.mp4.part',
+      modified: DateTime.now().subtract(const Duration(days: 5)),
+    );
+    final reciente = await touch('b.mp4.part');
+    await touch('c.mp4');
+
+    final videos = await source.list();
+
+    expect(videos.map((v) => v.path.split('/').last), ['c.mp4']);
+    expect(viejo.existsSync(), isFalse);
+    expect(reciente.existsSync(), isTrue);
+  });
+
   test('un archivo de datos dañado no esconde el video', () async {
     final file = await touch('v.mp4');
     await File('${file.path}.json').writeAsString('{no es json');

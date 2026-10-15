@@ -22,6 +22,7 @@ void main() {
         defaultFormat: DownloadFormat.audio,
         saveToGallery: false,
         theme: AppThemeChoice.system,
+        mobileData: MobileDataPolicy.wifiOnly,
       );
 
       expect(AppSettings.fromJson(original.toJson()), original);
@@ -35,6 +36,48 @@ void main() {
       });
 
       expect(parsed, const AppSettings());
+    });
+
+    test('con datos móviles pregunta solo si pesa mucho, por omisión', () {
+      expect(const AppSettings().mobileData, MobileDataPolicy.ask);
+    });
+  });
+
+  group('MobileDataPolicy.needsConfirmation', () {
+    const heavy = MobileDataPolicy.heavyBytes;
+
+    test('«descargar siempre» nunca pregunta', () {
+      for (final metered in [true, false]) {
+        expect(
+          MobileDataPolicy.allow.needsConfirmation(
+            metered: metered,
+            bytes: heavy * 10,
+          ),
+          isFalse,
+        );
+      }
+    });
+
+    test('«solo con Wi-Fi» pregunta siempre que la red sea de pago', () {
+      const policy = MobileDataPolicy.wifiOnly;
+      expect(policy.needsConfirmation(metered: true, bytes: 1), isTrue);
+      expect(policy.needsConfirmation(metered: true, bytes: null), isTrue);
+      expect(policy.needsConfirmation(metered: false, bytes: heavy), isFalse);
+    });
+
+    test('«preguntar» solo si es de pago y pesa 50 MB o más', () {
+      const policy = MobileDataPolicy.ask;
+      expect(policy.needsConfirmation(metered: true, bytes: heavy), isTrue);
+      expect(
+        policy.needsConfirmation(metered: true, bytes: heavy - 1),
+        isFalse,
+      );
+      expect(
+        policy.needsConfirmation(metered: false, bytes: heavy * 3),
+        isFalse,
+      );
+      // Sin saber el peso no se interrumpe al usuario.
+      expect(policy.needsConfirmation(metered: true, bytes: null), isFalse);
     });
   });
 
@@ -62,9 +105,25 @@ void main() {
         'defaultFormat': 'noWatermark',
         'saveToGallery': false,
         'theme': 'system',
+        'mobileData': 'ask',
       });
       await cubit.close();
     });
+
+    test(
+      'cambiar la política de datos móviles se aplica y se guarda',
+      () async {
+        final store = MemorySettingsStore();
+        final cubit = SettingsCubit(store: store);
+        await cubit.load();
+
+        await cubit.setMobileData(MobileDataPolicy.wifiOnly);
+
+        expect(cubit.state.mobileData, MobileDataPolicy.wifiOnly);
+        expect(store.saved['mobileData'], 'wifiOnly');
+        await cubit.close();
+      },
+    );
 
     test('un cambio no pisa los demás ajustes', () async {
       final cubit = SettingsCubit(

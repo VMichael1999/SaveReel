@@ -14,6 +14,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/models/downl
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
+import 'package:savetic/src/core/helpers/network_info.dart';
 import 'package:savetic/src/core/utils/video_link.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
@@ -229,7 +230,148 @@ const _carousel = TikTokVideo(
   ),
 );
 
+/// Igual que el video de siempre, pero con la versión con créditos de 60 MB.
+const _heavy = TikTokVideo(
+  code: 0,
+  msg: 'success',
+  processedTime: 0,
+  videoData: VideoData(
+    id: '99',
+    duration: 120,
+    title: 'Video largo',
+    originCover: 'https://ejemplo.pe/portada.jpg',
+    playVideo: 'https://ejemplo.pe/limpio',
+    wmPlayVideo: 'https://ejemplo.pe/con-marca',
+    music: 'https://ejemplo.pe/audio.mp3',
+    playCount: 1,
+    downloadCount: 1,
+    authorHandle: 'cocinaconlucia',
+    wmPlayBytes: 60 * 1024 * 1024,
+  ),
+);
+
 void main() {
+  /// Simula el tipo de red; devuelve cuántas veces se consultó.
+  int Function() fakeNetwork({required bool metered}) {
+    final original = NetworkInfo.isMetered;
+    var calls = 0;
+    NetworkInfo.isMetered = () async {
+      calls++;
+      return metered;
+    };
+    addTearDown(() => NetworkInfo.isMetered = original);
+    return () => calls;
+  }
+
+  Future<void> tapDownload(WidgetTester tester, String label) async {
+    await tester.tap(find.text(label));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+  }
+
+  testWidgets(
+    'con «Solo con Wi-Fi» y datos móviles pregunta y se puede cancelar',
+    (tester) async {
+      fakeNetwork(metered: true);
+      final repo = await _openPreview(
+        tester,
+        settings: const AppSettings(mobileData: MobileDataPolicy.wifiOnly),
+      );
+
+      await tapDownload(tester, 'Descargar video · 9.1 MB');
+
+      expect(find.text('Estás con datos móviles'), findsOneWidget);
+      expect(find.textContaining('Solo con Wi-Fi'), findsOneWidget);
+
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Estás con datos móviles'), findsNothing);
+      expect(repo.saved, isEmpty);
+    },
+  );
+
+  testWidgets('«Descargar igual» baja el video aun con datos móviles', (
+    tester,
+  ) async {
+    fakeNetwork(metered: true);
+    final repo = await _openPreview(
+      tester,
+      settings: const AppSettings(mobileData: MobileDataPolicy.wifiOnly),
+    );
+
+    await tapDownload(tester, 'Descargar video · 9.1 MB');
+    await tester.tap(find.text('Descargar igual'));
+    await tester.pump();
+    await _settleUntil(tester, () => repo.saved.isNotEmpty);
+
+    expect(repo.saved, ['https://ejemplo.pe/con-marca.mp4']);
+    await drainToasts(tester);
+  });
+
+  testWidgets('preguntar: un archivo pesado con datos móviles avisa su peso', (
+    tester,
+  ) async {
+    fakeNetwork(metered: true);
+    final repo = await _openPreview(tester, video: _heavy);
+
+    await tapDownload(tester, 'Descargar video · 60.0 MB');
+
+    expect(find.textContaining('60.0 MB'), findsWidgets);
+    expect(find.textContaining('datos móviles'), findsWidgets);
+    expect(repo.saved, isEmpty);
+    await tester.tap(find.text('Cancelar'));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('preguntar: un archivo liviano con datos móviles no molesta', (
+    tester,
+  ) async {
+    fakeNetwork(metered: true);
+    final repo = await _openPreview(tester);
+
+    await tapDownload(tester, 'Descargar video · 9.1 MB');
+    await _settleUntil(tester, () => repo.saved.isNotEmpty);
+
+    expect(find.text('Estás con datos móviles'), findsNothing);
+    expect(repo.saved, hasLength(1));
+    await drainToasts(tester);
+  });
+
+  testWidgets('con Wi-Fi nunca pregunta, ni siquiera por un archivo pesado', (
+    tester,
+  ) async {
+    fakeNetwork(metered: false);
+    final repo = await _openPreview(
+      tester,
+      video: _heavy,
+      settings: const AppSettings(mobileData: MobileDataPolicy.wifiOnly),
+    );
+
+    await tapDownload(tester, 'Descargar video · 60.0 MB');
+    await _settleUntil(tester, () => repo.saved.isNotEmpty);
+
+    expect(find.text('Estás con datos móviles'), findsNothing);
+    expect(repo.saved, hasLength(1));
+    await drainToasts(tester);
+  });
+
+  testWidgets('«descargar siempre» ni consulta la red', (tester) async {
+    final calls = fakeNetwork(metered: true);
+    final repo = await _openPreview(
+      tester,
+      video: _heavy,
+      settings: const AppSettings(mobileData: MobileDataPolicy.allow),
+    );
+
+    await tapDownload(tester, 'Descargar video · 60.0 MB');
+    await _settleUntil(tester, () => repo.saved.isNotEmpty);
+
+    expect(calls(), 0);
+    expect(find.text('Estás con datos móviles'), findsNothing);
+    await drainToasts(tester);
+  });
+
   testWidgets(
     'un slideshow ofrece todas las fotos y la música, elegidas las fotos',
     (tester) async {
