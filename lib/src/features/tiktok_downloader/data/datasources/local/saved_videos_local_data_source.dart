@@ -59,6 +59,11 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
 
     final videos = <SavedVideo>[];
     await for (final entity in dir.list()) {
+      if (entity is Directory) {
+        final gallery = await _readGallery(entity);
+        if (gallery != null) videos.add(gallery);
+        continue;
+      }
       if (entity is! File) continue;
       final lower = entity.path.toLowerCase();
       if (!_extensions.any(lower.endsWith)) continue;
@@ -78,6 +83,47 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
     }
     videos.sort((a, b) => b.modified.compareTo(a.modified));
     return videos;
+  }
+
+  /// Una carpeta con fotos o videos de un slideshow o carrusel se lista como
+  /// un solo elemento. Una carpeta sin piezas no cuenta.
+  Future<SavedVideo?> _readGallery(Directory folder) async {
+    final files = <File>[];
+    await for (final entity in folder.list()) {
+      if (entity is File && _isMedia(entity.path)) files.add(entity);
+    }
+    if (files.isEmpty) return null;
+    files.sort((a, b) => a.path.compareTo(b.path));
+    var size = 0;
+    for (final file in files) {
+      size += await file.length();
+    }
+    final stat = await folder.stat();
+    final meta = await _readMetadata(folder.path);
+    return SavedVideo(
+      path: folder.path,
+      sizeBytes: size,
+      modified: stat.modified,
+      title: meta?['title'] as String?,
+      authorHandle: meta?['author'] as String?,
+      network: VideoNetwork.values.asNameMap()[meta?['network']],
+      files: [for (final file in files) file.path],
+    );
+  }
+
+  static const _galleryExtensions = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.webp',
+    '.heic',
+    '.mp4',
+    '.mov',
+  ];
+
+  static bool _isMedia(String path) {
+    final lower = path.toLowerCase();
+    return _galleryExtensions.any(lower.endsWith);
   }
 
   /// Una duración de 0 es lo que informa una red que no la sabe (Instagram):
@@ -152,7 +198,10 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
   }
 
   Future<String?> _defaultThumbnail(String videoPath) async {
-    if (videoPath.toLowerCase().endsWith('.mp3')) return null;
+    final lower = videoPath.toLowerCase();
+    if (lower.endsWith('.mp3')) return null;
+    // Una foto es su propia portada.
+    if (!lower.endsWith('.mp4') && !lower.endsWith('.mov')) return videoPath;
     final cache = await _cacheDirectory();
     if (!await cache.exists()) await cache.create(recursive: true);
     final name = videoPath.split(Platform.pathSeparator).last;
