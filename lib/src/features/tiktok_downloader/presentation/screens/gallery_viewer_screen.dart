@@ -19,9 +19,16 @@ import '../widgets/video_player/player_action.dart';
 /// Visor de un slideshow o carrusel guardado: se desliza entre las piezas,
 /// las fotos se acercan con los dedos y los videos se reproducen en su lugar.
 class GalleryViewerScreen extends StatefulWidget {
-  const GalleryViewerScreen({super.key, required this.args});
+  const GalleryViewerScreen({
+    super.key,
+    required this.args,
+    this.saveToGallery = DirHelper.saveMediaToGallery,
+  });
 
   final VideoPlayerArgs args;
+
+  /// Guarda una pieza en la galería del teléfono; se cambia en las pruebas.
+  final Future<void> Function(String path) saveToGallery;
 
   @override
   State<GalleryViewerScreen> createState() => _GalleryViewerScreenState();
@@ -30,6 +37,9 @@ class GalleryViewerScreen extends StatefulWidget {
 class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
   final PageController _pages = PageController();
   int _index = 0;
+
+  /// Con una foto ampliada el arrastre la mueve, no cambia de página.
+  bool _zoomed = false;
   late bool _inGallery = widget.args.inGallery;
 
   VideoPlayerArgs get _args => widget.args;
@@ -58,7 +68,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
   Future<void> _saveToGallery() async {
     try {
       for (final path in _files) {
-        await DirHelper.saveMediaToGallery(path);
+        await widget.saveToGallery(path);
       }
       if (!mounted) return;
       setState(() => _inGallery = true);
@@ -102,11 +112,15 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
           children: [
             PageView.builder(
               controller: _pages,
+              physics: _zoomed ? const NeverScrollableScrollPhysics() : null,
               itemCount: _files.length,
               onPageChanged: (i) => setState(() => _index = i),
               itemBuilder:
-                  (context, i) =>
-                      _GalleryPage(path: _files[i], active: i == _index),
+                  (context, i) => _GalleryPage(
+                    path: _files[i],
+                    active: i == _index,
+                    onZoomChanged: (zoomed) => setState(() => _zoomed = zoomed),
+                  ),
             ),
             Positioned(
               top: 0,
@@ -273,31 +287,137 @@ bool _isVideoFile(String path) {
 
 /// Una pieza: foto con zoom, o video que se reproduce mientras es la visible.
 class _GalleryPage extends StatelessWidget {
-  const _GalleryPage({required this.path, required this.active});
+  const _GalleryPage({
+    required this.path,
+    required this.active,
+    required this.onZoomChanged,
+  });
 
   final String path;
   final bool active;
+  final ValueChanged<bool> onZoomChanged;
 
   @override
   Widget build(BuildContext context) {
     if (_isVideoFile(path)) return _VideoPage(path: path, active: active);
-    return InteractiveViewer(
-      minScale: 1,
-      maxScale: 4,
-      child: Center(
-        child: Image.file(
-          File(path),
-          fit: BoxFit.contain,
-          semanticLabel: AppStrings.coverLabel,
-          errorBuilder:
-              (context, _, __) => Center(
-                child: Text(
-                  AppStrings.cannotPlay,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppOverlay.onVideo),
-                ),
+    return _ZoomablePhoto(path: path, onZoomChanged: onZoomChanged);
+  }
+}
+
+/// Foto que se acerca con dos dedos o con doble toque. Lee los toques en
+/// crudo, sin entrar en la disputa de gestos, para que con la foto sin
+/// ampliar el arrastre siga deslizando entre piezas; ampliada, el arrastre
+/// la mueve y el visor deja de cambiar de página.
+class _ZoomablePhoto extends StatefulWidget {
+  const _ZoomablePhoto({required this.path, required this.onZoomChanged});
+
+  final String path;
+  final ValueChanged<bool> onZoomChanged;
+
+  @override
+  State<_ZoomablePhoto> createState() => _ZoomablePhotoState();
+}
+
+class _ZoomablePhotoState extends State<_ZoomablePhoto> {
+  static const double _maxScale = 4;
+  static const double _doubleTapScale = 2.5;
+
+  final Map<int, Offset> _pointers = {};
+  double _scale = 1;
+  Offset _offset = Offset.zero;
+  double _pinchStartDistance = 0;
+  double _pinchStartScale = 1;
+
+  bool get _zoomed => _scale > 1.01;
+
+  double _distance() {
+    final points = _pointers.values.take(2).toList();
+    return (points[0] - points[1]).distance;
+  }
+
+  Offset _clamp(Offset offset, double scale) {
+    final size = context.size ?? Size.zero;
+    final dx = size.width * (scale - 1) / 2;
+    final dy = size.height * (scale - 1) / 2;
+    return Offset(offset.dx.clamp(-dx, dx), offset.dy.clamp(-dy, dy));
+  }
+
+  void _apply(double scale, Offset offset) {
+    final wasZoomed = _zoomed;
+    setState(() {
+      _scale = scale.clamp(1, _maxScale);
+      _offset = _scale <= 1.01 ? Offset.zero : _clamp(offset, _scale);
+      if (_scale <= 1.01) _scale = 1;
+    });
+    if (wasZoomed != _zoomed) widget.onZoomChanged(_zoomed);
+  }
+
+  void _onDown(PointerDownEvent event) {
+    _pointers[event.pointer] = event.localPosition;
+    if (_pointers.length == 2) {
+      _pinchStartDistance = _distance();
+      _pinchStartScale = _scale;
+    }
+  }
+
+  void _onMove(PointerMoveEvent event) {
+    if (!_pointers.containsKey(event.pointer)) return;
+    _pointers[event.pointer] = event.localPosition;
+    if (_pointers.length >= 2) {
+      if (_pinchStartDistance > 0) {
+        _apply(_pinchStartScale * _distance() / _pinchStartDistance, _offset);
+      }
+    } else if (_zoomed) {
+      _apply(_scale, _offset + event.delta);
+    }
+  }
+
+  void _onUp(PointerEvent event) {
+    _pointers.remove(event.pointer);
+    if (_pointers.length == 1) {
+      // Al soltar un dedo del pellizco, el otro sigue moviendo la foto.
+      _pinchStartDistance = 0;
+    }
+  }
+
+  void _toggleZoom() =>
+      _zoomed ? _apply(1, Offset.zero) : _apply(_doubleTapScale, Offset.zero);
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: _onDown,
+      onPointerMove: _onMove,
+      onPointerUp: _onUp,
+      onPointerCancel: _onUp,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onDoubleTap: _toggleZoom,
+        child: ClipRect(
+          child: Transform(
+            alignment: Alignment.center,
+            transform:
+                Matrix4.identity()
+                  ..translateByDouble(_offset.dx, _offset.dy, 0, 1)
+                  ..scaleByDouble(_scale, _scale, 1, 1),
+            child: Center(
+              child: Image.file(
+                File(widget.path),
+                fit: BoxFit.contain,
+                semanticLabel: AppStrings.coverLabel,
+                errorBuilder:
+                    (context, _, __) => Center(
+                      child: Text(
+                        AppStrings.cannotPlay,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppOverlay.onVideo,
+                        ),
+                      ),
+                    ),
               ),
+            ),
+          ),
         ),
       ),
     );
