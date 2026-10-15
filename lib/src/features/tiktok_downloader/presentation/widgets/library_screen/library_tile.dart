@@ -6,6 +6,7 @@ import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../config/theme/savetic_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
 import '../../../../../core/utils/formatters.dart';
+import '../../../../../core/widgets/network_mark.dart';
 import '../../../domain/entities/saved_video.dart';
 import '../../screens/video_player_screen.dart';
 import 'library_thumbnail.dart';
@@ -55,6 +56,16 @@ class LibraryTile extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   LibraryThumbnail(path: video.path),
+                  Positioned(
+                    left: AppSpacing.sm,
+                    top: AppSpacing.sm,
+                    child: _Badge(
+                      child: NetworkMark(
+                        network: video.source,
+                        size: AppSizes.iconBadge,
+                      ),
+                    ),
+                  ),
                   if (video.durationSeconds != null)
                     Positioned(
                       left: AppSpacing.sm,

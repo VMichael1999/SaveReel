@@ -16,6 +16,8 @@ class LibraryState extends Equatable {
   int get totalBytes => videos.fold(0, (sum, v) => sum + v.sizeBytes);
   int get videoCount => videos.where((v) => !v.isAudio).length;
   int get audioCount => videos.where((v) => v.isAudio).length;
+  int countOf(VideoNetwork network) =>
+      videos.where((v) => v.source == network).length;
 
   @override
   List<Object?> get props => [status, videos];
