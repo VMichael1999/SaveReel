@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
+import '../../../../../core/utils/video_link.dart';
 import '../../../domain/entities/saved_video.dart';
 
 typedef RootPathProvider = Future<String> Function();
@@ -71,6 +72,7 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
           title: meta?['title'] as String?,
           authorHandle: meta?['author'] as String?,
           durationSeconds: meta?['durationSeconds'] as int?,
+          network: VideoNetwork.values.asNameMap()[meta?['network']],
         ),
       );
     }
@@ -100,6 +102,7 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
       if (metadata.authorHandle != null) 'author': metadata.authorHandle,
       if (metadata.durationSeconds != null)
         'durationSeconds': metadata.durationSeconds,
+      if (metadata.network != null) 'network': metadata.network!.name,
     };
     return _writeMetadata(metadata.path, current);
   }

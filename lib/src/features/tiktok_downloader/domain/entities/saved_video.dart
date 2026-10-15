@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/video_link.dart';
+
 /// Un archivo guardado en la app, con los datos que se conocen de él.
 class SavedVideo extends Equatable {
   final String path;
@@ -12,6 +14,10 @@ class SavedVideo extends Equatable {
   final String? authorHandle;
   final int? durationSeconds;
 
+  /// Red de la que viene. Los archivos de antes de Instagram no lo anotan
+  /// y cuentan como de TikTok.
+  final VideoNetwork? network;
+
   const SavedVideo({
     required this.path,
     required this.sizeBytes,
@@ -19,7 +25,10 @@ class SavedVideo extends Equatable {
     this.title,
     this.authorHandle,
     this.durationSeconds,
+    this.network,
   });
+
+  VideoNetwork get source => network ?? VideoNetwork.tiktok;
 
   bool get isAudio => path.toLowerCase().endsWith('.mp3');
 
@@ -30,6 +39,7 @@ class SavedVideo extends Equatable {
     title: title,
     authorHandle: authorHandle,
     durationSeconds: durationSeconds ?? this.durationSeconds,
+    network: network,
   );
 
   @override
@@ -40,6 +50,7 @@ class SavedVideo extends Equatable {
     title,
     authorHandle,
     durationSeconds,
+    network,
   ];
 }
 
@@ -49,14 +60,22 @@ class SavedVideoMetadata extends Equatable {
   final String? title;
   final String? authorHandle;
   final int? durationSeconds;
+  final VideoNetwork? network;
 
   const SavedVideoMetadata({
     required this.path,
     this.title,
     this.authorHandle,
     this.durationSeconds,
+    this.network,
   });
 
   @override
-  List<Object?> get props => [path, title, authorHandle, durationSeconds];
+  List<Object?> get props => [
+    path,
+    title,
+    authorHandle,
+    durationSeconds,
+    network,
+  ];
 }
