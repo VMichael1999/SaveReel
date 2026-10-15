@@ -21,22 +21,22 @@ Future<bool> confirmMobileData(
   final size = bytes == null ? null : formatMegabytes(bytes);
   final body =
       policy == MobileDataPolicy.wifiOnly
-          ? AppStrings.mobileDataBodyWifiOnly
-          : AppStrings.mobileDataBodyHeavy(size!);
+          ? context.strings.mobileDataBodyWifiOnly
+          : context.strings.mobileDataBodyHeavy(size!);
   final confirmed = await showDialog<bool>(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: const Text(AppStrings.mobileDataTitle),
+          title: Text(context.strings.mobileDataTitle),
           content: Text(body),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(AppStrings.cancel),
+              child: Text(context.strings.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(AppStrings.downloadAnyway),
+              child: Text(context.strings.downloadAnyway),
             ),
           ],
         ),

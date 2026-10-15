@@ -67,8 +67,8 @@ class PlatformBackgroundDownloads implements BackgroundDownloads {
     'count': snapshot.count,
     'heading':
         snapshot.count > 1
-            ? AppStrings.downloadsCount(snapshot.count)
-            : AppStrings.downloadingNow,
+            ? AppStrings.current.downloadsCount(snapshot.count)
+            : AppStrings.current.downloadingNow,
     'detail': snapshot.count > 1 ? '' : snapshot.title,
     'percent': snapshot.percent,
   });
@@ -76,7 +76,10 @@ class PlatformBackgroundDownloads implements BackgroundDownloads {
   @override
   Future<void> notifyFinished({required String title, required bool success}) =>
       _call('finished', {
-        'heading': success ? AppStrings.downloadReady : AppStrings.downloadFall,
+        'heading':
+            success
+                ? AppStrings.current.downloadReady
+                : AppStrings.current.downloadFall,
         'detail': title,
         'success': success,
       });

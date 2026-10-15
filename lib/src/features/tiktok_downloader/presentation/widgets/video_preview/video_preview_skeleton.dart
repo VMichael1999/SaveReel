@@ -61,7 +61,7 @@ class VideoPreviewSkeleton extends StatelessWidget {
 
     return Semantics(
       liveRegion: true,
-      label: AppStrings.searching,
+      label: context.strings.searching,
       excludeSemantics: true,
       child:
           reduceMotion

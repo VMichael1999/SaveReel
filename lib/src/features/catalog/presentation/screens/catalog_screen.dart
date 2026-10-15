@@ -59,7 +59,7 @@ const _failedItem = DownloadItem(
   path: 'ejemplo/fallida.mp4',
   receivedBytes: 34,
   totalBytes: 100,
-  failureMessage: 'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
+  failureMessage: 'errNoInternet',
 );
 
 class CatalogScreen extends StatefulWidget {
@@ -185,7 +185,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
           const TextField(
             decoration: InputDecoration(
               labelText: 'Enlace del video',
-              errorText: 'Ese enlace es de YouTube, y por ahora solo bajamos de TikTok e Instagram.',
+              errorText:
+                  'Ese enlace es de YouTube, y por ahora solo bajamos de TikTok e Instagram.',
               prefixIcon: Icon(Icons.link),
             ),
           ),

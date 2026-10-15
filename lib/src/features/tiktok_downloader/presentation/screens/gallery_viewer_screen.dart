@@ -60,7 +60,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
     return SharePlus.instance.share(
       ShareParams(
         files: [for (final path in _files) XFile(path)],
-        text: handle == null ? null : AppStrings.shareText(handle),
+        text: handle == null ? null : context.strings.shareText(handle),
       ),
     );
   }
@@ -74,14 +74,14 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
       setState(() => _inGallery = true);
       showAppMessage(
         context,
-        msg: AppStrings.galleryDone,
+        msg: context.strings.galleryDone,
         type: MessageType.success,
       );
     } catch (_) {
       if (!mounted) return;
       showAppMessage(
         context,
-        msg: AppStrings.galleryFailed,
+        msg: context.strings.galleryFailed,
         type: MessageType.error,
       );
     }
@@ -141,7 +141,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
                     child: Row(
                       children: [
                         IconButton.filled(
-                          tooltip: AppStrings.back,
+                          tooltip: context.strings.back,
                           onPressed: () => Navigator.of(context).maybePop(),
                           style: IconButton.styleFrom(
                             backgroundColor: AppOverlay.controlFill,
@@ -151,7 +151,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
                         ),
                         const Spacer(),
                         Semantics(
-                          label: AppStrings.galleryPosition(
+                          label: context.strings.galleryPosition(
                             _index + 1,
                             _files.length,
                           ),
@@ -238,7 +238,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
                             Expanded(
                               child: PlayerAction(
                                 icon: Icons.ios_share_rounded,
-                                label: AppStrings.share,
+                                label: context.strings.share,
                                 onTap: _share,
                               ),
                             ),
@@ -252,8 +252,8 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
                                 iconColor: _inGallery ? AppOverlay.done : null,
                                 label:
                                     _inGallery
-                                        ? AppStrings.inGallery
-                                        : AppStrings.saveToGallery,
+                                        ? context.strings.inGallery
+                                        : context.strings.saveToGallery,
                                 onTap: _inGallery ? null : _saveToGallery,
                               ),
                             ),
@@ -261,7 +261,7 @@ class _GalleryViewerScreenState extends State<GalleryViewerScreen> {
                             Expanded(
                               child: PlayerAction(
                                 icon: Icons.delete_outline_rounded,
-                                label: AppStrings.delete,
+                                label: context.strings.delete,
                                 onTap: _delete,
                               ),
                             ),
@@ -405,11 +405,11 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto> {
               child: Image.file(
                 File(widget.path),
                 fit: BoxFit.contain,
-                semanticLabel: AppStrings.coverLabel,
+                semanticLabel: context.strings.coverLabel,
                 errorBuilder:
                     (context, _, __) => Center(
                       child: Text(
-                        AppStrings.cannotPlay,
+                        context.strings.cannotPlay,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: AppOverlay.onVideo,
                         ),
@@ -479,7 +479,7 @@ class _VideoPageState extends State<_VideoPage> {
     if (_failed) {
       return Center(
         child: Text(
-          AppStrings.cannotPlay,
+          context.strings.cannotPlay,
           style: Theme.of(
             context,
           ).textTheme.bodyLarge?.copyWith(color: AppOverlay.onVideo),

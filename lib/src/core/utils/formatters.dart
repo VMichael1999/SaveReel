@@ -1,3 +1,5 @@
+import 'app_strings.dart';
+
 /// Duración en segundos como `0:34` o `1:12`.
 String formatDuration(int seconds) {
   final total = seconds < 0 ? 0 : seconds;
@@ -26,9 +28,10 @@ String formatMegabytes(int bytes, {bool withUnit = true}) {
   return withUnit ? '$number MB' : number;
 }
 
-/// Tiempo restante estimado: `faltan 3 s`, `faltan 1 min 20 s`.
+/// Tiempo restante estimado: `faltan 3 s`, `faltan 1 min 20 s` (o `3 s left`).
 /// Devuelve nulo mientras no hay datos suficientes para estimarlo.
 String? formatRemaining({
+  required AppStrings strings,
   required Duration elapsed,
   required int receivedBytes,
   required int totalBytes,
@@ -38,8 +41,5 @@ String? formatRemaining({
   final remainingMs =
       elapsed.inMilliseconds * (totalBytes - receivedBytes) / receivedBytes;
   final seconds = (remainingMs / 1000).ceil();
-  if (seconds < 60) return 'faltan $seconds s';
-  final minutes = seconds ~/ 60;
-  final rest = seconds % 60;
-  return rest == 0 ? 'faltan $minutes min' : 'faltan $minutes min $rest s';
+  return strings.remaining(seconds);
 }

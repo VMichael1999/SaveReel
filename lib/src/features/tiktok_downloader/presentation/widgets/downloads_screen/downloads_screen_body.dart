@@ -41,12 +41,12 @@ class DownloadsScreenBody extends StatelessWidget {
         final rows = <Widget Function()>[
           if (active.isEmpty && finished.isEmpty) () => const _NoActiveNote(),
           if (active.isNotEmpty) ...[
-            () => const _SectionLabel(AppStrings.inProgress),
+            () => _SectionLabel(context.strings.inProgress),
             for (final item in active)
               () => ActiveDownloadTile(key: ValueKey(item.path), item: item),
           ],
           if (finished.isNotEmpty) ...[
-            () => const _SectionLabel(AppStrings.today),
+            () => _SectionLabel(context.strings.today),
             for (final item in finished)
               () => FinishedDownloadTile(key: ValueKey(item.path), item: item),
           ],
@@ -99,7 +99,7 @@ class _NoActiveNote extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.lg),
       child: Text(
-        AppStrings.noActiveDownloads,
+        context.strings.noActiveDownloads,
         style: Theme.of(
           context,
         ).textTheme.bodyMedium?.copyWith(color: context.colors.muted),

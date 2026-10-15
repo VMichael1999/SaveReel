@@ -10,6 +10,7 @@ import 'package:savetic/src/config/theme/app_theme.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
+import 'package:savetic/src/core/utils/app_strings.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
@@ -181,7 +182,11 @@ void main() {
     await _settle(tester);
 
     expect(
-      find.text(const NoInternetConnectionFailure().message),
+      find.text(
+        AppStrings.current.translate(
+          const NoInternetConnectionFailure().message,
+        ),
+      ),
       findsOneWidget,
     );
     expect(

@@ -1,158 +1,233 @@
+import 'package:flutter/widgets.dart';
+
+import '../../localization/app_texts.dart';
+
+/// Los textos de la interfaz en el idioma de la app. Se obtienen con
+/// `context.strings` (o `AppStrings.of(context)`), así que la pantalla se
+/// reconstruye sola cuando el usuario cambia de idioma. Los textos viven en
+/// `localization/*.json`; aquí solo está el acceso tipado y la lógica de los
+/// que llevan datos o plurales.
 class AppStrings {
-  static const String appName = "SaveReel";
-  static const String videoLink = "Enlace del video";
-  static const String inputLinkFieldText = "Enlace de TikTok o Instagram";
-  static const String download = "Descargar";
-  static const String downloading = "Descargando";
-  static const String downloads = "Descargas";
-  static String downloadsCount(int n) => "$n descargas";
-  static const String downloadReady = "Descarga lista";
-  static const String downloadSuccess = "Descarga exitosa";
-  static const String play = "Reproducir";
-  static const String downloadFall = "Error en la descarga";
+  const AppStrings(this._texts);
+
+  final AppTexts _texts;
+
+  static AppStrings of(BuildContext context) =>
+      AppStrings(AppTexts.of(context));
+
+  /// Para el código que no tiene un [BuildContext] (notificaciones del sistema).
+  static AppStrings get current => AppStrings(AppTexts.current);
+
+  String _t(String key, [Map<String, Object?>? args]) => _texts.t(key, args);
+
+  /// Traduce lo que llegó como clave desde otra capa (por ejemplo el mensaje
+  /// de un error del servicio).
+  String translate(String key) => _t(key);
+  String get appName => _t('appName');
+  String get videoLink => _t('videoLink');
+  String get inputLinkFieldText => _t('inputLinkFieldText');
+  String get download => _t('download');
+  String get downloading => _t('downloading');
+  String get downloads => _t('downloads');
+  String get downloadReady => _t('downloadReady');
+  String get downloadSuccess => _t('downloadSuccess');
+  String get play => _t('play');
+  String get downloadFall => _t('downloadFall');
 
   // Inicio
-  static const String homeTitle = "Pega el enlace del video";
-  static const String clipboardFound = "Tienes un enlace copiado";
-  static const String useThisLink = "Usar este enlace";
-  static const String paste = "Pegar";
-  static const String clipboardNoLink =
-      "No hay un enlace de TikTok o Instagram copiado.";
-  static const String clearField = "Borrar el enlace";
-  static const String searchVideo = "Buscar video";
-  static const String searching = "Buscando el video…";
-  static const String recents = "Recientes";
-  static const String seeAll = "Ver todas";
-  static const String validLinksLook = "Un enlace que sí funciona se ve así:";
-  static const String openDownloads = "Tus descargas";
-  static const String linkNotAVideo =
-      "Ese enlace es de TikTok o Instagram, pero no es de un video.";
-  static const String linkUnsupported =
-      "Ese enlace no es de un video de TikTok ni de Instagram.";
-  static const String videoUnavailableInstagram =
-      "Instagram no nos dejó ver ese video. Puede ser privado o haber sido borrado, "
-      "o el servicio no está respondiendo ahora.";
-  static const String videoUnavailable =
-      "No pudimos obtener el video. Puede ser privado o haber sido borrado.";
-  static String linkOtherPlatform(String platform) =>
-      "Ese enlace es de $platform, y por ahora solo bajamos de TikTok e Instagram.";
-  static String downloadsInProgress(int n) =>
-      n == 1 ? "Tus descargas, 1 en curso" : "Tus descargas, $n en curso";
+  String get homeTitle => _t('homeTitle');
+  String get clipboardFound => _t('clipboardFound');
+  String get useThisLink => _t('useThisLink');
+  String get paste => _t('paste');
+  String get clipboardNoLink => _t('clipboardNoLink');
+  String get clearField => _t('clearField');
+  String get searchVideo => _t('searchVideo');
+  String get searching => _t('searching');
+  String get recents => _t('recents');
+  String get seeAll => _t('seeAll');
+  String get validLinksLook => _t('validLinksLook');
+  String get openDownloads => _t('openDownloads');
+  String get linkNotAVideo => _t('linkNotAVideo');
+  String get linkUnsupported => _t('linkUnsupported');
+  String get videoUnavailableInstagram => _t('videoUnavailableInstagram');
+  String get videoUnavailable => _t('videoUnavailable');
 
   // Vista previa
-  static const String previewSheetLabel = "Vista previa del video";
-  static const String formatLabel = "Formato";
-  static const String formatWithCredits = "Video con créditos";
-  static const String formatNoWatermark = "Video sin marca de agua";
-  static const String formatInstagramVideo = "Video";
-  static const String formatInstagramVideoHint =
-      "En la mejor calidad que entrega Instagram";
-  static const String formatGallery = "Todas las fotos";
-  static const String formatGalleryMixed = "Todo el carrusel";
-  static String downloadGallery(int total, {required bool onlyPhotos}) =>
-      "Descargar ${galleryCount(total, onlyPhotos: onlyPhotos)}";
-  static const String formatGalleryHintTikTok =
-      "Las fotos del slideshow, sin la música";
-  static const String formatGalleryHintInstagram =
-      "Todo el carrusel, en su calidad original";
-  static String galleryCount(int total, {required bool onlyPhotos}) {
-    if (onlyPhotos) return total == 1 ? "1 foto" : "$total fotos";
-    return total == 1 ? "1 elemento" : "$total elementos";
-  }
-
-  static String galleryPosition(int current, int total) =>
-      "Pieza $current de $total";
-
-  static String galleryProgress(int current, int total) =>
-      "Pieza $current de $total";
-  static const String formatAudio = "Solo el audio";
-  static const String formatNoWatermarkHint = "Para verlo tú, sin conexión";
-  static const String formatAudioHint = "Archivo de música";
-  static const String formatWithCreditsNoAuthor = "Incluye el nombre del autor";
-  static const String downloadVideo = "Descargar video";
-  static const String downloadAudio = "Descargar audio";
-  static const String durationLabel = "de duración";
-  static const String playsLabel = "reproducciones";
-  static const String downloadsLabel = "descargas";
-  static const String coverLabel = "Portada del video";
-  static const String untitledVideo = "Video sin título";
-  static String formatWithCreditsHint(String handle) =>
-      "Muestra @$handle al compartir";
-  static String creditNote(String handle) =>
-      "Si lo compartes, menciona a @$handle.";
+  String get previewSheetLabel => _t('previewSheetLabel');
+  String get formatLabel => _t('formatLabel');
+  String get formatWithCredits => _t('formatWithCredits');
+  String get formatNoWatermark => _t('formatNoWatermark');
+  String get formatInstagramVideo => _t('formatInstagramVideo');
+  String get formatInstagramVideoHint => _t('formatInstagramVideoHint');
+  String get formatGallery => _t('formatGallery');
+  String get formatGalleryMixed => _t('formatGalleryMixed');
+  String get formatGalleryHintTikTok => _t('formatGalleryHintTikTok');
+  String get formatGalleryHintInstagram => _t('formatGalleryHintInstagram');
+  String get formatAudio => _t('formatAudio');
+  String get formatNoWatermarkHint => _t('formatNoWatermarkHint');
+  String get formatAudioHint => _t('formatAudioHint');
+  String get formatWithCreditsNoAuthor => _t('formatWithCreditsNoAuthor');
+  String get downloadVideo => _t('downloadVideo');
+  String get downloadAudio => _t('downloadAudio');
+  String get durationLabel => _t('durationLabel');
+  String get playsLabel => _t('playsLabel');
+  String get downloadsLabel => _t('downloadsLabel');
+  String get coverLabel => _t('coverLabel');
+  String get untitledVideo => _t('untitledVideo');
 
   // Descargas
-  static const String inProgress = "En curso";
-  static const String today = "Hoy";
-  static const String cancelDownload = "Cancelar descarga";
-  static const String viewVideo = "Ver video";
-  static const String retry = "Reintentar";
-  static const String savedInGallery = "En tu galería";
-  static const String savedInApp = "Guardado en la app";
-  static const String downloadingNow = "Descargando…";
-  static const String downloadCancelled = "Descarga cancelada";
-  static const String emptyDownloadsTitle = "Aún no has guardado nada";
-  static const String emptyDownloadsBody =
-      "Cuando guardes un video, lo verás aquí.";
-  static const String pasteALink = "Pegar un enlace";
-  static const String share = "Compartir";
-  static const String withCreditsShort = "con créditos";
-  static const String noWatermarkShort = "sin marca";
-  static const String audioShort = "solo audio";
-  static String stoppedAt(int percent) =>
-      "se quedó en $percent %; al reintentar sigue desde ahí";
-  static String shareText(String handle) => "Video de @$handle";
+  String get inProgress => _t('inProgress');
+  String get today => _t('today');
+  String get cancelDownload => _t('cancelDownload');
+  String get viewVideo => _t('viewVideo');
+  String get retry => _t('retry');
+  String get savedInGallery => _t('savedInGallery');
+  String get savedInApp => _t('savedInApp');
+  String get downloadingNow => _t('downloadingNow');
+  String get downloadCancelled => _t('downloadCancelled');
+  String get emptyDownloadsTitle => _t('emptyDownloadsTitle');
+  String get emptyDownloadsBody => _t('emptyDownloadsBody');
+  String get pasteALink => _t('pasteALink');
+  String get share => _t('share');
+  String get withCreditsShort => _t('withCreditsShort');
+  String get noWatermarkShort => _t('noWatermarkShort');
+  String get audioShort => _t('audioShort');
 
   // Reproductor
-  static const String back = "Volver";
-  static const String playVideo = "Reproducir";
-  static const String saveToGallery = "Guardar en galería";
-  static const String inGallery = "En galería";
-  static const String delete = "Eliminar";
-  static const String cancel = "Cancelar";
-  static const String deleteTitle = "¿Eliminar este video?";
-  static const String deleteBodyCopy =
-      "Se borrará de SaveReel. La copia que guardaste en tu galería no se toca.";
-  static const String deleteBody = "Se borrará de SaveReel para siempre.";
-  static const String videoDeleted = "Video eliminado";
-  static const String cannotPlay = "No pudimos reproducir este video.";
-  static const String galleryFailed =
-      "No pudimos guardarlo en la galería. Revisa el permiso de Fotos.";
-  static const String galleryDone = "Guardado en tu galería";
-  static String playerPosition(String now, String total) => "$now de $total";
+  String get back => _t('back');
+  String get playVideo => _t('playVideo');
+  String get saveToGallery => _t('saveToGallery');
+  String get inGallery => _t('inGallery');
+  String get delete => _t('delete');
+  String get cancel => _t('cancel');
+  String get deleteTitle => _t('deleteTitle');
+  String get deleteBodyCopy => _t('deleteBodyCopy');
+  String get deleteBody => _t('deleteBody');
+  String get videoDeleted => _t('videoDeleted');
+  String get cannotPlay => _t('cannotPlay');
+  String get galleryFailed => _t('galleryFailed');
+  String get galleryDone => _t('galleryDone');
 
   // Biblioteca
-  static const String libraryTitle = "Tus descargas";
-  static const String libraryAll = "Todo";
-  static const String libraryVideos = "Videos";
-  static const String search = "Buscar";
-  static const String searchHint = "Buscar por título o autor";
-  static const String closeSearch = "Cerrar la búsqueda";
-  static const String clearSearch = "Borrar lo escrito";
-  static String noMatches(String query) => "Nada coincide con «$query».";
-  static const String sort = "Ordenar";
-  static const String sortNewest = "Más nuevos";
-  static const String sortOldest = "Más antiguos";
-  static const String sortBiggest = "Más pesados";
-  static const String sortTitle = "Título (A–Z)";
-  static const String select = "Seleccionar";
-  static const String galleryShort = "Galería";
-  static const String selectAll = "Seleccionar todo";
-  static const String cancelSelection = "Cancelar la selección";
-  static String selectedCount(int n) =>
-      n == 1 ? "1 seleccionado" : "$n seleccionados";
-  static String deleteManyTitle(int n) =>
-      n == 1 ? "¿Eliminar este elemento?" : "¿Eliminar $n elementos?";
-  static const String deleteManyBody =
-      "Se borrarán de SaveReel. Las copias que guardaste en tu galería no se tocan.";
-  static const String libraryPhotos = "Fotos";
-  static const String libraryAudio = "Audio";
-  static const String libraryFilterEmpty = "No hay nada en este filtro.";
-  static const String openLibrary = "Tu biblioteca";
-  static const String audioBadge = "Audio";
-  static String filesSummary(int count, String size) =>
-      "${count == 1 ? '1 archivo' : '$count archivos'} · $size";
-  static String libraryTile(
+  String get libraryTitle => _t('libraryTitle');
+  String get libraryAll => _t('libraryAll');
+  String get libraryVideos => _t('libraryVideos');
+  String get search => _t('search');
+  String get searchHint => _t('searchHint');
+  String get closeSearch => _t('closeSearch');
+  String get clearSearch => _t('clearSearch');
+  String get sort => _t('sort');
+  String get sortNewest => _t('sortNewest');
+  String get sortOldest => _t('sortOldest');
+  String get sortBiggest => _t('sortBiggest');
+  String get sortTitle => _t('sortTitle');
+  String get select => _t('select');
+  String get galleryShort => _t('galleryShort');
+  String get selectAll => _t('selectAll');
+  String get cancelSelection => _t('cancelSelection');
+  String get deleteManyBody => _t('deleteManyBody');
+  String get libraryPhotos => _t('libraryPhotos');
+  String get libraryAudio => _t('libraryAudio');
+  String get libraryFilterEmpty => _t('libraryFilterEmpty');
+  String get openLibrary => _t('openLibrary');
+  String get audioBadge => _t('audioBadge');
+
+  // Primer uso
+  String get firstUseTitle => _t('firstUseTitle');
+  String get step1Title => _t('step1Title');
+  String get step1Body => _t('step1Body');
+  String get step2Title => _t('step2Title');
+  String get step2Body => _t('step2Body');
+  String get step3Title => _t('step3Title');
+  String get step3Body => _t('step3Body');
+  String get galleryTipLead => _t('galleryTipLead');
+  String get galleryTipBold => _t('galleryTipBold');
+  String get galleryTipTail => _t('galleryTipTail');
+  String get openTikTok => _t('openTikTok');
+  String get haveALink => _t('haveALink');
+  String get tikTokNotFound => _t('tikTokNotFound');
+
+  // Ajustes
+  String get settingsTitle => _t('settingsTitle');
+  String get settingsOpen => _t('settingsOpen');
+  String get sectionOnDownload => _t('sectionOnDownload');
+  String get sectionSpace => _t('sectionSpace');
+  String get sectionAppearance => _t('sectionAppearance');
+  String get settingsFormat => _t('settingsFormat');
+  String get settingsFormatValueCredits => _t('settingsFormatValueCredits');
+  String get settingsFormatValueNoWatermark =>
+      _t('settingsFormatValueNoWatermark');
+  String get settingsFormatValueAudio => _t('settingsFormatValueAudio');
+  String get settingsFormatHintCredits => _t('settingsFormatHintCredits');
+  String get settingsMobileData => _t('settingsMobileData');
+  String get settingsMobileDataAsk => _t('settingsMobileDataAsk');
+  String get settingsMobileDataAskShort => _t('settingsMobileDataAskShort');
+  String get settingsMobileDataAllowShort => _t('settingsMobileDataAllowShort');
+  String get settingsMobileDataWifiOnlyShort =>
+      _t('settingsMobileDataWifiOnlyShort');
+  String get settingsMobileDataAskHint => _t('settingsMobileDataAskHint');
+  String get settingsMobileDataAllow => _t('settingsMobileDataAllow');
+  String get settingsMobileDataAllowHint => _t('settingsMobileDataAllowHint');
+  String get settingsMobileDataWifiOnly => _t('settingsMobileDataWifiOnly');
+  String get settingsMobileDataWifiOnlyHint =>
+      _t('settingsMobileDataWifiOnlyHint');
+  String get mobileDataTitle => _t('mobileDataTitle');
+  String get mobileDataBodyWifiOnly => _t('mobileDataBodyWifiOnly');
+  String get downloadAnyway => _t('downloadAnyway');
+  String get settingsGallery => _t('settingsGallery');
+  String get settingsGalleryHint => _t('settingsGalleryHint');
+  String get settingsDownloads => _t('settingsDownloads');
+  String get settingsClearCache => _t('settingsClearCache');
+  String get settingsCacheCleared => _t('settingsCacheCleared');
+  String get settingsTheme => _t('settingsTheme');
+  String get themeSystem => _t('themeSystem');
+  String get themeSystemHint => _t('themeSystemHint');
+  String get themeLight => _t('themeLight');
+  String get themeDark => _t('themeDark');
+  String get legalNotice => _t('legalNotice');
+  String get noActiveDownloads => _t('noActiveDownloads');
+
+  String get settingsLanguage => _t('settingsLanguage');
+  String get settingsLanguageHint => _t('settingsLanguageHint');
+
+  // Con datos o plurales
+  String downloadsCount(int n) => _t('downloadsCount', {'n': n});
+  String linkOtherPlatform(String platform) =>
+      _t('linkOtherPlatform', {'platform': platform});
+  String downloadsInProgress(int n) =>
+      n == 1
+          ? _t('downloadsInProgressOne')
+          : _t('downloadsInProgressMany', {'n': n});
+  String galleryCount(int total, {required bool onlyPhotos}) {
+    if (onlyPhotos) {
+      return total == 1 ? _t('photoOne') : _t('photoMany', {'n': total});
+    }
+    return total == 1 ? _t('itemOne') : _t('itemMany', {'n': total});
+  }
+
+  String downloadGallery(int total, {required bool onlyPhotos}) => _t(
+    'downloadGallery',
+    {'count': galleryCount(total, onlyPhotos: onlyPhotos)},
+  );
+  String galleryPosition(int current, int total) =>
+      _t('galleryPosition', {'current': current, 'total': total});
+  String galleryProgress(int current, int total) =>
+      _t('galleryProgress', {'current': current, 'total': total});
+  String formatWithCreditsHint(String handle) =>
+      _t('formatWithCreditsHint', {'handle': handle});
+  String creditNote(String handle) => _t('creditNote', {'handle': handle});
+  String stoppedAt(int percent) => _t('stoppedAt', {'percent': percent});
+  String shareText(String handle) => _t('shareText', {'handle': handle});
+  String playerPosition(String now, String total) =>
+      _t('playerPosition', {'now': now, 'total': total});
+  String noMatches(String query) => _t('noMatches', {'query': query});
+  String selectedCount(int n) =>
+      n == 1 ? _t('selectedCountOne') : _t('selectedCountMany', {'n': n});
+  String deleteManyTitle(int n) =>
+      n == 1 ? _t('deleteManyTitleOne') : _t('deleteManyTitleMany', {'n': n});
+  String filesSummary(int count, String size) =>
+      '${count == 1 ? _t('fileOne') : _t('fileMany', {'n': count})} · $size';
+  String libraryTile(
     String? title, {
     bool isAudio = false,
     String? duration,
@@ -160,80 +235,36 @@ class AppStrings {
   }) {
     if (pieces != null) {
       return [
-        title == null ? "Abrir galería guardada" : "Abrir $title",
-        pieces == 1 ? "1 pieza" : "$pieces piezas",
-      ].join(", ");
+        title == null ? _t('openGallery') : _t('openTitle', {'title': title}),
+        pieces == 1 ? _t('pieceOne') : _t('pieceMany', {'n': pieces}),
+      ].join(', ');
     }
-    final base =
-        title == null ? "Reproducir video guardado" : "Reproducir $title";
     return [
-      base,
-      if (isAudio) "audio",
+      title == null ? _t('playSaved') : _t('playTitle', {'title': title}),
+      if (isAudio) _t('audioWord'),
       if (duration != null) duration,
-    ].join(", ");
+    ].join(', ');
   }
 
-  // Primer uso
-  static const String firstUseTitle = "Guarda cualquier video en 3 pasos";
-  static const String step1Title = "En TikTok o Instagram, toca Compartir";
-  static const String step1Body = "Es la flecha o el avioncito junto al video.";
-  static const String step2Title = "Elige «Copiar enlace»";
-  static const String step2Body = "Aparece en la fila de opciones que se abre.";
-  static const String step3Title = "Vuelve aquí";
-  static const String step3Body =
-      "Detectamos el enlace copiado y te lo ofrecemos.";
-  static const String galleryTipLead = "Los videos van a tu ";
-  static const String galleryTipBold = "Galería";
-  static const String galleryTipTail =
-      ', al álbum "SaveReel". No pedimos acceso a tus archivos.';
-  static const String openTikTok = "Abrir TikTok";
-  static const String haveALink = "Ya tengo un enlace";
-  static const String tikTokNotFound = "No encontramos TikTok en tu teléfono.";
-  static String stepLabel(int n, String title) => "Paso $n: $title";
+  String remaining(int seconds) {
+    if (seconds < 60) return _t('remainingSeconds', {'s': seconds});
+    final minutes = seconds ~/ 60;
+    final rest = seconds % 60;
+    return rest == 0
+        ? _t('remainingMinutes', {'m': minutes})
+        : _t('remainingMinutesSeconds', {'m': minutes, 's': rest});
+  }
 
-  // Ajustes
-  static const String settingsTitle = "Ajustes";
-  static const String settingsOpen = "Ajustes";
-  static const String sectionOnDownload = "Al descargar";
-  static const String sectionSpace = "Espacio";
-  static const String sectionAppearance = "Apariencia";
-  static const String settingsFormat = "Formato";
-  static const String settingsFormatValueCredits = "Con créditos";
-  static const String settingsFormatValueNoWatermark = "Sin marca de agua";
-  static const String settingsFormatValueAudio = "Solo audio";
-  static const String settingsFormatHintCredits =
-      "Muestra al autor al compartir";
-  static const String settingsMobileData = "Datos móviles";
-  static const String settingsMobileDataAsk = "Preguntar si pesa mucho";
-  static const String settingsMobileDataAskShort = "Preguntar";
-  static const String settingsMobileDataAllowShort = "Siempre";
-  static const String settingsMobileDataWifiOnlyShort = "Solo Wi-Fi";
-  static const String settingsMobileDataAskHint =
-      "Te avisa antes de bajar más de 50 MB con datos móviles";
-  static const String settingsMobileDataAllow = "Descargar siempre";
-  static const String settingsMobileDataAllowHint =
-      "No te pregunta, aunque uses datos móviles";
-  static const String settingsMobileDataWifiOnly = "Solo con Wi-Fi";
-  static const String settingsMobileDataWifiOnlyHint =
-      "Con datos móviles te pregunta antes de cada descarga";
-  static const String mobileDataTitle = "Estás con datos móviles";
-  static const String mobileDataBodyWifiOnly =
-      "Tienes activado «Solo con Wi-Fi». ¿Quieres descargar igual con tus datos?";
-  static String mobileDataBodyHeavy(String size) =>
-      "Este archivo pesa $size y se bajará con tus datos móviles. ¿Quieres descargarlo?";
-  static const String downloadAnyway = "Descargar igual";
-  static const String settingsGallery = "Guardar en la Galería";
-  static const String settingsGalleryHint = 'Álbum "SaveReel"';
-  static const String settingsDownloads = "Descargas";
-  static const String settingsClearCache = "Borrar miniaturas en caché";
-  static const String settingsCacheCleared = "Miniaturas borradas";
-  static const String settingsTheme = "Tema";
-  static const String themeSystem = "Sistema";
-  static const String themeSystemHint = "Sigue el tema de tu teléfono";
-  static const String themeLight = "Claro";
-  static const String themeDark = "Oscuro";
-  static const String legalNotice =
-      "SaveReel no está afiliada a TikTok ni a Instagram. Descarga solo videos "
-      "que tengas permiso de guardar y respeta a sus autores.";
-  static const String noActiveDownloads = "No hay descargas en curso.";
+  String bytesOf(String received, String total) =>
+      _t('bytesOf', {'received': received, 'total': total});
+
+  String stepLabel(int n, String title) =>
+      _t('stepLabel', {'n': n, 'title': title});
+  String mobileDataBodyHeavy(String size) =>
+      _t('mobileDataBodyHeavy', {'size': size});
+}
+
+/// `context.strings.searchVideo`: el atajo para llegar a los textos.
+extension AppStringsContext on BuildContext {
+  AppStrings get strings => AppStrings.of(this);
 }

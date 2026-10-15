@@ -16,23 +16,27 @@ class ActiveDownloadTile extends StatelessWidget {
 
   final DownloadItem item;
 
-  String get _status {
+  String _status(BuildContext context) {
     final progress = item.progress;
-    if (progress == null) return AppStrings.downloadingNow;
+    if (progress == null) return context.strings.downloadingNow;
     if (item.isGallery) {
       final current = (item.unitsDone + 1).clamp(1, item.unitsTotal);
       return [
-        AppStrings.galleryProgress(current, item.unitsTotal),
+        context.strings.galleryProgress(current, item.unitsTotal),
         '${(progress * 100).floor()} %',
       ].join(' · ');
     }
     final parts = [
-      '${formatMegabytes(item.receivedBytes, withUnit: false)} de ${formatMegabytes(item.totalBytes)}',
+      context.strings.bytesOf(
+        formatMegabytes(item.receivedBytes, withUnit: false),
+        formatMegabytes(item.totalBytes),
+      ),
       '${(progress * 100).floor()} %',
     ];
     final started = item.startedAt;
     if (started != null) {
       final remaining = formatRemaining(
+        strings: context.strings,
         elapsed: DateTime.now().difference(started),
         receivedBytes: item.receivedBytes,
         totalBytes: item.totalBytes,
@@ -78,7 +82,7 @@ class ActiveDownloadTile extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    _status,
+                    _status(context),
                     style: theme.textTheme.bodySmall?.tabular.copyWith(
                       color: colors.muted,
                     ),
@@ -88,7 +92,7 @@ class ActiveDownloadTile extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: AppStrings.cancelDownload,
+            tooltip: context.strings.cancelDownload,
             icon: const Icon(Icons.close_rounded),
             onPressed:
                 () => context.read<DownloaderBloc>().add(

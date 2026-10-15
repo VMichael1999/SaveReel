@@ -24,7 +24,7 @@ class DownloaderScreenAppBar extends StatelessWidget
         children: [
           const SaveticMark(size: AppSizes.markBar),
           const SizedBox(width: AppSpacing.sm),
-          Text(AppStrings.appName, style: theme.textTheme.titleLarge),
+          Text(context.strings.appName, style: theme.textTheme.titleLarge),
         ],
       ),
       actions: [
@@ -40,8 +40,8 @@ class DownloaderScreenAppBar extends StatelessWidget
             return IconButton(
               tooltip:
                   active > 0
-                      ? AppStrings.downloadsInProgress(active)
-                      : AppStrings.openDownloads,
+                      ? context.strings.downloadsInProgress(active)
+                      : context.strings.openDownloads,
               onPressed:
                   () => Navigator.of(context).pushNamed(Routes.downloads),
               icon: Badge(
@@ -53,7 +53,7 @@ class DownloaderScreenAppBar extends StatelessWidget
           },
         ),
         IconButton(
-          tooltip: AppStrings.settingsOpen,
+          tooltip: context.strings.settingsOpen,
           onPressed: () => Navigator.of(context).pushNamed(Routes.settings),
           icon: const Icon(Icons.settings_outlined),
         ),

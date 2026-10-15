@@ -74,7 +74,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     return SharePlus.instance.share(
       ShareParams(
         files: [XFile(_args.path)],
-        text: handle == null ? null : AppStrings.shareText(handle),
+        text: handle == null ? null : context.strings.shareText(handle),
       ),
     );
   }
@@ -86,14 +86,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       setState(() => _inGallery = true);
       showAppMessage(
         context,
-        msg: AppStrings.galleryDone,
+        msg: context.strings.galleryDone,
         type: MessageType.success,
       );
     } catch (_) {
       if (!mounted) return;
       showAppMessage(
         context,
-        msg: AppStrings.galleryFailed,
+        msg: context.strings.galleryFailed,
         type: MessageType.error,
       );
     }
@@ -164,7 +164,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     child: Align(
                       alignment: AlignmentDirectional.centerStart,
                       child: IconButton.filled(
-                        tooltip: AppStrings.back,
+                        tooltip: context.strings.back,
                         onPressed: () => Navigator.of(context).maybePop(),
                         style: IconButton.styleFrom(
                           backgroundColor: AppOverlay.controlFill,
@@ -233,7 +233,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             Expanded(
                               child: PlayerAction(
                                 icon: Icons.ios_share_rounded,
-                                label: AppStrings.share,
+                                label: context.strings.share,
                                 onTap: _share,
                               ),
                             ),
@@ -249,8 +249,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                       _inGallery ? AppOverlay.done : null,
                                   label:
                                       _inGallery
-                                          ? AppStrings.inGallery
-                                          : AppStrings.saveToGallery,
+                                          ? context.strings.inGallery
+                                          : context.strings.saveToGallery,
                                   onTap: _inGallery ? null : _saveToGallery,
                                 ),
                               ),
@@ -259,7 +259,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             Expanded(
                               child: PlayerAction(
                                 icon: Icons.delete_outline_rounded,
-                                label: AppStrings.delete,
+                                label: context.strings.delete,
                                 onTap: _delete,
                               ),
                             ),
@@ -301,7 +301,7 @@ class _Backdrop extends StatelessWidget {
     if (failed) {
       return Center(
         child: Text(
-          AppStrings.cannotPlay,
+          context.strings.cannotPlay,
           style: theme.textTheme.bodyLarge?.copyWith(color: AppOverlay.onVideo),
         ),
       );
@@ -324,7 +324,7 @@ class _Backdrop extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: AppStrings.playVideo,
+      label: context.strings.playVideo,
       onTap: onTap,
       excludeSemantics: true,
       child: GestureDetector(

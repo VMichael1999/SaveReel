@@ -33,14 +33,14 @@ Future<void> saveSavedVideosToGallery(
     if (!context.mounted) return;
     showAppMessage(
       context,
-      msg: AppStrings.galleryDone,
+      msg: context.strings.galleryDone,
       type: MessageType.success,
     );
   } catch (_) {
     if (!context.mounted) return;
     showAppMessage(
       context,
-      msg: AppStrings.galleryFailed,
+      msg: context.strings.galleryFailed,
       type: MessageType.error,
     );
   }
@@ -52,19 +52,19 @@ Future<bool> confirmDeleteMany(BuildContext context, int count) async {
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Text(AppStrings.deleteManyTitle(count)),
-          content: const Text(AppStrings.deleteManyBody),
+          title: Text(context.strings.deleteManyTitle(count)),
+          content: Text(context.strings.deleteManyBody),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(AppStrings.cancel),
+              child: Text(context.strings.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
                 foregroundColor: context.colors.failed,
               ),
-              child: const Text(AppStrings.delete),
+              child: Text(context.strings.delete),
             ),
           ],
         ),

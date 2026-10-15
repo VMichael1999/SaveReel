@@ -117,7 +117,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       title:
           active.length == 1
               ? active.first.video.videoData?.title ?? ''
-              : AppStrings.downloadsCount(active.length),
+              : AppStrings.current.downloadsCount(active.length),
       progress:
           known.length == active.length && known.isNotEmpty
               ? known.reduce((a, b) => a + b) / known.length

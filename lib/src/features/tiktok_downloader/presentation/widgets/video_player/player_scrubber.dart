@@ -50,7 +50,7 @@ class _PlayerScrubberState extends State<PlayerScrubber> {
                 max: totalMs <= 0 ? 1 : totalMs,
                 value: currentMs,
                 semanticFormatterCallback:
-                    (v) => AppStrings.playerPosition(
+                    (v) => context.strings.playerPosition(
                       formatDuration(
                         Duration(milliseconds: v.round()).inSeconds,
                       ),

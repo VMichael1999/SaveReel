@@ -56,7 +56,7 @@ class TiktokVideoRemoteDataSource implements TiktokVideoBaseRemoteDataSource {
         onReceiveProgress: onProgress,
         cancelToken: cancelToken,
       );
-      return AppStrings.downloadSuccess;
+      return AppStrings.current.downloadSuccess;
     } catch (error) {
       rethrow;
     }

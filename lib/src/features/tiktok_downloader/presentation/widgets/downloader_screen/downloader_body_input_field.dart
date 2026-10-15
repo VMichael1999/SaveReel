@@ -47,8 +47,8 @@ class DownloaderBodyInputField extends StatelessWidget {
       enableSuggestions: false,
       onSubmitted: (_) => onSubmit(),
       decoration: InputDecoration(
-        labelText: AppStrings.videoLink,
-        hintText: AppStrings.inputLinkFieldText,
+        labelText: context.strings.videoLink,
+        hintText: context.strings.inputLinkFieldText,
         errorText: errorText,
         errorMaxLines: 3,
         prefixIcon:
@@ -64,7 +64,7 @@ class DownloaderBodyInputField extends StatelessWidget {
         suffixIcon:
             hasText
                 ? IconButton(
-                  tooltip: AppStrings.clearField,
+                  tooltip: context.strings.clearField,
                   icon: const Icon(Icons.close_rounded),
                   onPressed: controller.clear,
                 )
@@ -76,7 +76,7 @@ class DownloaderBodyInputField extends StatelessWidget {
                       Icons.content_paste_rounded,
                       size: AppSizes.iconSm,
                     ),
-                    label: const Text(AppStrings.paste),
+                    label: Text(context.strings.paste),
                   ),
                 ),
       ),

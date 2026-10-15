@@ -43,27 +43,27 @@ class FirstUseView extends StatelessWidget {
                   Semantics(
                     header: true,
                     child: Text(
-                      AppStrings.firstUseTitle,
+                      context.strings.firstUseTitle,
                       style: theme.textTheme.headlineMedium,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  const _Step(
+                  _Step(
                     number: 1,
-                    title: AppStrings.step1Title,
-                    body: AppStrings.step1Body,
+                    title: context.strings.step1Title,
+                    body: context.strings.step1Body,
                   ),
                   const Divider(),
-                  const _Step(
+                  _Step(
                     number: 2,
-                    title: AppStrings.step2Title,
-                    body: AppStrings.step2Body,
+                    title: context.strings.step2Title,
+                    body: context.strings.step2Body,
                   ),
                   const Divider(),
-                  const _Step(
+                  _Step(
                     number: 3,
-                    title: AppStrings.step3Title,
-                    body: AppStrings.step3Body,
+                    title: context.strings.step3Title,
+                    body: context.strings.step3Body,
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Row(
@@ -85,15 +85,15 @@ class FirstUseView extends StatelessWidget {
                               color: colors.muted,
                             ),
                             children: [
-                              const TextSpan(text: AppStrings.galleryTipLead),
+                              TextSpan(text: context.strings.galleryTipLead),
                               TextSpan(
-                                text: AppStrings.galleryTipBold,
+                                text: context.strings.galleryTipBold,
                                 style: TextStyle(
                                   color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              const TextSpan(text: AppStrings.galleryTipTail),
+                              TextSpan(text: context.strings.galleryTipTail),
                             ],
                           ),
                         ),
@@ -139,12 +139,12 @@ class FirstUseView extends StatelessWidget {
                 ],
                 FilledButton(
                   onPressed: onOpenTikTok,
-                  child: const Text(AppStrings.openTikTok),
+                  child: Text(context.strings.openTikTok),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 OutlinedButton(
                   onPressed: onHaveLink,
-                  child: const Text(AppStrings.haveALink),
+                  child: Text(context.strings.haveALink),
                 ),
               ],
             ),
@@ -169,7 +169,7 @@ class _Step extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: AppStrings.stepLabel(number, title),
+      label: context.strings.stepLabel(number, title),
       value: body,
       excludeSemantics: true,
       child: Padding(

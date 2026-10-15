@@ -22,13 +22,14 @@ class FinishedDownloadTile extends StatelessWidget {
 
   bool get _failed => item.status == DownloadStatus.error;
 
-  String _formatName(DownloadFormat? format) => switch (format) {
-    DownloadFormat.withCredits => AppStrings.withCreditsShort,
-    DownloadFormat.noWatermark => AppStrings.noWatermarkShort,
-    DownloadFormat.audio => AppStrings.audioShort,
-    DownloadFormat.gallery => '',
-    null => '',
-  };
+  String _formatName(BuildContext context, DownloadFormat? format) =>
+      switch (format) {
+        DownloadFormat.withCredits => context.strings.withCreditsShort,
+        DownloadFormat.noWatermark => context.strings.noWatermarkShort,
+        DownloadFormat.audio => context.strings.audioShort,
+        DownloadFormat.gallery => '',
+        null => '',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -46,24 +47,26 @@ class FinishedDownloadTile extends StatelessWidget {
     final statusColor = _failed ? colors.failed : colors.done;
     final statusText =
         _failed
-            ? (item.failureMessage ?? AppStrings.downloadFall)
+            ? context.strings.translate(item.failureMessage ?? 'downloadFall')
             : [
-              isAudio ? AppStrings.savedInApp : AppStrings.savedInGallery,
+              isAudio
+                  ? context.strings.savedInApp
+                  : context.strings.savedInGallery,
               if (size != null) size,
             ].join(' · ');
     final detail = [
       if (data.authorHandle != null) '@${data.authorHandle}',
       if (_failed && percent > 0)
-        AppStrings.stoppedAt(percent)
+        context.strings.stoppedAt(percent)
       else if (data.isGallery)
-        AppStrings.galleryCount(
+        context.strings.galleryCount(
           data.gallery.length,
           onlyPhotos: data.photoCount == data.gallery.length,
         )
       else if (data.network == VideoNetwork.instagram)
         NetworkMark.labelOf(data.network)
-      else if (_formatName(format).isNotEmpty)
-        _formatName(format),
+      else if (_formatName(context, format).isNotEmpty)
+        _formatName(context, format),
     ].join(' · ');
 
     return Padding(
@@ -123,7 +126,7 @@ class FinishedDownloadTile extends StatelessWidget {
                       Icons.refresh_rounded,
                       size: AppSizes.iconSm,
                     ),
-                    label: const Text(AppStrings.retry),
+                    label: Text(context.strings.retry),
                     onPressed:
                         () => context.read<DownloaderBloc>().add(
                           DownloaderRetryVideo(item.path),
@@ -137,7 +140,9 @@ class FinishedDownloadTile extends StatelessWidget {
                       size: AppSizes.iconSm,
                     ),
                     label: Text(
-                      isAudio ? AppStrings.play : AppStrings.viewVideo,
+                      isAudio
+                          ? context.strings.play
+                          : context.strings.viewVideo,
                     ),
                     onPressed:
                         () => Navigator.of(context).pushNamed(

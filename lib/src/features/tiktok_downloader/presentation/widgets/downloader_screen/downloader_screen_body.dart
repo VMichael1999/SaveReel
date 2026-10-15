@@ -77,7 +77,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     if (shared.consumeMissing()) {
       showAppMessage(
         context,
-        msg: AppStrings.clipboardNoLink,
+        msg: context.strings.clipboardNoLink,
         type: MessageType.info,
       );
     }
@@ -141,7 +141,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     setState(() => _firstUseError = null);
     final opened = await widget.openTikTok();
     if (!opened && mounted) {
-      setState(() => _firstUseError = AppStrings.tikTokNotFound);
+      setState(() => _firstUseError = context.strings.tikTokNotFound);
     }
   }
 
@@ -164,7 +164,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
   VideoLinkCheck get _check => VideoLink.check(_controller.text);
 
   String? get _errorText {
-    if (_serviceError != null) return _serviceError;
+    if (_serviceError != null) return context.strings.translate(_serviceError!);
     final check = _check;
     final immediate =
         check.status == VideoLinkStatus.otherPlatform ||
@@ -172,11 +172,11 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     if (!_touched && !immediate) return null;
     return switch (check.status) {
       VideoLinkStatus.empty || VideoLinkStatus.valid => null,
-      VideoLinkStatus.notAVideo => AppStrings.linkNotAVideo,
-      VideoLinkStatus.otherPlatform => AppStrings.linkOtherPlatform(
+      VideoLinkStatus.notAVideo => context.strings.linkNotAVideo,
+      VideoLinkStatus.otherPlatform => context.strings.linkOtherPlatform(
         check.platform!,
       ),
-      VideoLinkStatus.unsupported => AppStrings.linkUnsupported,
+      VideoLinkStatus.unsupported => context.strings.linkUnsupported,
     };
   }
 
@@ -206,8 +206,8 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
           setState(() {
             _serviceError =
                 VideoLink.networkOf(_controller.text) == VideoNetwork.instagram
-                    ? AppStrings.videoUnavailableInstagram
-                    : AppStrings.videoUnavailable;
+                    ? 'videoUnavailableInstagram'
+                    : 'videoUnavailable';
             _serviceRetryable = true;
           });
         } else {
@@ -216,9 +216,9 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       case DownloaderSaveVideoSuccess(:final path):
         showAppMessage(
           context,
-          msg: AppStrings.downloadSuccess,
+          msg: context.strings.downloadSuccess,
           type: MessageType.success,
-          actionLabel: AppStrings.play,
+          actionLabel: context.strings.play,
           onAction:
               () => Navigator.of(context).pushNamed(
                 Routes.viewVideo,
@@ -228,17 +228,21 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       case DownloaderVideoDeleted():
         showAppMessage(
           context,
-          msg: AppStrings.videoDeleted,
+          msg: context.strings.videoDeleted,
           type: MessageType.info,
         );
       case DownloaderSaveVideoCancelled():
         showAppMessage(
           context,
-          msg: AppStrings.downloadCancelled,
+          msg: context.strings.downloadCancelled,
           type: MessageType.info,
         );
       case DownloaderSaveVideoFailure():
-        showAppMessage(context, msg: state.message, type: MessageType.error);
+        showAppMessage(
+          context,
+          msg: context.strings.translate(state.message),
+          type: MessageType.error,
+        );
       default:
         break;
     }
@@ -278,7 +282,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    AppStrings.homeTitle,
+                    context.strings.homeTitle,
                     style: theme.textTheme.headlineMedium,
                   ),
                   const SizedBox(height: AppSpacing.xl),
@@ -307,7 +311,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                       child: TextButton.icon(
                         onPressed: canSearch ? _search : null,
                         icon: const Icon(Icons.refresh_rounded),
-                        label: const Text(AppStrings.retry),
+                        label: Text(context.strings.retry),
                       ),
                     ),
                   ],
@@ -329,7 +333,9 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                             )
                             : const Icon(Icons.search_rounded),
                     label: Text(
-                      searching ? AppStrings.searching : AppStrings.searchVideo,
+                      searching
+                          ? context.strings.searching
+                          : context.strings.searchVideo,
                     ),
                   ),
                   if (searching) ...[

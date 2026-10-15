@@ -29,12 +29,15 @@ class RecentDownloadsStrip extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(AppStrings.recents, style: theme.textTheme.titleMedium),
+                Text(
+                  context.strings.recents,
+                  style: theme.textTheme.titleMedium,
+                ),
                 TextButton(
                   onPressed:
                       () => Navigator.of(context).pushNamed(Routes.library),
                   child: Text(
-                    AppStrings.seeAll,
+                    context.strings.seeAll,
                     style: TextStyle(color: context.colors.muted),
                   ),
                 ),
@@ -68,7 +71,7 @@ class _RecentThumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: AppStrings.libraryTile(
+      label: context.strings.libraryTile(
         video.title,
         pieces: video.isGallery ? video.files.length : null,
       ),
