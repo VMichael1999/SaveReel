@@ -56,6 +56,9 @@ class AppStrings {
     return total == 1 ? "1 elemento" : "$total elementos";
   }
 
+  static String galleryPosition(int current, int total) =>
+      "Pieza $current de $total";
+
   static String galleryProgress(int current, int total) =>
       "Pieza $current de $total";
   static const String formatAudio = "Solo el audio";
@@ -117,6 +120,7 @@ class AppStrings {
   static const String libraryTitle = "Tus descargas";
   static const String libraryAll = "Todo";
   static const String libraryVideos = "Videos";
+  static const String libraryPhotos = "Fotos";
   static const String libraryAudio = "Audio";
   static const String libraryFilterEmpty = "No hay nada en este filtro.";
   static const String openLibrary = "Tu biblioteca";
@@ -127,7 +131,14 @@ class AppStrings {
     String? title, {
     bool isAudio = false,
     String? duration,
+    int? pieces,
   }) {
+    if (pieces != null) {
+      return [
+        title == null ? "Abrir galería guardada" : "Abrir $title",
+        pieces == 1 ? "1 pieza" : "$pieces piezas",
+      ].join(", ");
+    }
     final base =
         title == null ? "Reproducir video guardado" : "Reproducir $title";
     return [

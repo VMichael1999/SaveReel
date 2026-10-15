@@ -9,7 +9,15 @@ import '../../../../../core/utils/formatters.dart';
 import '../../../../../core/widgets/network_mark.dart';
 import '../../../domain/entities/saved_video.dart';
 import '../../screens/video_player_screen.dart';
+import '../../screens/gallery_viewer_screen.dart';
+import '../../models/video_player_args.dart';
 import 'library_thumbnail.dart';
+
+/// Pantalla que abre un video guardado: el visor si es una galería.
+Widget openerFor(VideoPlayerArgs args) =>
+    args.isGallery
+        ? GalleryViewerScreen(args: args)
+        : VideoPlayerScreen(args: args);
 
 /// Una miniatura de la cuadrícula. Se expande al reproductor al tocarla.
 class LibraryTile extends StatelessWidget {
@@ -35,14 +43,14 @@ class LibraryTile extends StatelessWidget {
       openColor: AppOverlay.videoBackground,
       middleColor: AppOverlay.videoBackground,
       openBuilder:
-          (context, _) =>
-              VideoPlayerScreen(args: videoPlayerArgsFor(context, video)),
+          (context, _) => openerFor(videoPlayerArgsFor(context, video)),
       closedBuilder:
           (context, open) => Semantics(
             button: true,
             label: AppStrings.libraryTile(
               video.title,
               isAudio: video.isAudio,
+              pieces: video.isGallery ? video.files.length : null,
               duration:
                   video.durationSeconds == null
                       ? null
@@ -55,7 +63,9 @@ class LibraryTile extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  LibraryThumbnail(path: video.path),
+                  LibraryThumbnail(
+                    path: video.isGallery ? video.files.first : video.path,
+                  ),
                   Positioned(
                     left: AppSpacing.sm,
                     top: AppSpacing.sm,
@@ -66,7 +76,31 @@ class LibraryTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (video.durationSeconds != null)
+                  if (video.isGallery)
+                    Positioned(
+                      left: AppSpacing.sm,
+                      bottom: AppSpacing.sm,
+                      child: _Badge(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.photo_library_outlined,
+                              size: AppSizes.iconBadge,
+                              color: AppOverlay.onVideo,
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              '${video.files.length}',
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.tabular
+                                  .copyWith(color: AppOverlay.onVideo),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else if (video.durationSeconds != null)
                     Positioned(
                       left: AppSpacing.sm,
                       bottom: AppSpacing.sm,

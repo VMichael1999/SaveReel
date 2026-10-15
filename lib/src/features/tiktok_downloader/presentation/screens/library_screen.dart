@@ -31,7 +31,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   List<SavedVideo> _apply(List<SavedVideo> all) => switch (_filter) {
     LibraryFilter.all => all,
-    LibraryFilter.videos => all.where((v) => !v.isAudio).toList(),
+    LibraryFilter.videos =>
+      all.where((v) => !v.isAudio && !v.isGallery).toList(),
+    LibraryFilter.photos => all.where((v) => v.isGallery).toList(),
     LibraryFilter.audio => all.where((v) => v.isAudio).toList(),
     LibraryFilter.tiktok =>
       all.where((v) => v.source == VideoNetwork.tiktok).toList(),
@@ -83,6 +85,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         LibraryFilter.all: state.videos.length,
                         LibraryFilter.videos: state.videoCount,
                         LibraryFilter.audio: state.audioCount,
+                        LibraryFilter.photos: state.galleryCount,
                         LibraryFilter.tiktok: state.countOf(VideoNetwork.tiktok),
                         LibraryFilter.instagram: state.countOf(
                           VideoNetwork.instagram,
@@ -92,6 +95,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         LibraryFilter.all,
                         LibraryFilter.videos,
                         LibraryFilter.audio,
+                        if (state.galleryCount > 0) LibraryFilter.photos,
                         if (state.countOf(VideoNetwork.tiktok) > 0 &&
                             state.countOf(VideoNetwork.instagram) > 0) ...[
                           LibraryFilter.tiktok,
