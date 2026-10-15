@@ -209,11 +209,16 @@ void main() {
 
     await tester.tap(find.text('Eliminar'));
     await tester.pumpAndSettle();
-    await tester.runAsync(() async {
-      await tester.tap(find.widgetWithText(TextButton, 'Eliminar'));
+    await tester.tap(find.widgetWithText(TextButton, 'Eliminar'));
+    await tester.pump();
+    // Borrar la carpeta usa disco real: se espera a que desaparezca, sin un
+    // tiempo fijo que dependa de lo rápido que sea la máquina.
+    for (var i = 0; i < 200 && dir.existsSync(); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
       await tester.pump();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-    });
+    }
     await tester.pumpAndSettle();
 
     expect(find.text('1 / 3'), findsNothing);

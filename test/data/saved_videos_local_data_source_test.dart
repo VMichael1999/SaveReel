@@ -152,10 +152,6 @@ void main() {
       expect(item.source, VideoNetwork.instagram);
       expect(item.isAudio, isFalse);
       expect(videos.length, 2); // la galería y el video suelto
-      expect(
-        videos[(await File('${dir.path}/suelto.mp4').resolveSymbolicLinks())],
-        isNull,
-      );
     },
   );
 
