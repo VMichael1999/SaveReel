@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_save_link_short">Guardar enlace</string>
+    <string name="shortcut_save_link_long">Guardar el enlace copiado</string>
+    <string name="tile_save_link_label">Guardar enlace</string>
+</resources>

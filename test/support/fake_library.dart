@@ -134,14 +134,24 @@ SettingsCubit fakeSettingsCubit([AppSettings settings = const AppSettings()]) =>
     SettingsCubit(store: MemorySettingsStore(settings.toJson()))..load();
 
 /// Fuente de texto compartido que las pruebas controlan a mano.
-class FakeSharedSource implements SharedTextSource {
-  FakeSharedSource({this.initial});
+class FakeSharedSource implements SharedTextSource, MissingLinkSource {
+  FakeSharedSource({this.initial, this.missingAtStart = false});
 
   final String? initial;
+
+  /// Simula abrir la app con el atajo «guardar el enlace copiado» sin enlace.
+  final bool missingAtStart;
   final StreamController<String> controller = StreamController.broadcast();
+  final StreamController<void> missingController = StreamController.broadcast();
 
   @override
-  Future<String?> initialText() async => initial;
+  Future<String?> initialText() async {
+    if (missingAtStart) missingController.add(null);
+    return initial;
+  }
+
+  @override
+  Stream<void> get missing => missingController.stream;
 
   @override
   Stream<String> get texts => controller.stream;

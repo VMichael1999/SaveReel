@@ -51,6 +51,8 @@ class AppRouter {
           },
         );
     }
-    return null;
+    // Una ruta que la app no conoce (por ejemplo la de un enlace externo) no
+    // debe romper el arranque: se vuelve a la pantalla inicial.
+    return MaterialPageRoute(builder: (context) => const SplashScreen());
   }
 }

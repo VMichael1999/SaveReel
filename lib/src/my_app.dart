@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
   /// Si llega un enlace con la app en otra pantalla, vuelve al inicio, donde
   /// el enlace se pone solo y se busca el video.
   void _goHomeForSharedLink(BuildContext context, SharedLinkState state) {
-    if (state.pending == null) return;
+    if (state.pending == null && !state.missing) return;
     _navigatorKey.currentState?.popUntil(
       (route) => route.isFirst || route.settings.name == Routes.downloader,
     );

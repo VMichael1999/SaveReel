@@ -26,6 +26,17 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Los enlaces savetic:// los lee app_links; Flutter no debe tomarlos
+                 como ruta de pantalla. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
+              />
+            <!-- Atajo al mantener pulsado el ícono: «Guardar el enlace copiado». -->
+            <meta-data
+              android:name="android.app.shortcuts"
+              android:resource="@xml/shortcuts"
+              />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -37,6 +48,17 @@
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
+        <!-- Mosaico de Ajustes rápidos «Guardar enlace». -->
+        <service
+            android:name=".SaveLinkTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_save"
+            android:label="@string/tile_save_link_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
         <!-- Mantiene viva la descarga con la app en segundo plano. -->
         <service
             android:name=".DownloadService"

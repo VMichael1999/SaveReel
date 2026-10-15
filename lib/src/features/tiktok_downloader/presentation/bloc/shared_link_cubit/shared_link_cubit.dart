@@ -8,13 +8,24 @@ import '../../../../../core/helpers/shared_link_receiver.dart';
 /// El enlace que llegó desde «Compartir» y aún no se usó. `serial` distingue
 /// dos veces el mismo enlace.
 class SharedLinkState extends Equatable {
-  const SharedLinkState({this.pending, this.serial = 0});
+  const SharedLinkState({
+    this.pending,
+    this.serial = 0,
+    this.missing = false,
+    this.missingSerial = 0,
+  });
 
   final String? pending;
   final int serial;
 
+  /// Se pidió usar el enlace copiado y no había ninguno, y aún no se avisó.
+  final bool missing;
+
+  /// Distingue dos avisos seguidos.
+  final int missingSerial;
+
   @override
-  List<Object?> get props => [pending, serial];
+  List<Object?> get props => [pending, serial, missing, missingSerial];
 }
 
 class SharedLinkCubit extends Cubit<SharedLinkState> {
@@ -22,29 +33,76 @@ class SharedLinkCubit extends Cubit<SharedLinkState> {
 
   final SharedLinkReceiver receiver;
   StreamSubscription<String>? _subscription;
+  StreamSubscription<void>? _missingSubscription;
 
   /// Escucha lo compartido: lo que abrió la app y lo que llega después.
   Future<void> start() async {
     _subscription = receiver.links.listen(_receive);
+    _missingSubscription = receiver.missingLinks.listen((_) => _missing());
     final initial = await receiver.initialLink();
     if (initial != null) _receive(initial);
   }
 
   void _receive(String link) {
     if (isClosed) return;
-    emit(SharedLinkState(pending: link, serial: state.serial + 1));
+    emit(
+      SharedLinkState(
+        pending: link,
+        serial: state.serial + 1,
+        missing: state.missing,
+        missingSerial: state.missingSerial,
+      ),
+    );
+  }
+
+  void _missing() {
+    if (isClosed) return;
+    emit(
+      SharedLinkState(
+        pending: state.pending,
+        serial: state.serial,
+        missing: true,
+        missingSerial: state.missingSerial + 1,
+      ),
+    );
   }
 
   /// Marca el enlace como usado, para que no se vuelva a aplicar.
   String? consume() {
     final link = state.pending;
-    if (link != null) emit(SharedLinkState(serial: state.serial));
+    if (link != null) {
+      emit(
+        SharedLinkState(
+          serial: state.serial,
+          missing: state.missing,
+          missingSerial: state.missingSerial,
+        ),
+      );
+    }
     return link;
+  }
+
+  /// Dice si hay que explicar que no había un enlace copiado, y lo da por
+  /// avisado. Lo llama la pantalla de Inicio cuando ya está lista, para no
+  /// mostrar nada mientras la app aún arranca.
+  bool consumeMissing() {
+    final missing = state.missing;
+    if (missing) {
+      emit(
+        SharedLinkState(
+          pending: state.pending,
+          serial: state.serial,
+          missingSerial: state.missingSerial,
+        ),
+      );
+    }
+    return missing;
   }
 
   @override
   Future<void> close() async {
     await _subscription?.cancel();
+    await _missingSubscription?.cancel();
     return super.close();
   }
 }
