@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/features/tiktok_downloader/data/models/instagram_embed_parser.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/entities/media_item.dart';
 import 'package:savetic/src/features/tiktok_downloader/data/sources/instagram_cobalt_client.dart';
 import 'package:savetic/src/features/tiktok_downloader/data/sources/instagram_video_source.dart';
 
@@ -24,6 +25,25 @@ const _tagPage = '''
 <img class="EmbeddedMediaImage" src="https://cdn.ig/cover.jpg?a=1&amp;b=2">
 <video class="tvp" src="https://cdn.ig/clip.mp4?a=1&amp;b=2"></video>
 <div class="Caption"><a class="CaptionUsername" href="/viajes.peru/">viajes.peru</a><br /><br />Machu Picchu al amanecer &#128525; &amp; más<br /><br />Segunda línea</div></div>
+''';
+
+/// Carrusel de una foto, un video y otra foto, con el JSON escapado.
+const _carouselPage = r'''
+<script>window.__additionalDataLoaded('x',{"shortcode_media":{
+\"__typename\":\"GraphSidecar\",\"username\":\"viajes.peru\",
+\"display_url\":\"https:\\/\\/cdn.ig\\/portada.jpg\",
+\"edge_sidecar_to_children\":{\"edges\":[
+{\"node\":{\"__typename\":\"GraphImage\",\"display_url\":\"https:\\/\\/cdn.ig\\/uno.jpg?a=1\\u0026b=2\"}},
+{\"node\":{\"__typename\":\"GraphVideo\",\"display_url\":\"https:\\/\\/cdn.ig\\/dos-portada.jpg\",\"video_url\":\"https:\\/\\/cdn.ig\\/dos.mp4\"}},
+{\"node\":{\"__typename\":\"GraphImage\",\"display_url\":\"https:\\/\\/cdn.ig\\/tres.jpg\"}}
+]}}});</script>
+''';
+
+/// Publicación de una sola foto, sin video ni carrusel.
+const _photoPage = r'''
+<div class="Embed"><span class="UsernameText">viajes.peru</span>
+<img class="EmbeddedMediaImage" src="https://cdn.ig/foto.jpg?a=1&amp;b=2"></div>
+<script>x={\"display_url\":\"https:\\/\\/cdn.ig\\/foto.jpg?a=1\\u0026b=2\"}</script>
 ''';
 
 class _FakeAdapter implements HttpClientAdapter {
@@ -88,6 +108,34 @@ void main() {
       expect(data.authorHandle, 'viajes.peru');
       expect(data.originCover, 'https://cdn.ig/cover.jpg?a=1&b=2');
       expect(data.title, 'Machu Picchu al amanecer 😍 & más');
+    });
+
+    test('lee un carrusel con fotos y un video, en orden', () {
+      final data = InstagramEmbedParser.parse(_carouselPage, shortcode: 'C9z');
+
+      expect(data, isNotNull);
+      expect(data!.isGallery, isTrue);
+      expect(data.gallery, [
+        const MediaItem(url: 'https://cdn.ig/uno.jpg?a=1&b=2'),
+        const MediaItem(url: 'https://cdn.ig/dos.mp4', isVideo: true),
+        const MediaItem(url: 'https://cdn.ig/tres.jpg'),
+      ]);
+      expect(data.photoCount, 2);
+      expect(data.authorHandle, 'viajes.peru');
+    });
+
+    test('una publicación de una sola foto es una galería de una pieza', () {
+      final data = InstagramEmbedParser.parse(_photoPage, shortcode: 'C9p');
+
+      expect(data!.gallery, [
+        const MediaItem(url: 'https://cdn.ig/foto.jpg?a=1&b=2'),
+      ]);
+      expect(data.playVideo, isEmpty);
+    });
+
+    test('un video suelto no se toma por una galería', () {
+      final data = InstagramEmbedParser.parse(_tagPage, shortcode: 'C9y');
+      expect(data!.isGallery, isFalse);
     });
 
     test('devuelve nulo si la página no trae ningún video', () {
