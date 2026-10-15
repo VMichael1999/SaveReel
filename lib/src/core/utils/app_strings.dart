@@ -43,6 +43,18 @@ class AppStrings {
   static const String formatInstagramVideo = "Video";
   static const String formatInstagramVideoHint =
       "En la mejor calidad que entrega Instagram";
+  static const String formatGallery = "Todas las fotos";
+  static const String formatGalleryHintTikTok =
+      "Las fotos del slideshow, sin la música";
+  static const String formatGalleryHintInstagram =
+      "Todo el carrusel, en su calidad original";
+  static String galleryCount(int total, {required bool onlyPhotos}) {
+    if (onlyPhotos) return total == 1 ? "1 foto" : "$total fotos";
+    return total == 1 ? "1 elemento" : "$total elementos";
+  }
+
+  static String galleryProgress(int current, int total) =>
+      "Pieza $current de $total";
   static const String formatAudio = "Solo el audio";
   static const String formatNoWatermarkHint = "Para verlo tú, sin conexión";
   static const String formatAudioHint = "Archivo de música";

@@ -56,7 +56,12 @@ class AppSettings extends Equatable {
     const defaults = AppSettings();
     return AppSettings(
       defaultFormat: pick(
-        DownloadFormat.values,
+        // «gallery» no es una preferencia: depende de cada publicación.
+        [
+          DownloadFormat.withCredits,
+          DownloadFormat.noWatermark,
+          DownloadFormat.audio,
+        ],
         json['defaultFormat'],
         defaults.defaultFormat,
       ),
