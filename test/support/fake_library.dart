@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/core/error/failure.dart';
+import 'package:flutter/widgets.dart';
+import 'package:savetic/src/core/helpers/language_store.dart';
 import 'package:savetic/src/core/helpers/onboarding_store.dart';
 import 'package:savetic/src/core/helpers/settings_store.dart';
 import 'package:savetic/src/core/helpers/shared_link_receiver.dart';
@@ -17,6 +19,7 @@ import 'package:savetic/src/features/tiktok_downloader/domain/usecases/probe_vid
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/record_saved_video_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/locale_cubit/locale_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/app_settings.dart';
@@ -132,6 +135,25 @@ class MemorySettingsStore extends SettingsStore {
 /// Ajustes ya cargados, por omisión los de fábrica.
 SettingsCubit fakeSettingsCubit([AppSettings settings = const AppSettings()]) =>
     SettingsCubit(store: MemorySettingsStore(settings.toJson()))..load();
+
+/// Almacén del idioma en memoria.
+class MemoryLanguageStore extends LanguageStore {
+  MemoryLanguageStore([this.saved]);
+
+  String? saved;
+
+  @override
+  Future<String?> read() async => saved;
+
+  @override
+  Future<void> write(String code) async => saved = code;
+}
+
+/// Idioma ya cargado: español salvo que se pida otro.
+LocaleCubit fakeLocaleCubit([String? code]) => LocaleCubit(
+  store: MemoryLanguageStore(code),
+  deviceLocale: () => const Locale('es'),
+)..load();
 
 /// Fuente de texto compartido que las pruebas controlan a mano.
 class FakeSharedSource implements SharedTextSource, MissingLinkSource {

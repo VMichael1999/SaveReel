@@ -37,11 +37,11 @@ class LibraryLinkRow extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppStrings.openLibrary,
+                        context.strings.openLibrary,
                         style: theme.textTheme.titleMedium,
                       ),
                       Text(
-                        AppStrings.filesSummary(
+                        context.strings.filesSummary(
                           state.videos.length,
                           formatMegabytes(state.totalBytes),
                         ),

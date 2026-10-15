@@ -12,21 +12,23 @@ Future<bool> confirmDeleteVideo(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: const Text(AppStrings.deleteTitle),
+          title: Text(context.strings.deleteTitle),
           content: Text(
-            hasGalleryCopy ? AppStrings.deleteBodyCopy : AppStrings.deleteBody,
+            hasGalleryCopy
+                ? context.strings.deleteBodyCopy
+                : context.strings.deleteBody,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(AppStrings.cancel),
+              child: Text(context.strings.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
                 foregroundColor: context.colors.failed,
               ),
-              child: const Text(AppStrings.delete),
+              child: Text(context.strings.delete),
             ),
           ],
         ),

@@ -213,6 +213,24 @@ punto de acceso o ahorro de datos): *Preguntar si pesa mucho* (50 MB o más, por
 *Solo con Wi-Fi* (pregunta siempre) o *Descargar siempre*. La red se consulta con código nativo
 (`ConnectivityManager` en Android y `NWPathMonitor` en iOS), sin paquetes extra.
 
+### Idiomas
+
+La app está en español e inglés y cambia al momento desde **Ajustes → Idioma**, sin reiniciar.
+La primera vez usa el idioma del teléfono si lo tiene; si no, español.
+
+- Los textos viven en `localization/<idioma>.json`, un archivo por idioma.
+- `dart run localization/generator.dart` los revisa (mismas claves y mismos `{datos}` en todos
+  los idiomas) y genera `lib/src/localization/translations.g.dart`. Las pruebas fallan si ese
+  archivo no está al día.
+- En el código se usan con `context.strings.algo`; al cambiar de idioma, `LocaleCubit` emite
+  el nuevo `Locale` y el `MaterialApp` reconstruye toda la app. No usa GetX ni paquetes de
+  traducción.
+- Para añadir un idioma: crea su JSON, agrégalo en `AppLanguages` (`app_texts.dart`) y corre
+  el generador.
+
+Quedan en español los textos que fija el sistema: las frases de Siri del atajo de iOS y los
+permisos de `Info.plist`.
+
 ## Servicio de descargas
 
 Para TikTok, por omisión se consulta el servicio público de
@@ -237,6 +255,7 @@ Arquitectura limpia con `flutter_bloc` y `get_it`:
 
 ```text
 lib/src/
+├── localization/  textos por idioma (generados desde `localization/*.json`)
 ├── config/        tema (colores, texto, tokens de tamaño y movimiento) y rutas
 ├── core/          enlaces, errores, red, almacenamiento y widgets comunes
 └── features/

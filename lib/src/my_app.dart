@@ -1,14 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'config/routes_manager.dart';
 import 'config/theme/app_theme.dart';
 import 'container_injector.dart';
+import 'localization/app_texts.dart';
 import 'features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
 import 'features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'features/tiktok_downloader/presentation/bloc/locale_cubit/locale_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import 'features/tiktok_downloader/presentation/models/app_settings.dart';
@@ -30,6 +33,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => sl<DownloaderBloc>()),
         BlocProvider(create: (context) => sl<LibraryCubit>()..load()),
         BlocProvider(create: (context) => sl<FirstUseCubit>()..load()),
+        BlocProvider(create: (context) => sl<LocaleCubit>()..load()),
         BlocProvider(create: (context) => sl<SettingsCubit>()..load()),
         BlocProvider(create: (context) => sl<SharedLinkCubit>()..start()),
       ],
@@ -38,17 +42,31 @@ class MyApp extends StatelessWidget {
         child: BlocListener<DownloaderBloc, DownloaderState>(
           listener: _syncLibrary,
           child: AppLifecycleBridge(
-            child: BlocBuilder<SettingsCubit, AppSettings>(
-              buildWhen: (a, b) => a.theme != b.theme,
+            child: BlocBuilder<LocaleCubit, Locale>(
               builder:
-                  (context, settings) => MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
-                    onGenerateRoute: AppRouter.getRoute,
-                    theme: AppTheme.light,
-                    darkTheme: AppTheme.dark,
-                    themeMode: settings.theme.themeMode,
-                    navigatorKey: _navigatorKey,
+                  (context, locale) => BlocBuilder<SettingsCubit, AppSettings>(
+                    buildWhen: (a, b) => a.theme != b.theme,
+                    builder:
+                        (context, settings) => AppLocaleScope(
+                          code: locale.languageCode,
+                          child: MaterialApp(
+                            debugShowCheckedModeBanner: false,
+                            initialRoute:
+                                _showCatalog ? Routes.catalog : Routes.splash,
+                            onGenerateRoute: AppRouter.getRoute,
+                            theme: AppTheme.light,
+                            darkTheme: AppTheme.dark,
+                            themeMode: settings.theme.themeMode,
+                            navigatorKey: _navigatorKey,
+                            locale: locale,
+                            supportedLocales: AppLanguages.supportedLocales,
+                            localizationsDelegates: const [
+                              GlobalMaterialLocalizations.delegate,
+                              GlobalWidgetsLocalizations.delegate,
+                              GlobalCupertinoLocalizations.delegate,
+                            ],
+                          ),
+                        ),
                   ),
             ),
           ),

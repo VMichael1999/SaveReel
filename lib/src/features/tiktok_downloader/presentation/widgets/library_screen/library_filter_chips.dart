@@ -27,14 +27,15 @@ class LibraryFilterChips extends StatelessWidget {
   /// Los filtros que se muestran; los de red solo cuando hay de ambas.
   final List<LibraryFilter> filters;
 
-  static const _labels = {
-    LibraryFilter.all: AppStrings.libraryAll,
-    LibraryFilter.videos: AppStrings.libraryVideos,
-    LibraryFilter.audio: AppStrings.libraryAudio,
-    LibraryFilter.photos: AppStrings.libraryPhotos,
-    LibraryFilter.tiktok: 'TikTok',
-    LibraryFilter.instagram: 'Instagram',
-  };
+  static String _label(BuildContext context, LibraryFilter filter) =>
+      switch (filter) {
+        LibraryFilter.all => context.strings.libraryAll,
+        LibraryFilter.videos => context.strings.libraryVideos,
+        LibraryFilter.audio => context.strings.libraryAudio,
+        LibraryFilter.photos => context.strings.libraryPhotos,
+        LibraryFilter.tiktok => 'TikTok',
+        LibraryFilter.instagram => 'Instagram',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,7 @@ class LibraryFilterChips extends StatelessWidget {
             label: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(text: _labels[filter]),
+                  TextSpan(text: _label(context, filter)),
                   TextSpan(text: ' ${counts[filter] ?? 0}', style: number),
                 ],
               ),

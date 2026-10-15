@@ -9,9 +9,7 @@ class DownloadsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.downloads),
-      ),
+      appBar: AppBar(title: Text(context.strings.downloads)),
       body: const DownloadsScreenBody(),
     );
   }

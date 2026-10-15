@@ -25,7 +25,10 @@ class ValidLinksHint extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppStrings.validLinksLook, style: theme.textTheme.labelMedium),
+          Text(
+            context.strings.validLinksLook,
+            style: theme.textTheme.labelMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text('vm.tiktok.com/ZMh7K2pQx/', style: mono),
           const SizedBox(height: AppSpacing.xs),

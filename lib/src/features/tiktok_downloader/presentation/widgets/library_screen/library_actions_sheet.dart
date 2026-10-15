@@ -57,7 +57,7 @@ Future<void> showLibraryActionsSheet(
                       in video.isGallery ? video.files : [video.path])
                     XFile(path),
                 ],
-                text: handle == null ? null : AppStrings.shareText(handle),
+                text: handle == null ? null : context.strings.shareText(handle),
               ),
             );
           },
@@ -70,14 +70,14 @@ Future<void> showLibraryActionsSheet(
               if (!messenger.mounted) return;
               showAppMessage(
                 messenger,
-                msg: AppStrings.galleryDone,
+                msg: context.strings.galleryDone,
                 type: MessageType.success,
               );
             } catch (_) {
               if (!messenger.mounted) return;
               showAppMessage(
                 messenger,
-                msg: AppStrings.galleryFailed,
+                msg: context.strings.galleryFailed,
                 type: MessageType.error,
               );
             }
@@ -131,7 +131,9 @@ class _LibraryActions extends StatelessWidget {
           Semantics(
             header: true,
             child: Text(
-              title == null || title.isEmpty ? AppStrings.untitledVideo : title,
+              title == null || title.isEmpty
+                  ? context.strings.untitledVideo
+                  : title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleMedium,
@@ -146,23 +148,23 @@ class _LibraryActions extends StatelessWidget {
           if (onSelect != null)
             _ActionRow(
               icon: Icons.check_circle_outline_rounded,
-              label: AppStrings.select,
+              label: context.strings.select,
               onTap: onSelect!,
             ),
           _ActionRow(
             icon: Icons.ios_share_rounded,
-            label: AppStrings.share,
+            label: context.strings.share,
             onTap: onShare,
           ),
           if (!video.isAudio)
             _ActionRow(
               icon: Icons.photo_library_outlined,
-              label: AppStrings.saveToGallery,
+              label: context.strings.saveToGallery,
               onTap: onSaveToGallery,
             ),
           _ActionRow(
             icon: Icons.delete_outline_rounded,
-            label: AppStrings.delete,
+            label: context.strings.delete,
             color: colors.failed,
             onTap: onDelete,
           ),

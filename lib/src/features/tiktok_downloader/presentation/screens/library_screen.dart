@@ -110,24 +110,24 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   String _sortName(LibrarySort sort) => switch (sort) {
-    LibrarySort.newest => AppStrings.sortNewest,
-    LibrarySort.oldest => AppStrings.sortOldest,
-    LibrarySort.biggest => AppStrings.sortBiggest,
-    LibrarySort.title => AppStrings.sortTitle,
+    LibrarySort.newest => context.strings.sortNewest,
+    LibrarySort.oldest => context.strings.sortOldest,
+    LibrarySort.biggest => context.strings.sortBiggest,
+    LibrarySort.title => context.strings.sortTitle,
   };
 
   AppBar _appBar(List<SavedVideo> all, List<SavedVideo> visible) {
     if (_selecting) {
       return AppBar(
         leading: IconButton(
-          tooltip: AppStrings.cancelSelection,
+          tooltip: context.strings.cancelSelection,
           icon: const Icon(Icons.close_rounded),
           onPressed: _stopSelecting,
         ),
-        title: Text(AppStrings.selectedCount(_chosen(all).length)),
+        title: Text(context.strings.selectedCount(_chosen(all).length)),
         actions: [
           IconButton(
-            tooltip: AppStrings.selectAll,
+            tooltip: context.strings.selectAll,
             icon: const Icon(Icons.select_all_rounded),
             onPressed:
                 () => setState(() {
@@ -140,7 +140,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     if (_searching) {
       return AppBar(
         leading: IconButton(
-          tooltip: AppStrings.closeSearch,
+          tooltip: context.strings.closeSearch,
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: _closeSearch,
         ),
@@ -151,8 +151,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
           textInputAction: TextInputAction.search,
           style: Theme.of(context).textTheme.titleMedium,
           // Sin borde ni relleno: el tema los pone a todos los campos.
-          decoration: const InputDecoration(
-            hintText: AppStrings.searchHint,
+          decoration: InputDecoration(
+            hintText: context.strings.searchHint,
             border: InputBorder.none,
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -165,7 +165,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         actions: [
           if (_query.text.isNotEmpty)
             IconButton(
-              tooltip: AppStrings.clearSearch,
+              tooltip: context.strings.clearSearch,
               icon: const Icon(Icons.close_rounded),
               onPressed: () => setState(_query.clear),
             ),
@@ -175,12 +175,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return AppBar(
       actions: [
         IconButton(
-          tooltip: AppStrings.search,
+          tooltip: context.strings.search,
           icon: const Icon(Icons.search_rounded),
           onPressed: _openSearch,
         ),
         PopupMenuButton<LibrarySort>(
-          tooltip: AppStrings.sort,
+          tooltip: context.strings.sort,
           icon: const Icon(Icons.sort_rounded),
           initialValue: _sort,
           onSelected: (sort) => setState(() => _sort = sort),
@@ -195,7 +195,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               ],
         ),
         IconButton(
-          tooltip: AppStrings.select,
+          tooltip: context.strings.select,
           icon: const Icon(Icons.checklist_rounded),
           onPressed: _startSelecting,
         ),
@@ -215,14 +215,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
             Expanded(
               child: _BarAction(
                 icon: Icons.ios_share_rounded,
-                label: AppStrings.share,
+                label: context.strings.share,
                 onTap: enabled ? () => shareSavedVideos(chosen) : null,
               ),
             ),
             Expanded(
               child: _BarAction(
                 icon: Icons.photo_library_outlined,
-                label: AppStrings.galleryShort,
+                label: context.strings.galleryShort,
                 onTap:
                     enabled && chosen.any((v) => !v.isAudio)
                         ? () => saveSavedVideosToGallery(context, chosen)
@@ -232,7 +232,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             Expanded(
               child: _BarAction(
                 icon: Icons.delete_outline_rounded,
-                label: AppStrings.delete,
+                label: context.strings.delete,
                 color: context.colors.failed,
                 onTap: enabled ? () => _deleteChosen(chosen) : null,
               ),
@@ -300,13 +300,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
               Semantics(
                 header: true,
                 child: Text(
-                  AppStrings.libraryTitle,
+                  context.strings.libraryTitle,
                   style: theme.textTheme.headlineMedium,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                AppStrings.filesSummary(
+                context.strings.filesSummary(
                   state.videos.length,
                   formatMegabytes(state.totalBytes),
                 ),
@@ -352,8 +352,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
               padding: const EdgeInsets.all(AppSpacing.xl),
               child: Text(
                 _query.text.trim().isEmpty
-                    ? AppStrings.libraryFilterEmpty
-                    : AppStrings.noMatches(_query.text.trim()),
+                    ? context.strings.libraryFilterEmpty
+                    : context.strings.noMatches(_query.text.trim()),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: context.colors.muted,

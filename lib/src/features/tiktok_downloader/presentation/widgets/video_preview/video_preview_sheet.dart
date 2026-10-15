@@ -116,13 +116,15 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
 
   String get _buttonLabel {
     if (_format == DownloadFormat.gallery) {
-      return AppStrings.downloadGallery(
+      return context.strings.downloadGallery(
         _data.gallery.length,
         onlyPhotos: _onlyPhotos,
       );
     }
     final base =
-        _format.isAudio ? AppStrings.downloadAudio : AppStrings.downloadVideo;
+        _format.isAudio
+            ? context.strings.downloadAudio
+            : context.strings.downloadVideo;
     final size = _sizeText(_format);
     return size == null ? base : '$base · $size';
   }
@@ -137,7 +139,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      label: AppStrings.previewSheetLabel,
+      label: context.strings.previewSheetLabel,
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
@@ -152,7 +154,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
             _Header(data: _data),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              AppStrings.formatLabel,
+              context.strings.formatLabel,
               style: theme.textTheme.labelSmall?.copyWith(color: colors.muted),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -160,14 +162,14 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               FormatOption(
                 title:
                     _onlyPhotos
-                        ? AppStrings.formatGallery
-                        : AppStrings.formatGalleryMixed,
+                        ? context.strings.formatGallery
+                        : context.strings.formatGalleryMixed,
                 subtitle:
                     _data.network == VideoNetwork.instagram
-                        ? AppStrings.formatGalleryHintInstagram
-                        : AppStrings.formatGalleryHintTikTok,
+                        ? context.strings.formatGalleryHintInstagram
+                        : context.strings.formatGalleryHintTikTok,
                 selected: _format == DownloadFormat.gallery,
-                size: AppStrings.galleryCount(
+                size: context.strings.galleryCount(
                   _data.gallery.length,
                   onlyPhotos: _onlyPhotos,
                 ),
@@ -176,8 +178,8 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               if (DownloadFormat.audio.isAvailableIn(_data)) ...[
                 const SizedBox(height: AppSpacing.sm),
                 FormatOption(
-                  title: AppStrings.formatAudio,
-                  subtitle: AppStrings.formatAudioHint,
+                  title: context.strings.formatAudio,
+                  subtitle: context.strings.formatAudioHint,
                   selected: _format == DownloadFormat.audio,
                   size: _sizeText(DownloadFormat.audio),
                   onTap: () => setState(() => _format = DownloadFormat.audio),
@@ -185,19 +187,19 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               ],
             ] else if (_data.network == VideoNetwork.instagram)
               FormatOption(
-                title: AppStrings.formatInstagramVideo,
-                subtitle: AppStrings.formatInstagramVideoHint,
+                title: context.strings.formatInstagramVideo,
+                subtitle: context.strings.formatInstagramVideoHint,
                 selected: true,
                 size: _sizeText(DownloadFormat.noWatermark),
                 onTap: () {},
               )
             else ...[
               FormatOption(
-                title: AppStrings.formatWithCredits,
+                title: context.strings.formatWithCredits,
                 subtitle:
                     handle == null
-                        ? AppStrings.formatWithCreditsNoAuthor
-                        : AppStrings.formatWithCreditsHint(handle),
+                        ? context.strings.formatWithCreditsNoAuthor
+                        : context.strings.formatWithCreditsHint(handle),
                 selected: _format == DownloadFormat.withCredits,
                 size: _sizeText(DownloadFormat.withCredits),
                 onTap:
@@ -208,8 +210,8 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               ),
               const SizedBox(height: AppSpacing.sm),
               FormatOption(
-                title: AppStrings.formatNoWatermark,
-                subtitle: AppStrings.formatNoWatermarkHint,
+                title: context.strings.formatNoWatermark,
+                subtitle: context.strings.formatNoWatermarkHint,
                 selected: _format == DownloadFormat.noWatermark,
                 size: _sizeText(DownloadFormat.noWatermark),
                 onTap:
@@ -220,8 +222,8 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               ),
               const SizedBox(height: AppSpacing.sm),
               FormatOption(
-                title: AppStrings.formatAudio,
-                subtitle: AppStrings.formatAudioHint,
+                title: context.strings.formatAudio,
+                subtitle: context.strings.formatAudioHint,
                 selected: _format == DownloadFormat.audio,
                 size: _sizeText(DownloadFormat.audio),
                 onTap:
@@ -239,7 +241,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
             if (handle != null) ...[
               const SizedBox(height: AppSpacing.md),
               Text(
-                AppStrings.creditNote(handle),
+                context.strings.creditNote(handle),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(color: colors.muted),
               ),
@@ -289,7 +291,7 @@ class _Header extends StatelessWidget {
                     ? data.originCover
                     : data.gallery.first.url,
                 fit: BoxFit.cover,
-                semanticLabel: AppStrings.coverLabel,
+                semanticLabel: context.strings.coverLabel,
                 errorBuilder:
                     (_, __, ___) => ColoredBox(
                       color: colors.raised,
@@ -306,7 +308,7 @@ class _Header extends StatelessWidget {
             children: [
               Text(
                 data.title.trim().isEmpty
-                    ? AppStrings.untitledVideo
+                    ? context.strings.untitledVideo
                     : data.title,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -323,22 +325,25 @@ class _Header extends StatelessWidget {
               ],
               const SizedBox(height: AppSpacing.md),
               if (data.duration > 0) ...[
-                stat(formatDuration(data.duration), AppStrings.durationLabel),
+                stat(
+                  formatDuration(data.duration),
+                  context.strings.durationLabel,
+                ),
                 const SizedBox(height: AppSpacing.xs),
               ],
               if (data.playCount > 0) ...[
-                stat(formatCount(data.playCount), AppStrings.playsLabel),
+                stat(formatCount(data.playCount), context.strings.playsLabel),
                 const SizedBox(height: AppSpacing.xs),
               ],
               if (data.downloadCount > 0)
                 stat(
                   formatCount(data.downloadCount),
-                  AppStrings.downloadsLabel,
+                  context.strings.downloadsLabel,
                 ),
               if (data.isGallery) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  AppStrings.galleryCount(
+                  context.strings.galleryCount(
                     data.gallery.length,
                     onlyPhotos: data.photoCount == data.gallery.length,
                   ),

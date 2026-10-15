@@ -35,7 +35,7 @@ class ClipboardLinkCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppStrings.clipboardFound,
+                      context.strings.clipboardFound,
                       style: theme.textTheme.titleMedium,
                     ),
                     Text(
@@ -59,7 +59,7 @@ class ClipboardLinkCard extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(AppSizes.touch),
               ),
-              child: const Text(AppStrings.useThisLink),
+              child: Text(context.strings.useThisLink),
             ),
           ),
         ],

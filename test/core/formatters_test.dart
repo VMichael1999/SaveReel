@@ -1,3 +1,4 @@
+import 'package:savetic/src/core/utils/app_strings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/core/utils/formatters.dart';
 
@@ -57,6 +58,7 @@ void main() {
       // 25 % en 1 s: faltan 3 s.
       expect(
         formatRemaining(
+          strings: AppStrings.current,
           elapsed: const Duration(seconds: 1),
           receivedBytes: 25,
           totalBytes: 100,
@@ -68,6 +70,7 @@ void main() {
     test('pasa a minutos cuando falta más de un minuto', () {
       expect(
         formatRemaining(
+          strings: AppStrings.current,
           elapsed: const Duration(seconds: 10),
           receivedBytes: 10,
           totalBytes: 100,
@@ -79,6 +82,7 @@ void main() {
     test('no estima sin datos suficientes', () {
       expect(
         formatRemaining(
+          strings: AppStrings.current,
           elapsed: const Duration(milliseconds: 100),
           receivedBytes: 10,
           totalBytes: 100,
@@ -87,6 +91,7 @@ void main() {
       );
       expect(
         formatRemaining(
+          strings: AppStrings.current,
           elapsed: const Duration(seconds: 2),
           receivedBytes: 0,
           totalBytes: 100,

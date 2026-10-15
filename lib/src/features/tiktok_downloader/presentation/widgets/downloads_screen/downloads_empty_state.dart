@@ -25,13 +25,13 @@ class DownloadsEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              AppStrings.emptyDownloadsTitle,
+              context.strings.emptyDownloadsTitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              AppStrings.emptyDownloadsBody,
+              context.strings.emptyDownloadsBody,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: context.colors.muted,
@@ -40,7 +40,7 @@ class DownloadsEmptyState extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             FilledButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const Text(AppStrings.pasteALink),
+              child: Text(context.strings.pasteALink),
             ),
           ],
         ),

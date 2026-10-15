@@ -67,7 +67,7 @@ class LibraryTile extends StatelessWidget {
           (context, open) => Semantics(
             button: true,
             selected: selecting ? selected : null,
-            label: AppStrings.libraryTile(
+            label: context.strings.libraryTile(
               video.title,
               isAudio: video.isAudio,
               pieces: video.isGallery ? video.files.length : null,
@@ -152,7 +152,7 @@ class LibraryTile extends StatelessWidget {
                       child: _SelectionMark(selected: selected),
                     ),
                   if (video.isAudio)
-                    const Positioned(
+                    Positioned(
                       right: AppSpacing.sm,
                       top: AppSpacing.sm,
                       child: _Badge(
@@ -160,7 +160,7 @@ class LibraryTile extends StatelessWidget {
                           Icons.music_note_rounded,
                           size: AppSizes.iconBadge,
                           color: AppOverlay.onVideo,
-                          semanticLabel: AppStrings.audioBadge,
+                          semanticLabel: context.strings.audioBadge,
                         ),
                       ),
                     ),

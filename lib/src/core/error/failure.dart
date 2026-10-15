@@ -32,7 +32,7 @@ class NotFoundFailure extends Failure {
 
 class NoInternetConnectionFailure extends Failure {
   const NoInternetConnectionFailure()
-      : super(message: Authorized.noInternetConnection);
+    : super(message: Authorized.noInternetConnection);
 
   @override
   bool get retryable => true;
