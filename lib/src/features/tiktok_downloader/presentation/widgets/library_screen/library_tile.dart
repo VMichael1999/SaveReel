@@ -9,6 +9,7 @@ import '../../../../../core/utils/formatters.dart';
 import '../../../../../core/widgets/network_mark.dart';
 import '../../../domain/entities/saved_video.dart';
 import '../../screens/video_player_screen.dart';
+import 'library_actions_sheet.dart';
 import 'library_thumbnail.dart';
 
 /// Una miniatura de la cuadrícula. Se expande al reproductor al tocarla.
@@ -50,8 +51,10 @@ class LibraryTile extends StatelessWidget {
             ),
             excludeSemantics: true,
             onTap: open,
+            onLongPress: () => showLibraryActionsSheet(context, video),
             child: InkWell(
               onTap: open,
+              onLongPress: () => showLibraryActionsSheet(context, video),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
