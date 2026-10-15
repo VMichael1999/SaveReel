@@ -32,6 +32,7 @@ abstract final class AppSizes {
 
   /// Íconos: pequeño (junto a texto), mediano y de insignia sobre miniaturas.
   static const double iconSm = 16;
+  static const double selectMark = 24;
   static const double iconMd = 18;
   static const double iconBadge = 13;
 

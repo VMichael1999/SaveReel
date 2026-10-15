@@ -19,7 +19,8 @@ Future<void> showLibraryActionsSheet(
   BuildContext context,
   SavedVideo video, {
   Future<void> Function(String path) saveToGallery =
-      DirHelper.saveVideoToGallery,
+      DirHelper.saveMediaToGallery,
+  VoidCallback? onSelect,
 }) {
   HapticFeedback.mediumImpact().catchError((_) {});
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -39,6 +40,13 @@ Future<void> showLibraryActionsSheet(
     builder:
         (sheetContext) => _LibraryActions(
           video: video,
+          onSelect:
+              onSelect == null
+                  ? null
+                  : () {
+                    Navigator.of(sheetContext).pop();
+                    onSelect();
+                  },
           onShare: () {
             Navigator.of(sheetContext).pop();
             final handle = video.authorHandle;
@@ -91,12 +99,14 @@ Future<void> showLibraryActionsSheet(
 class _LibraryActions extends StatelessWidget {
   const _LibraryActions({
     required this.video,
+    required this.onSelect,
     required this.onShare,
     required this.onSaveToGallery,
     required this.onDelete,
   });
 
   final SavedVideo video;
+  final VoidCallback? onSelect;
   final VoidCallback onShare;
   final VoidCallback onSaveToGallery;
   final VoidCallback onDelete;
@@ -133,6 +143,12 @@ class _LibraryActions extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: colors.muted),
             ),
           const SizedBox(height: AppSpacing.md),
+          if (onSelect != null)
+            _ActionRow(
+              icon: Icons.check_circle_outline_rounded,
+              label: AppStrings.select,
+              onTap: onSelect!,
+            ),
           _ActionRow(
             icon: Icons.ios_share_rounded,
             label: AppStrings.share,
