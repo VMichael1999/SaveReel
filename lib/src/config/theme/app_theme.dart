@@ -5,7 +5,7 @@ import 'app_text.dart';
 import 'app_tokens.dart';
 import 'savetic_colors.dart';
 
-/// Temas claro y oscuro de SaveTic (paleta fusión TikTok + Instagram).
+/// Temas claro y oscuro de SaveReel (paleta fusión TikTok + Instagram).
 abstract final class AppTheme {
   static const _ciruela = Color(0xFF0E0A1F);
   static const _tinta = Color(0xFF1A1330);

@@ -1,4 +1,4 @@
-/// Redes de las que SaveTic sabe bajar videos.
+/// Redes de las que SaveReel sabe bajar videos.
 enum VideoNetwork { tiktok, instagram }
 
 /// Resultado de revisar el texto que el usuario pegó como enlace.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Escala de texto de SaveTic, sobre la fuente del sistema
+/// Escala de texto de SaveReel, sobre la fuente del sistema
 /// (Roboto en Android, San Francisco en iOS). Sin colores: los pone el tema.
 abstract final class AppText {
   static const TextTheme scale = TextTheme(

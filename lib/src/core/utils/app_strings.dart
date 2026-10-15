@@ -1,5 +1,5 @@
 class AppStrings {
-  static const String appName = "SaveTic";
+  static const String appName = "SaveReel";
   static const String videoLink = "Enlace del video";
   static const String inputLinkFieldText = "Enlace de TikTok o Instagram";
   static const String download = "Descargar";
@@ -86,8 +86,8 @@ class AppStrings {
   static const String cancel = "Cancelar";
   static const String deleteTitle = "¿Eliminar este video?";
   static const String deleteBodyCopy =
-      "Se borrará de SaveTic. La copia que guardaste en tu galería no se toca.";
-  static const String deleteBody = "Se borrará de SaveTic para siempre.";
+      "Se borrará de SaveReel. La copia que guardaste en tu galería no se toca.";
+  static const String deleteBody = "Se borrará de SaveReel para siempre.";
   static const String videoDeleted = "Video eliminado";
   static const String cannotPlay = "No pudimos reproducir este video.";
   static const String galleryFailed =
@@ -131,7 +131,7 @@ class AppStrings {
   static const String galleryTipLead = "Los videos van a tu ";
   static const String galleryTipBold = "Galería";
   static const String galleryTipTail =
-      ', al álbum "SaveTic". No pedimos acceso a tus archivos.';
+      ', al álbum "SaveReel". No pedimos acceso a tus archivos.';
   static const String openTikTok = "Abrir TikTok";
   static const String haveALink = "Ya tengo un enlace";
   static const String tikTokNotFound = "No encontramos TikTok en tu teléfono.";
@@ -150,7 +150,7 @@ class AppStrings {
   static const String settingsFormatHintCredits =
       "Muestra al autor al compartir";
   static const String settingsGallery = "Guardar en la Galería";
-  static const String settingsGalleryHint = 'Álbum "SaveTic"';
+  static const String settingsGalleryHint = 'Álbum "SaveReel"';
   static const String settingsDownloads = "Descargas";
   static const String settingsClearCache = "Borrar miniaturas en caché";
   static const String settingsCacheCleared = "Miniaturas borradas";
@@ -160,7 +160,7 @@ class AppStrings {
   static const String themeLight = "Claro";
   static const String themeDark = "Oscuro";
   static const String legalNotice =
-      "SaveTic no está afiliada a TikTok. Descarga solo videos que tengas "
-      "permiso de guardar y respeta a sus autores.";
+      "SaveReel no está afiliada a TikTok ni a Instagram. Descarga solo videos "
+      "que tengas permiso de guardar y respeta a sus autores.";
   static const String noActiveDownloads = "No hay descargas en curso.";
 }

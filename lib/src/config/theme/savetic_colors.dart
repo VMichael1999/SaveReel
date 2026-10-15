@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Colores semánticos de SaveTic que `ColorScheme` no cubre.
+/// Colores semánticos de SaveReel que `ColorScheme` no cubre.
 @immutable
 class SaveticColors extends ThemeExtension<SaveticColors> {
   const SaveticColors({

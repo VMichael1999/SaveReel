@@ -4,7 +4,7 @@ import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DirHelper {
-  static const String _albumName = 'SaveTic';
+  static const String _albumName = 'SaveReel';
 
   static Future<String> getAppPath() async {
     final Directory base = Platform.isAndroid

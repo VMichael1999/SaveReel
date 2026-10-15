@@ -131,7 +131,7 @@ void main() {
       expect(find.text('En TikTok, toca Compartir'), findsOneWidget);
       expect(find.text('Elige «Copiar enlace»'), findsOneWidget);
       expect(find.text('Vuelve aquí'), findsOneWidget);
-      expect(find.textContaining('álbum "SaveTic"'), findsOneWidget);
+      expect(find.textContaining('álbum "SaveReel"'), findsOneWidget);
       expect(find.text('Abrir TikTok'), findsOneWidget);
       expect(find.text('Ya tengo un enlace'), findsOneWidget);
       // El campo del enlace todavía no aparece.

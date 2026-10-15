@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../config/theme/savetic_colors.dart';
 
-/// Marca de SaveTic: un marcador con una flecha hacia abajo.
+/// Marca de SaveReel: un marcador con una flecha hacia abajo.
 class SaveticMark extends StatelessWidget {
   const SaveticMark({super.key, this.size = 24, this.color});
 
   final double size;
 
-  /// Si se omite, la marca se pinta con el degradado de SaveTic.
+  /// Si se omite, la marca se pinta con el degradado de SaveReel.
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'SaveTic',
+      label: 'SaveReel',
       image: true,
       child: CustomPaint(
         size: Size.square(size),

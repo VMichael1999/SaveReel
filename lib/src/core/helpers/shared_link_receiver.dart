@@ -73,7 +73,7 @@ class SchemeShareSource implements SharedTextSource {
           .cast<String>();
 }
 
-/// Recibe lo que el usuario comparte hacia SaveTic y entrega solo el enlace
+/// Recibe lo que el usuario comparte hacia SaveReel y entrega solo el enlace
 /// de TikTok que haya dentro del texto.
 class SharedLinkReceiver {
   SharedLinkReceiver({List<SharedTextSource>? sources})

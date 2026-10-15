@@ -5,7 +5,7 @@ import '../../config/theme/app_tokens.dart';
 import '../../config/theme/savetic_colors.dart';
 import '../utils/app_enums.dart';
 
-/// El aviso de SaveTic: una tarjeta con ícono de estado, el mensaje y, si hace
+/// El aviso de SaveReel: una tarjeta con ícono de estado, el mensaje y, si hace
 /// falta, una acción. Se dibuja con los colores del tema, igual que el resto.
 class SaveticToast extends StatelessWidget {
   const SaveticToast({
