@@ -46,3 +46,6 @@ app.*.map.json
 
 # Claves locales (nunca se suben)
 env.json
+
+# Cobertura de pruebas
+coverage/
