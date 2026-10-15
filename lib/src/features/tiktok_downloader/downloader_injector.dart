@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../container_injector.dart';
+import '../../core/helpers/background_downloads.dart';
 import '../../core/helpers/dir_helper.dart';
 import '../../core/helpers/onboarding_store.dart';
 import '../../core/helpers/settings_store.dart';
@@ -101,6 +102,7 @@ void initDownloader() {
       saveVideoUseCase: sl(),
       getFileSizeUseCase: sl(),
       shouldSaveToGallery: () => sl<SettingsCubit>().state.saveToGallery,
+      background: const PlatformBackgroundDownloads(),
     ),
   );
 }
