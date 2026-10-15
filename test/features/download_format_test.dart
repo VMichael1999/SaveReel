@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/entities/media_item.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/video_data.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/download_format.dart';
 
@@ -47,5 +48,27 @@ void main() {
     );
     expect(DownloadFormat.audio.isAvailableIn(sinAudio), isFalse);
     expect(DownloadFormat.withCredits.isAvailableIn(sinAudio), isTrue);
+  });
+
+  test('el formato de galería solo está en publicaciones con piezas', () {
+    const galeria = VideoData(
+      id: '9',
+      duration: 0,
+      title: '',
+      originCover: '',
+      playVideo: '',
+      wmPlayVideo: '',
+      music: 'https://ejemplo.pe/audio',
+      playCount: 0,
+      downloadCount: 0,
+      gallery: [MediaItem(url: 'https://ejemplo.pe/1.jpg')],
+    );
+
+    expect(DownloadFormat.gallery.isAvailableIn(galeria), isTrue);
+    expect(DownloadFormat.gallery.isAvailableIn(_video), isFalse);
+    expect(DownloadFormat.withCredits.isAvailableIn(galeria), isFalse);
+    expect(DownloadFormat.audio.isAvailableIn(galeria), isTrue);
+    expect(DownloadFormat.gallery.fileNameFor('9'), '9');
+    expect(DownloadFormat.gallery.isAudio, isFalse);
   });
 }
