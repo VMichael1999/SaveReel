@@ -167,15 +167,6 @@ abstract final class AppTheme {
           ),
         ),
       ),
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: extension.raised,
-        contentTextStyle: textTheme.bodyMedium,
-        actionTextColor: extension.accent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadii.md),
-        ),
-      ),
       dividerTheme: DividerThemeData(color: extension.line, space: 1),
       listTileTheme: ListTileThemeData(
         iconColor: extension.muted,

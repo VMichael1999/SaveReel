@@ -206,13 +206,13 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
         showAppMessage(
           context,
           msg: AppStrings.videoDeleted,
-          type: MessageType.success,
+          type: MessageType.info,
         );
       case DownloaderSaveVideoCancelled():
         showAppMessage(
           context,
           msg: AppStrings.downloadCancelled,
-          type: MessageType.success,
+          type: MessageType.info,
         );
       case DownloaderSaveVideoFailure():
         showAppMessage(context, msg: state.message, type: MessageType.error);
