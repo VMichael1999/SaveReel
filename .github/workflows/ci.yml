@@ -20,4 +20,12 @@ jobs:
       - name: Análisis estático
         run: flutter analyze
       - name: Pruebas
-        run: flutter test --reporter github
+        run: |
+          set -o pipefail
+          flutter test --reporter expanded 2>&1 | tee pruebas.log
+      - name: Resumen de fallos
+        if: failure()
+        run: |
+          grep -E "\[E\]|Expected:|Actual:|Which:|EXCEPTION|Exception:" pruebas.log | sort -u | head -9 | while IFS= read -r linea; do
+            echo "::error::${linea:0:380}"
+          done
