@@ -20,7 +20,7 @@
 		</dict>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>SaveTic</string>
+	<string>SaveReel</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -28,7 +28,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>SaveTic</string>
+	<string>SaveReel</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -40,9 +40,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>SaveTic guarda los videos que descargas en tu galería.</string>
+	<string>SaveReel guarda los videos que descargas en tu galería.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>SaveTic necesita acceso a tu galería para crear el álbum «SaveTic» y guardar ahí tus videos.</string>
+	<string>SaveReel necesita acceso a tu galería para crear el álbum «SaveReel» y guardar ahí tus videos.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

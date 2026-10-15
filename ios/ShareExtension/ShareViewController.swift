@@ -2,7 +2,7 @@ import UIKit
 import UniformTypeIdentifiers
 
 /// Extensión de «Compartir»: recibe el enlace o el texto que otra app comparte
-/// hacia SaveTic y abre la app con `savetic://share?text=<texto>`, para que el
+/// hacia SaveReel y abre la app con `savetic://share?text=<texto>`, para que el
 /// enlace se ponga solo y se pueda elegir el formato.
 class ShareViewController: UIViewController {
 
