@@ -57,7 +57,9 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
     super.initState();
     final preferred = context.read<SettingsCubit>().state.defaultFormat;
     _format =
-        preferred.isAvailableIn(_data)
+        _data.isGallery
+            ? DownloadFormat.gallery
+            : preferred.isAvailableIn(_data)
             ? preferred
             : DownloadFormat.values.firstWhere(
               (f) => f.isAvailableIn(_data),
@@ -83,6 +85,7 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
     _useKnownSizes();
     final bloc = context.read<DownloaderBloc>();
     for (final format in DownloadFormat.values) {
+      if (format == DownloadFormat.gallery) continue;
       if (!format.isAvailableIn(_data) || _sizes.containsKey(format)) continue;
       bloc.fileSizeOf(format.urlOf(_data)).then((bytes) {
         if (bytes != null && mounted) {
@@ -103,7 +106,15 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
     );
   }
 
+  bool get _onlyPhotos => _data.photoCount == _data.gallery.length;
+
   String get _buttonLabel {
+    if (_format == DownloadFormat.gallery) {
+      return AppStrings.downloadGallery(
+        _data.gallery.length,
+        onlyPhotos: _onlyPhotos,
+      );
+    }
     final base =
         _format.isAudio ? AppStrings.downloadAudio : AppStrings.downloadVideo;
     final size = _sizeText(_format);
@@ -139,7 +150,34 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
               style: theme.textTheme.labelSmall?.copyWith(color: colors.muted),
             ),
             const SizedBox(height: AppSpacing.sm),
-            if (_data.network == VideoNetwork.instagram)
+            if (_data.isGallery) ...[
+              FormatOption(
+                title:
+                    _onlyPhotos
+                        ? AppStrings.formatGallery
+                        : AppStrings.formatGalleryMixed,
+                subtitle:
+                    _data.network == VideoNetwork.instagram
+                        ? AppStrings.formatGalleryHintInstagram
+                        : AppStrings.formatGalleryHintTikTok,
+                selected: _format == DownloadFormat.gallery,
+                size: AppStrings.galleryCount(
+                  _data.gallery.length,
+                  onlyPhotos: _onlyPhotos,
+                ),
+                onTap: () => setState(() => _format = DownloadFormat.gallery),
+              ),
+              if (DownloadFormat.audio.isAvailableIn(_data)) ...[
+                const SizedBox(height: AppSpacing.sm),
+                FormatOption(
+                  title: AppStrings.formatAudio,
+                  subtitle: AppStrings.formatAudioHint,
+                  selected: _format == DownloadFormat.audio,
+                  size: _sizeText(DownloadFormat.audio),
+                  onTap: () => setState(() => _format = DownloadFormat.audio),
+                ),
+              ],
+            ] else if (_data.network == VideoNetwork.instagram)
               FormatOption(
                 title: AppStrings.formatInstagramVideo,
                 subtitle: AppStrings.formatInstagramVideoHint,
@@ -241,7 +279,9 @@ class _Header extends StatelessWidget {
             child: AspectRatio(
               aspectRatio: 9 / 16,
               child: Image.network(
-                data.originCover,
+                data.originCover.isNotEmpty || !data.isGallery
+                    ? data.originCover
+                    : data.gallery.first.url,
                 fit: BoxFit.cover,
                 semanticLabel: AppStrings.coverLabel,
                 errorBuilder:
@@ -289,6 +329,16 @@ class _Header extends StatelessWidget {
                   formatCount(data.downloadCount),
                   AppStrings.downloadsLabel,
                 ),
+              if (data.isGallery) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  AppStrings.galleryCount(
+                    data.gallery.length,
+                    onlyPhotos: data.photoCount == data.gallery.length,
+                  ),
+                  style: value,
+                ),
+              ],
               if (data.duration <= 0 &&
                   data.playCount <= 0 &&
                   data.downloadCount <= 0)

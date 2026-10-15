@@ -44,6 +44,9 @@ class AppStrings {
   static const String formatInstagramVideoHint =
       "En la mejor calidad que entrega Instagram";
   static const String formatGallery = "Todas las fotos";
+  static const String formatGalleryMixed = "Todo el carrusel";
+  static String downloadGallery(int total, {required bool onlyPhotos}) =>
+      "Descargar ${galleryCount(total, onlyPhotos: onlyPhotos)}";
   static const String formatGalleryHintTikTok =
       "Las fotos del slideshow, sin la música";
   static const String formatGalleryHintInstagram =
