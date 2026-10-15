@@ -51,6 +51,9 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
   /// Error devuelto por el servicio al buscar el video.
   String? _serviceError;
 
+  /// Si el error del servicio es pasajero y se ofrece «Reintentar».
+  bool _serviceRetryable = false;
+
   @override
   void initState() {
     super.initState();
@@ -95,7 +98,10 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
   }
 
   void _onTextChanged() {
-    setState(() => _serviceError = null);
+    setState(() {
+      _serviceError = null;
+      _serviceRetryable = false;
+    });
   }
 
   Future<void> _checkClipboard() async {
@@ -183,10 +189,19 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       case DownloaderSaveVideoLoading():
         Navigator.of(context).popAndPushNamed(Routes.downloads);
       case DownloaderGetVideoFailure():
-        setState(() => _serviceError = state.message);
+        setState(() {
+          _serviceError = state.message;
+          _serviceRetryable = state.retryable;
+        });
       case DownloaderGetVideoSuccess(:final tikTokVideo):
         if (tikTokVideo.videoData == null) {
-          setState(() => _serviceError = AppStrings.videoUnavailable);
+          setState(() {
+            _serviceError =
+                VideoLink.networkOf(_controller.text) == VideoNetwork.instagram
+                    ? AppStrings.videoUnavailableInstagram
+                    : AppStrings.videoUnavailable;
+            _serviceRetryable = true;
+          });
         } else {
           showVideoPreviewSheet(context, tikTokVideo);
         }
@@ -277,6 +292,17 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                           onPasted: () => setState(() => _touched = true),
                         ),
                   ),
+                  if (_serviceError != null && _serviceRetryable) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: canSearch ? _search : null,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text(AppStrings.retry),
+                      ),
+                    ),
+                  ],
                   if (errorText != null &&
                       _check.status == VideoLinkStatus.unsupported) ...[
                     const SizedBox(height: AppSpacing.md),

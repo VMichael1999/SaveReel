@@ -21,9 +21,15 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/downloa
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/downloader_screen.dart';
 
 class _FakeRepo implements TiktokVideoBaseRepo {
+  _FakeRepo({this.results = const [Left(NotFoundFailure())]});
+
+  /// Respuestas de las búsquedas, una por intento; la última se repite.
+  final List<Either<Failure, TikTokVideo>> results;
+  int searches = 0;
+
   @override
   Future<Either<Failure, TikTokVideo>> getVideo(String videoLink) async =>
-      const Left(NotFoundFailure());
+      results[(searches++).clamp(0, results.length - 1)];
 
   @override
   Future<Either<Failure, int?>> getFileSize(String url) async =>
@@ -58,8 +64,11 @@ void _mockPlatform({String? clipboardText}) {
   );
 }
 
-Future<void> _pumpHome(WidgetTester tester) async {
-  final repo = _FakeRepo();
+Future<_FakeRepo> _pumpHome(
+  WidgetTester tester, {
+  List<Either<Failure, TikTokVideo>>? results,
+}) async {
+  final repo = results == null ? _FakeRepo() : _FakeRepo(results: results);
   await tester.pumpWidget(
     BlocProvider(
       create:
@@ -82,6 +91,7 @@ Future<void> _pumpHome(WidgetTester tester) async {
     ),
   );
   await tester.pump(const Duration(milliseconds: 500));
+  return repo;
 }
 
 // FilledButton.icon crea una subclase, así que byType no la encuentra.
@@ -156,6 +166,81 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('un video privado no ofrece reintentar', (tester) async {
+    _mockPlatform();
+    await _pumpHome(tester);
+
+    await tester.enterText(
+      find.byType(TextField),
+      'https://vm.tiktok.com/ZMh7K2pQx/',
+    );
+    await tester.pump();
+    await tester.tap(_filledButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.textContaining('privado o haber sido borrado'), findsOneWidget);
+    expect(find.text('Reintentar'), findsNothing);
+  });
+
+  testWidgets('si el servicio falla ofrece reintentar y vuelve a buscar', (
+    tester,
+  ) async {
+    _mockPlatform();
+    final repo = await _pumpHome(
+      tester,
+      results: const [
+        Left(ServerFailure()),
+        Left(NoInternetConnectionFailure()),
+      ],
+    );
+
+    await tester.enterText(
+      find.byType(TextField),
+      'https://vm.tiktok.com/ZMh7K2pQx/',
+    );
+    await tester.pump();
+    await tester.tap(_filledButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.textContaining('El servicio tuvo un problema'), findsOneWidget);
+    expect(find.text('Reintentar'), findsOneWidget);
+
+    await tester.tap(find.text('Reintentar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(repo.searches, 2);
+    expect(find.textContaining('Sin conexión'), findsOneWidget);
+    expect(find.text('Reintentar'), findsOneWidget);
+  });
+
+  testWidgets('al escribir otro enlace desaparece el error y el reintento', (
+    tester,
+  ) async {
+    _mockPlatform();
+    await _pumpHome(tester, results: const [Left(ServerFailure())]);
+
+    await tester.enterText(
+      find.byType(TextField),
+      'https://vm.tiktok.com/ZMh7K2pQx/',
+    );
+    await tester.pump();
+    await tester.tap(_filledButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Reintentar'), findsOneWidget);
+
+    await tester.enterText(
+      find.byType(TextField),
+      'https://vm.tiktok.com/ZMh7K2pQy/',
+    );
+    await tester.pump();
+
+    expect(find.text('Reintentar'), findsNothing);
   });
 
   testWidgets('al eliminar un video avisa «Video eliminado»', (tester) async {

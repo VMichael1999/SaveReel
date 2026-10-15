@@ -25,6 +25,9 @@ class AppStrings {
       "Ese enlace es de TikTok o Instagram, pero no es de un video.";
   static const String linkUnsupported =
       "Ese enlace no es de un video de TikTok ni de Instagram.";
+  static const String videoUnavailableInstagram =
+      "Instagram no nos dejó ver ese video. Puede ser privado o haber sido borrado, "
+      "o el servicio no está respondiendo ahora.";
   static const String videoUnavailable =
       "No pudimos obtener el video. Puede ser privado o haber sido borrado.";
   static String linkOtherPlatform(String platform) =>
