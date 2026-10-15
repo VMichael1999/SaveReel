@@ -26,6 +26,7 @@ class FinishedDownloadTile extends StatelessWidget {
     DownloadFormat.withCredits => AppStrings.withCreditsShort,
     DownloadFormat.noWatermark => AppStrings.noWatermarkShort,
     DownloadFormat.audio => AppStrings.audioShort,
+    DownloadFormat.gallery => '',
     null => '',
   };
 
@@ -36,7 +37,10 @@ class FinishedDownloadTile extends StatelessWidget {
     final data = item.video.videoData!;
     final format = context.read<DownloaderBloc>().formatOf(item.path);
     final isAudio = format == DownloadFormat.audio;
-    final size = item.totalBytes > 0 ? formatMegabytes(item.totalBytes) : null;
+    final size =
+        item.totalBytes > 0 && !item.isGallery
+            ? formatMegabytes(item.totalBytes)
+            : null;
     final percent = item.progress == null ? 0 : (item.progress! * 100).floor();
 
     final statusColor = _failed ? colors.failed : colors.done;
@@ -51,6 +55,11 @@ class FinishedDownloadTile extends StatelessWidget {
       if (data.authorHandle != null) '@${data.authorHandle}',
       if (_failed && percent > 0)
         AppStrings.stoppedAt(percent)
+      else if (data.isGallery)
+        AppStrings.galleryCount(
+          data.gallery.length,
+          onlyPhotos: data.photoCount == data.gallery.length,
+        )
       else if (data.network == VideoNetwork.instagram)
         NetworkMark.labelOf(data.network)
       else if (_formatName(format).isNotEmpty)
