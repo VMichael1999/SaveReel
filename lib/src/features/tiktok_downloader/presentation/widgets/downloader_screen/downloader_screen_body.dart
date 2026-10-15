@@ -73,7 +73,15 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
   /// siguiente que vea el usuario sea elegir el formato.
   void _useSharedLink() {
     if (!mounted) return;
-    final link = context.read<SharedLinkCubit>().consume();
+    final shared = context.read<SharedLinkCubit>();
+    if (shared.consumeMissing()) {
+      showAppMessage(
+        context,
+        msg: AppStrings.clipboardNoLink,
+        type: MessageType.info,
+      );
+    }
+    final link = shared.consume();
     if (link == null) return;
     _controller.text = link;
     setState(() {
@@ -241,7 +249,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     final theme = Theme.of(context);
 
     return BlocListener<SharedLinkCubit, SharedLinkState>(
-      listenWhen: (_, current) => current.pending != null,
+      listenWhen: (_, current) => current.pending != null || current.missing,
       listener: (_, __) => _useSharedLink(),
       child: BlocConsumer<DownloaderBloc, DownloaderState>(
         listener: _onBlocState,

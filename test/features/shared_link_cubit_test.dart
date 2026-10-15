@@ -87,27 +87,40 @@ void main() {
   });
 
   test(
-    'pedir usar el enlace copiado sin que haya cuenta como faltante',
+    'pedir usar el enlace copiado sin que haya lo deja pendiente de avisar',
     () async {
       final source = _MissingSource();
       final cubit = SharedLinkCubit(
         receiver: SharedLinkReceiver(sources: [source]),
       );
       await cubit.start();
-      expect(cubit.state.missingSerial, 0);
+      expect(cubit.state.missing, isFalse);
 
       source.missingController.add(null);
       await Future<void>.delayed(Duration.zero);
-      source.missingController.add(null);
-      await Future<void>.delayed(Duration.zero);
 
-      expect(cubit.state.missingSerial, 2);
+      expect(cubit.state.missing, isTrue);
       expect(cubit.state.pending, isNull);
       await cubit.close();
     },
   );
 
-  test('usar el enlace pendiente no borra la cuenta de faltantes', () async {
+  test('consumeMissing avisa una sola vez', () async {
+    final source = _MissingSource();
+    final cubit = SharedLinkCubit(
+      receiver: SharedLinkReceiver(sources: [source]),
+    );
+    await cubit.start();
+    source.missingController.add(null);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(cubit.consumeMissing(), isTrue);
+    expect(cubit.consumeMissing(), isFalse);
+    expect(cubit.state.missing, isFalse);
+    await cubit.close();
+  });
+
+  test('avisar o usar el enlace pendiente no se pisan entre sí', () async {
     final source = _MissingSource();
     final cubit = SharedLinkCubit(
       receiver: SharedLinkReceiver(sources: [source]),
@@ -119,9 +132,12 @@ void main() {
     await Future<void>.delayed(Duration.zero);
 
     expect(cubit.consume(), 'https://vm.tiktok.com/ZMabc123/');
+    expect(cubit.state.missing, isTrue);
 
-    expect(cubit.state.missingSerial, 1);
-    expect(cubit.state.pending, isNull);
+    source.controller.add('https://vm.tiktok.com/ZMxyz789/');
+    await Future<void>.delayed(Duration.zero);
+    expect(cubit.consumeMissing(), isTrue);
+    expect(cubit.state.pending, 'https://vm.tiktok.com/ZMxyz789/');
     await cubit.close();
   });
 }

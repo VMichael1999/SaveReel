@@ -69,6 +69,7 @@ Future<(_Repo, FakeSharedSource)> _pump(
   String? initialShared,
   bool firstUseDismissed = false,
   String? clipboardText,
+  bool missingAtStart = false,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 3;
@@ -91,7 +92,10 @@ Future<(_Repo, FakeSharedSource)> _pump(
   );
 
   final repo = _Repo();
-  final source = FakeSharedSource(initial: initialShared);
+  final source = FakeSharedSource(
+    initial: initialShared,
+    missingAtStart: missingAtStart,
+  );
   final shared = fakeSharedLinkCubit(source);
   await tester.runAsync(shared.start);
   final library = fakeLibraryCubit();
@@ -209,4 +213,52 @@ void main() {
       expect(find.text('Tienes un enlace copiado'), findsNothing);
     },
   );
+
+  Future<void> showUp(WidgetTester tester) async {
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  testWidgets('abrir con el atajo sin enlace copiado lo explica en Inicio', (
+    tester,
+  ) async {
+    final (repo, _) = await _pump(
+      tester,
+      firstUseDismissed: true,
+      missingAtStart: true,
+    );
+    await showUp(tester);
+
+    expect(
+      find.text('No hay un enlace de TikTok o Instagram copiado.'),
+      findsOneWidget,
+    );
+    expect(repo.searched, isEmpty);
+    await drainToasts(tester);
+  });
+
+  testWidgets('con la app abierta, el atajo sin enlace también lo explica', (
+    tester,
+  ) async {
+    final (repo, source) = await _pump(tester, firstUseDismissed: true);
+    expect(
+      find.text('No hay un enlace de TikTok o Instagram copiado.'),
+      findsNothing,
+    );
+
+    source.missingController.add(null);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+    await showUp(tester);
+
+    expect(
+      find.text('No hay un enlace de TikTok o Instagram copiado.'),
+      findsOneWidget,
+    );
+    expect(repo.searched, isEmpty);
+    await drainToasts(tester);
+  });
 }

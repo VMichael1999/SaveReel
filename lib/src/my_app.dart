@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'config/routes_manager.dart';
-import 'core/utils/app_enums.dart';
-import 'core/utils/app_strings.dart';
-import 'core/widgets/app_message.dart';
 import 'config/theme/app_theme.dart';
 import 'container_injector.dart';
 import 'features/tiktok_downloader/domain/entities/saved_video.dart';
@@ -37,27 +34,22 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => sl<SharedLinkCubit>()..start()),
       ],
       child: BlocListener<SharedLinkCubit, SharedLinkState>(
-        listenWhen: (a, b) => a.missingSerial != b.missingSerial,
-        listener: _explainMissingLink,
-        child: BlocListener<SharedLinkCubit, SharedLinkState>(
-          listener: _goHomeForSharedLink,
-          child: BlocListener<DownloaderBloc, DownloaderState>(
-            listener: _syncLibrary,
-            child: AppLifecycleBridge(
-              child: BlocBuilder<SettingsCubit, AppSettings>(
-                buildWhen: (a, b) => a.theme != b.theme,
-                builder:
-                    (context, settings) => MaterialApp(
-                      debugShowCheckedModeBanner: false,
-                      initialRoute:
-                          _showCatalog ? Routes.catalog : Routes.splash,
-                      onGenerateRoute: AppRouter.getRoute,
-                      theme: AppTheme.light,
-                      darkTheme: AppTheme.dark,
-                      themeMode: settings.theme.themeMode,
-                      navigatorKey: _navigatorKey,
-                    ),
-              ),
+        listener: _goHomeForSharedLink,
+        child: BlocListener<DownloaderBloc, DownloaderState>(
+          listener: _syncLibrary,
+          child: AppLifecycleBridge(
+            child: BlocBuilder<SettingsCubit, AppSettings>(
+              buildWhen: (a, b) => a.theme != b.theme,
+              builder:
+                  (context, settings) => MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
+                    onGenerateRoute: AppRouter.getRoute,
+                    theme: AppTheme.light,
+                    darkTheme: AppTheme.dark,
+                    themeMode: settings.theme.themeMode,
+                    navigatorKey: _navigatorKey,
+                  ),
             ),
           ),
         ),
@@ -65,26 +57,10 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  /// Se pidió «guardar el enlace copiado» pero no había ninguno: se vuelve a
-  /// Inicio y se explica, en lugar de abrir la app sin decir nada.
-  void _explainMissingLink(BuildContext context, SharedLinkState state) {
-    final navigator = _navigatorKey.currentState;
-    navigator?.popUntil(
-      (route) => route.isFirst || route.settings.name == Routes.downloader,
-    );
-    final overlay = navigator?.overlay?.context;
-    if (overlay == null) return;
-    showAppMessage(
-      overlay,
-      msg: AppStrings.clipboardNoLink,
-      type: MessageType.info,
-    );
-  }
-
   /// Si llega un enlace con la app en otra pantalla, vuelve al inicio, donde
   /// el enlace se pone solo y se busca el video.
   void _goHomeForSharedLink(BuildContext context, SharedLinkState state) {
-    if (state.pending == null) return;
+    if (state.pending == null && !state.missing) return;
     _navigatorKey.currentState?.popUntil(
       (route) => route.isFirst || route.settings.name == Routes.downloader,
     );

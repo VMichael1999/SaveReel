@@ -11,17 +11,21 @@ class SharedLinkState extends Equatable {
   const SharedLinkState({
     this.pending,
     this.serial = 0,
+    this.missing = false,
     this.missingSerial = 0,
   });
 
   final String? pending;
   final int serial;
 
-  /// Cuenta las veces que se pidió usar el enlace copiado y no había ninguno.
+  /// Se pidió usar el enlace copiado y no había ninguno, y aún no se avisó.
+  final bool missing;
+
+  /// Distingue dos avisos seguidos.
   final int missingSerial;
 
   @override
-  List<Object?> get props => [pending, serial, missingSerial];
+  List<Object?> get props => [pending, serial, missing, missingSerial];
 }
 
 class SharedLinkCubit extends Cubit<SharedLinkState> {
@@ -45,6 +49,7 @@ class SharedLinkCubit extends Cubit<SharedLinkState> {
       SharedLinkState(
         pending: link,
         serial: state.serial + 1,
+        missing: state.missing,
         missingSerial: state.missingSerial,
       ),
     );
@@ -56,6 +61,7 @@ class SharedLinkCubit extends Cubit<SharedLinkState> {
       SharedLinkState(
         pending: state.pending,
         serial: state.serial,
+        missing: true,
         missingSerial: state.missingSerial + 1,
       ),
     );
@@ -68,11 +74,29 @@ class SharedLinkCubit extends Cubit<SharedLinkState> {
       emit(
         SharedLinkState(
           serial: state.serial,
+          missing: state.missing,
           missingSerial: state.missingSerial,
         ),
       );
     }
     return link;
+  }
+
+  /// Dice si hay que explicar que no había un enlace copiado, y lo da por
+  /// avisado. Lo llama la pantalla de Inicio cuando ya está lista, para no
+  /// mostrar nada mientras la app aún arranca.
+  bool consumeMissing() {
+    final missing = state.missing;
+    if (missing) {
+      emit(
+        SharedLinkState(
+          pending: state.pending,
+          serial: state.serial,
+          missingSerial: state.missingSerial,
+        ),
+      );
+    }
+    return missing;
   }
 
   @override
