@@ -48,6 +48,7 @@ Todavía **no está publicada** en las tiendas.
 | Slideshows de TikTok y carruseles o fotos de Instagram | Hecho con pruebas; **el formato de las fuentes está supuesto y falta verificarlo con publicaciones reales** |
 | Compartir desde otras apps (extensión en iOS, intent en Android) | Hecho |
 | Biblioteca con filtros por red, tipo y audio | Hecho |
+| Descarga en segundo plano | **Android:** servicio en primer plano con notificación de progreso, probado en emulador. **iOS:** tiempo extra y reanudación automática al volver, sin verificar en un iPhone real |
 | Reanudar descargas cortadas y cuidar los datos móviles | Hecho con pruebas; la detección de la red usa código nativo y no se probó en un teléfono con datos móviles |
 | Servidor propio que reemplace a los servicios de terceros | Pendiente |
 | Publicar en App Store y Google Play | Pendiente (nombre, cuenta de Apple de pago y política de privacidad) |
@@ -153,6 +154,20 @@ Los lectores de las fuentes (`images` en el servicio de TikTok y `edge_sidecar_t
 la página de inserción de Instagram) se escribieron a partir del formato conocido y se prueban
 con páginas de ejemplo: si alguna publicación real no se reconoce, hay que ajustar
 `video_data_model.dart` o `instagram_embed_parser.dart`.
+
+### Descargas en segundo plano
+
+- **Android:** al empezar una descarga se levanta un servicio en primer plano (`DownloadService`,
+  tipo `dataSync`) con una notificación de progreso. Así el sistema no cierra la app al pasar a
+  segundo plano y la descarga sigue hasta el final; al terminar, una notificación avisa
+  «Descarga lista» (o el fallo). Pide el permiso de notificaciones de Android 13 una vez.
+- **iOS:** el sistema suspende la app a los ~30 s de salir de pantalla y no deja seguir
+  ejecutando código. SaveReel pide ese tiempo extra (`beginBackgroundTask`) y, si la conexión se
+  corta por la suspensión, retoma sola la descarga desde donde quedó al volver (hasta 3 veces,
+  gracias al `.part`). Al terminar con la app fuera de pantalla manda una notificación local.
+  Una descarga larga que siga con el teléfono bloqueado exigiría un `URLSession` en segundo plano
+  con código nativo propio; no está hecho.
+- Los textos de las notificaciones salen de Flutter, no del código nativo.
 
 ### Descargas cortadas y datos móviles
 
