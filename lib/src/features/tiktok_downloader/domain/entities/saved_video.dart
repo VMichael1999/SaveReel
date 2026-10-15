@@ -35,6 +35,10 @@ class SavedVideo extends Equatable {
 
   bool get isGallery => files.isNotEmpty;
 
+  /// Archivo del que sale la portada: la primera pieza de una galería, o el
+  /// propio video.
+  String get coverPath => isGallery ? files.first : path;
+
   VideoNetwork get source => network ?? VideoNetwork.tiktok;
 
   bool get isAudio => path.toLowerCase().endsWith('.mp3');

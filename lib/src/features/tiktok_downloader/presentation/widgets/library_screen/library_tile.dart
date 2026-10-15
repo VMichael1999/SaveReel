@@ -66,9 +66,7 @@ class LibraryTile extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  LibraryThumbnail(
-                    path: video.isGallery ? video.files.first : video.path,
-                  ),
+                  LibraryThumbnail(path: video.coverPath),
                   Positioned(
                     left: AppSpacing.sm,
                     top: AppSpacing.sm,
