@@ -14,7 +14,8 @@ class LibraryState extends Equatable {
   final List<SavedVideo> videos;
 
   int get totalBytes => videos.fold(0, (sum, v) => sum + v.sizeBytes);
-  int get videoCount => videos.where((v) => !v.isAudio).length;
+  int get videoCount => videos.where((v) => !v.isAudio && !v.isGallery).length;
+  int get galleryCount => videos.where((v) => v.isGallery).length;
   int get audioCount => videos.where((v) => v.isAudio).length;
   int countOf(VideoNetwork network) =>
       videos.where((v) => v.source == network).length;

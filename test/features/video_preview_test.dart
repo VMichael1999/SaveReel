@@ -17,6 +17,7 @@ import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/core/utils/video_link.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/tiktok_video.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/entities/media_item.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/video_data.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/repositories/tiktok_video_base_repo.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_file_size_usecase.dart';
@@ -152,6 +153,18 @@ Future<void> _settle(WidgetTester tester) async {
   }
 }
 
+/// Como [_settle], pero sigue esperando (hasta unos 10 s) a que se cumpla
+/// [done]: el disco de un runner de CI puede tardar mucho más que el de un
+/// Mac, y una espera fija deja la prueba a merced de la velocidad.
+Future<void> _settleUntil(WidgetTester tester, bool Function() done) async {
+  for (var i = 0; i < 200 && !done(); i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+  }
+}
+
 const _reel = TikTokVideo(
   code: 0,
   msg: 'success',
@@ -171,7 +184,92 @@ const _reel = TikTokVideo(
   ),
 );
 
+const _slideshow = TikTokVideo(
+  code: 0,
+  msg: 'success',
+  processedTime: 0,
+  videoData: VideoData(
+    id: '7412',
+    duration: 20,
+    title: 'Mis fotos de Cusco',
+    originCover: '',
+    playVideo: '',
+    wmPlayVideo: '',
+    music: 'https://ejemplo.pe/musica.mp3',
+    playCount: 500,
+    downloadCount: 3,
+    authorHandle: 'viajes.peru',
+    gallery: [
+      MediaItem(url: 'https://ejemplo.pe/1.jpg'),
+      MediaItem(url: 'https://ejemplo.pe/2.jpg'),
+      MediaItem(url: 'https://ejemplo.pe/3.jpg'),
+    ],
+  ),
+);
+
+const _carousel = TikTokVideo(
+  code: 0,
+  msg: 'success',
+  processedTime: 0,
+  videoData: VideoData(
+    id: 'C9z',
+    duration: 0,
+    title: 'Carrusel',
+    originCover: 'https://ejemplo.pe/portada.jpg',
+    playVideo: '',
+    wmPlayVideo: '',
+    music: '',
+    playCount: 0,
+    downloadCount: 0,
+    network: VideoNetwork.instagram,
+    gallery: [
+      MediaItem(url: 'https://ejemplo.pe/1.jpg'),
+      MediaItem(url: 'https://ejemplo.pe/2.mp4', isVideo: true),
+    ],
+  ),
+);
+
 void main() {
+  testWidgets(
+    'un slideshow ofrece todas las fotos y la música, elegidas las fotos',
+    (tester) async {
+      await _openPreview(tester, video: _slideshow);
+
+      expect(find.text('Todas las fotos'), findsOneWidget);
+      expect(find.text('3 fotos'), findsWidgets);
+      expect(find.text('Solo el audio'), findsOneWidget);
+      expect(find.text('Video con créditos'), findsNothing);
+      expect(find.text('Video sin marca de agua'), findsNothing);
+      expect(find.text('Descargar 3 fotos'), findsOneWidget);
+    },
+  );
+
+  testWidgets('un carrusel con video se llama «elemento» y no ofrece audio', (
+    tester,
+  ) async {
+    await _openPreview(tester, video: _carousel);
+
+    expect(find.text('Todo el carrusel'), findsOneWidget);
+    expect(find.text('Descargar 2 elementos'), findsOneWidget);
+    expect(find.text('Solo el audio'), findsNothing);
+    expect(find.text('Instagram'), findsWidgets);
+  });
+
+  testWidgets('descargar un slideshow baja cada foto en orden', (tester) async {
+    final repo = await _openPreview(tester, video: _slideshow);
+
+    await tester.tap(find.text('Descargar 3 fotos'));
+    await tester.pump();
+    await _settleUntil(tester, () => repo.saved.length >= 3);
+
+    expect(repo.saved, [
+      'https://ejemplo.pe/1.jpg',
+      'https://ejemplo.pe/2.jpg',
+      'https://ejemplo.pe/3.jpg',
+    ]);
+    await drainToasts(tester);
+  });
+
   testWidgets(
     'un video de Instagram ofrece un solo formato y sin cifras en 0',
     (tester) async {
@@ -187,7 +285,7 @@ void main() {
       await tester.pump();
       await _settle(tester);
       // La firma de la URL no se toca: no se le pega «.mp4» al final.
-    expect(repo.saved, ['https://ejemplo.pe/reel.mp4?sig=abc&oe=1']);
+      expect(repo.saved, ['https://ejemplo.pe/reel.mp4?sig=abc&oe=1']);
       await drainToasts(tester);
     },
   );

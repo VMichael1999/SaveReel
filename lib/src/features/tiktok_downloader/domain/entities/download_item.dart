@@ -11,6 +11,11 @@ class DownloadItem extends Equatable {
   final int receivedBytes;
   final int totalBytes;
 
+  /// En una galería, cuántas piezas van descargadas y cuántas son; ambas en
+  /// 0 en un video suelto. Los bytes cuentan en milésimas de pieza.
+  final int unitsDone;
+  final int unitsTotal;
+
   /// Momento en que empezó la descarga, para estimar el tiempo restante.
   final DateTime? startedAt;
 
@@ -23,9 +28,13 @@ class DownloadItem extends Equatable {
     required this.path,
     this.receivedBytes = 0,
     this.totalBytes = 0,
+    this.unitsDone = 0,
+    this.unitsTotal = 0,
     this.startedAt,
     this.failureMessage,
   });
+
+  bool get isGallery => unitsTotal > 0;
 
   /// Avance de 0 a 1, o nulo si el servidor no informó el tamaño.
   double? get progress =>
@@ -37,6 +46,8 @@ class DownloadItem extends Equatable {
     String? path,
     int? receivedBytes,
     int? totalBytes,
+    int? unitsDone,
+    int? unitsTotal,
     DateTime? startedAt,
     String? failureMessage,
     bool clearFailure = false,
@@ -47,6 +58,8 @@ class DownloadItem extends Equatable {
       path: path ?? this.path,
       receivedBytes: receivedBytes ?? this.receivedBytes,
       totalBytes: totalBytes ?? this.totalBytes,
+      unitsDone: unitsDone ?? this.unitsDone,
+      unitsTotal: unitsTotal ?? this.unitsTotal,
       startedAt: startedAt ?? this.startedAt,
       failureMessage:
           clearFailure ? null : (failureMessage ?? this.failureMessage),
@@ -60,6 +73,8 @@ class DownloadItem extends Equatable {
         path,
         receivedBytes,
         totalBytes,
+        unitsDone,
+        unitsTotal,
         startedAt,
         failureMessage,
       ];

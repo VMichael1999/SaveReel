@@ -5,6 +5,7 @@ class VideoPlayerArgs {
     this.title,
     this.authorHandle,
     this.inGallery = false,
+    this.files = const [],
   });
 
   final String path;
@@ -16,6 +17,11 @@ class VideoPlayerArgs {
 
   /// Si ya hay una copia en la galería.
   final bool inGallery;
+
+  /// Las piezas, si es un slideshow o carrusel: [path] es entonces la carpeta.
+  final List<String> files;
+
+  bool get isGallery => files.isNotEmpty;
 
   bool get isAudio => path.toLowerCase().endsWith('.mp3');
 }

@@ -19,6 +19,13 @@ class ActiveDownloadTile extends StatelessWidget {
   String get _status {
     final progress = item.progress;
     if (progress == null) return AppStrings.downloadingNow;
+    if (item.isGallery) {
+      final current = (item.unitsDone + 1).clamp(1, item.unitsTotal);
+      return [
+        AppStrings.galleryProgress(current, item.unitsTotal),
+        '${(progress * 100).floor()} %',
+      ].join(' · ');
+    }
     final parts = [
       '${formatMegabytes(item.receivedBytes, withUnit: false)} de ${formatMegabytes(item.totalBytes)}',
       '${(progress * 100).floor()} %',

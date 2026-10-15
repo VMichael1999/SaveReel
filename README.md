@@ -45,6 +45,7 @@ Todavía **no está publicada** en las tiendas.
 | Sistema visual: tokens, paleta fusión TikTok + Instagram, tema claro y oscuro, avisos propios | Hecho |
 | Descargas de TikTok | Hecho; usa el servicio de terceros [tikwm.com](https://www.tikwm.com) |
 | Descargas de Instagram (reels, `/p/` e IGTV) | Hecho; usa la página pública de inserción, una fuente no oficial |
+| Slideshows de TikTok y carruseles o fotos de Instagram | Hecho con pruebas; **el formato de las fuentes está supuesto y falta verificarlo con publicaciones reales** |
 | Compartir desde otras apps (extensión en iOS, intent en Android) | Hecho |
 | Biblioteca con filtros por red, tipo y audio | Hecho |
 | Servidor propio que reemplace a los servicios de terceros | Pendiente |
@@ -138,6 +139,19 @@ inserción de Instagram, que no pide clave ni sesión. Es una fuente no oficial:
 funcionar si Instagram la cambia. Como respaldo se puede apuntar a una instancia de
 [Cobalt](https://github.com/imputnet/cobalt) con `--dart-define=COBALT_URL=https://…` (y
 `--dart-define=COBALT_KEY=…` si pide clave). Solo funciona con contenido público.
+
+### Fotos, slideshows y carruseles
+
+Las publicaciones con varias piezas (un slideshow de TikTok, un carrusel de Instagram o una
+foto suelta) se bajan completas a una carpeta, con un solo avance general, y cada pieza va
+también a la galería del teléfono. En la biblioteca aparecen como **un solo elemento**, con la
+primera foto de portada y la cantidad de piezas, y se abren en un visor para deslizar entre
+ellas, ampliar las fotos (pellizco o doble toque), compartir, guardar en la galería y eliminar.
+
+Los lectores de las fuentes (`images` en el servicio de TikTok y `edge_sidecar_to_children` en
+la página de inserción de Instagram) se escribieron a partir del formato conocido y se prueban
+con páginas de ejemplo: si alguna publicación real no se reconoce, hay que ajustar
+`video_data_model.dart` o `instagram_embed_parser.dart`.
 
 ## Servicio de descargas
 

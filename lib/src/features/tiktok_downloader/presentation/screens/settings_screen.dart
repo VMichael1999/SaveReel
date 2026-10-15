@@ -52,6 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     DownloadFormat.withCredits => AppStrings.settingsFormatValueCredits,
     DownloadFormat.noWatermark => AppStrings.settingsFormatValueNoWatermark,
     DownloadFormat.audio => AppStrings.settingsFormatValueAudio,
+    DownloadFormat.gallery => AppStrings.settingsFormatValueCredits,
   };
 
   String _themeName(AppThemeChoice theme) => switch (theme) {

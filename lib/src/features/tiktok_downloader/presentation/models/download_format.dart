@@ -9,7 +9,10 @@ enum DownloadFormat {
   noWatermark,
 
   /// Solo la música.
-  audio;
+  audio,
+
+  /// Todas las fotos (y videos) de un slideshow o carrusel, en una carpeta.
+  gallery;
 
   bool get isAudio => this == DownloadFormat.audio;
 
@@ -18,9 +21,12 @@ enum DownloadFormat {
         DownloadFormat.withCredits => video.wmPlayVideo,
         DownloadFormat.noWatermark => video.playVideo,
         DownloadFormat.audio => video.music,
+        DownloadFormat.gallery =>
+          video.gallery.isEmpty ? '' : video.gallery.first.url,
       };
 
-  bool isAvailableIn(VideoData video) => urlOf(video).isNotEmpty;
+  bool isAvailableIn(VideoData video) =>
+      this == DownloadFormat.gallery ? video.isGallery : urlOf(video).isNotEmpty;
 
   /// Nombre del archivo, sin carpeta. Cada formato tiene el suyo para que
   /// bajar uno no pise a otro.
@@ -28,5 +34,6 @@ enum DownloadFormat {
         DownloadFormat.withCredits => '$videoId.mp4',
         DownloadFormat.noWatermark => '${videoId}_sin_marca.mp4',
         DownloadFormat.audio => '$videoId.mp3',
+        DownloadFormat.gallery => videoId,
       };
 }

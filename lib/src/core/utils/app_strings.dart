@@ -43,6 +43,24 @@ class AppStrings {
   static const String formatInstagramVideo = "Video";
   static const String formatInstagramVideoHint =
       "En la mejor calidad que entrega Instagram";
+  static const String formatGallery = "Todas las fotos";
+  static const String formatGalleryMixed = "Todo el carrusel";
+  static String downloadGallery(int total, {required bool onlyPhotos}) =>
+      "Descargar ${galleryCount(total, onlyPhotos: onlyPhotos)}";
+  static const String formatGalleryHintTikTok =
+      "Las fotos del slideshow, sin la música";
+  static const String formatGalleryHintInstagram =
+      "Todo el carrusel, en su calidad original";
+  static String galleryCount(int total, {required bool onlyPhotos}) {
+    if (onlyPhotos) return total == 1 ? "1 foto" : "$total fotos";
+    return total == 1 ? "1 elemento" : "$total elementos";
+  }
+
+  static String galleryPosition(int current, int total) =>
+      "Pieza $current de $total";
+
+  static String galleryProgress(int current, int total) =>
+      "Pieza $current de $total";
   static const String formatAudio = "Solo el audio";
   static const String formatNoWatermarkHint = "Para verlo tú, sin conexión";
   static const String formatAudioHint = "Archivo de música";
@@ -102,6 +120,7 @@ class AppStrings {
   static const String libraryTitle = "Tus descargas";
   static const String libraryAll = "Todo";
   static const String libraryVideos = "Videos";
+  static const String libraryPhotos = "Fotos";
   static const String libraryAudio = "Audio";
   static const String libraryFilterEmpty = "No hay nada en este filtro.";
   static const String openLibrary = "Tu biblioteca";
@@ -112,7 +131,14 @@ class AppStrings {
     String? title, {
     bool isAudio = false,
     String? duration,
+    int? pieces,
   }) {
+    if (pieces != null) {
+      return [
+        title == null ? "Abrir galería guardada" : "Abrir $title",
+        pieces == 1 ? "1 pieza" : "$pieces piezas",
+      ].join(", ");
+    }
     final base =
         title == null ? "Reproducir video guardado" : "Reproducir $title";
     return [

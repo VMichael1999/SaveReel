@@ -44,7 +44,11 @@ Future<void> showLibraryActionsSheet(
             final handle = video.authorHandle;
             SharePlus.instance.share(
               ShareParams(
-                files: [XFile(video.path)],
+                files: [
+                  for (final path
+                      in video.isGallery ? video.files : [video.path])
+                    XFile(path),
+                ],
                 text: handle == null ? null : AppStrings.shareText(handle),
               ),
             );
@@ -52,7 +56,9 @@ Future<void> showLibraryActionsSheet(
           onSaveToGallery: () async {
             Navigator.of(sheetContext).pop();
             try {
-              await saveToGallery(video.path);
+              for (final path in video.isGallery ? video.files : [video.path]) {
+                await saveToGallery(path);
+              }
               if (!messenger.mounted) return;
               showAppMessage(
                 messenger,

@@ -18,6 +18,10 @@ class SavedVideo extends Equatable {
   /// y cuentan como de TikTok.
   final VideoNetwork? network;
 
+  /// Las piezas, en orden, cuando es una galería (slideshow o carrusel): su
+  /// [path] es la carpeta. Vacío en un video o audio suelto.
+  final List<String> files;
+
   const SavedVideo({
     required this.path,
     required this.sizeBytes,
@@ -26,7 +30,14 @@ class SavedVideo extends Equatable {
     this.authorHandle,
     this.durationSeconds,
     this.network,
+    this.files = const [],
   });
+
+  bool get isGallery => files.isNotEmpty;
+
+  /// Archivo del que sale la portada: la primera pieza de una galería, o el
+  /// propio video.
+  String get coverPath => isGallery ? files.first : path;
 
   VideoNetwork get source => network ?? VideoNetwork.tiktok;
 
@@ -40,6 +51,7 @@ class SavedVideo extends Equatable {
     authorHandle: authorHandle,
     durationSeconds: durationSeconds ?? this.durationSeconds,
     network: network,
+    files: files,
   );
 
   @override
@@ -51,6 +63,7 @@ class SavedVideo extends Equatable {
     authorHandle,
     durationSeconds,
     network,
+    files,
   ];
 }
 

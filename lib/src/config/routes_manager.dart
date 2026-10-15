@@ -5,6 +5,7 @@ import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/downloader_screen.dart';
 import '../features/tiktok_downloader/presentation/models/video_player_args.dart';
 import '../features/tiktok_downloader/presentation/screens/downloads_screen.dart';
+import '../features/tiktok_downloader/presentation/screens/gallery_viewer_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/library_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/settings_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/video_player_screen.dart';
@@ -42,10 +43,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (context) => const DownloadsScreen());
       case Routes.viewVideo:
         return MaterialPageRoute(
-          builder:
-              (context) => VideoPlayerScreen(
-                args: routeSettings.arguments as VideoPlayerArgs,
-              ),
+          builder: (context) {
+            final args = routeSettings.arguments as VideoPlayerArgs;
+            return args.isGallery
+                ? GalleryViewerScreen(args: args)
+                : VideoPlayerScreen(args: args);
+          },
         );
     }
     return null;

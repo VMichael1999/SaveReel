@@ -20,6 +20,18 @@ class DirHelper {
     await Gal.putVideo(videoPath, album: _albumName);
   }
 
+  static Future<void> saveImageToGallery(String imagePath) async {
+    await Gal.putImage(imagePath, album: _albumName);
+  }
+
+  /// Guarda una foto o un video en la galería según su extensión.
+  static Future<void> saveMediaToGallery(String path) {
+    final lower = path.toLowerCase();
+    return lower.endsWith('.mp4') || lower.endsWith('.mov')
+        ? saveVideoToGallery(path)
+        : saveImageToGallery(path);
+  }
+
   static Future<void> removeFileFromDownloadsDir(String videoPath) async {
     await File(videoPath).delete();
   }

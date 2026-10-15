@@ -68,7 +68,10 @@ class _RecentThumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: AppStrings.libraryTile(video.title),
+      label: AppStrings.libraryTile(
+        video.title,
+        pieces: video.isGallery ? video.files.length : null,
+      ),
       excludeSemantics: true,
       child: GestureDetector(
         onTap:
@@ -80,7 +83,7 @@ class _RecentThumb extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.md),
           child: AspectRatio(
             aspectRatio: 9 / 16,
-            child: LibraryThumbnail(path: video.path),
+            child: LibraryThumbnail(path: video.coverPath),
           ),
         ),
       ),

@@ -53,7 +53,7 @@ class LibraryCubit extends Cubit<LibraryState> {
   Future<void> _fillMissingDurations(int generation) async {
     final missing =
         state.videos
-            .where((v) => v.durationSeconds == null)
+            .where((v) => v.durationSeconds == null && !v.isGallery)
             .map((v) => v.path)
             .toList();
     for (final path in missing) {

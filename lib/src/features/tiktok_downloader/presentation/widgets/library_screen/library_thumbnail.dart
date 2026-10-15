@@ -16,6 +16,7 @@ VideoPlayerArgs videoPlayerArgsFor(BuildContext context, SavedVideo video) {
     title: video.title,
     authorHandle: video.authorHandle,
     inGallery: context.read<DownloaderBloc>().isInGallery(video.path),
+    files: video.files,
   );
 }
 
