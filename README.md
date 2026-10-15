@@ -47,7 +47,7 @@ Todavía **no está publicada** en las tiendas.
 | Descargas de Instagram (reels, `/p/` e IGTV) | Hecho; usa la página pública de inserción, una fuente no oficial |
 | Slideshows de TikTok y carruseles o fotos de Instagram | Hecho con pruebas; **el formato de las fuentes está supuesto y falta verificarlo con publicaciones reales** |
 | Compartir desde otras apps (extensión en iOS, intent en Android) | Hecho |
-| Biblioteca con filtros por red, tipo y audio | Hecho |
+| Biblioteca con filtros por red, tipo y audio, búsqueda, orden y selección múltiple | Hecho con pruebas |
 | Descarga en segundo plano | **Android:** servicio en primer plano con notificación de progreso, probado en emulador. **iOS:** tiempo extra y reanudación automática al volver, sin verificar en un iPhone real |
 | Reanudar descargas cortadas y cuidar los datos móviles | Hecho con pruebas; la detección de la red usa código nativo y no se probó en un teléfono con datos móviles |
 | Servidor propio que reemplace a los servicios de terceros | Pendiente |
@@ -141,6 +141,18 @@ inserción de Instagram, que no pide clave ni sesión. Es una fuente no oficial:
 funcionar si Instagram la cambia. Como respaldo se puede apuntar a una instancia de
 [Cobalt](https://github.com/imputnet/cobalt) con `--dart-define=COBALT_URL=https://…` (y
 `--dart-define=COBALT_KEY=…` si pide clave). Solo funciona con contenido público.
+
+### Buscar, ordenar y seleccionar en la biblioteca
+
+- **Buscar:** la lupa filtra por título o autor mientras se escribe, sin distinguir mayúsculas ni
+  tildes («cancion» encuentra «Canción») y exigiendo todas las palabras. Se combina con los
+  filtros de tipo y de red.
+- **Ordenar:** más nuevos (por omisión), más antiguos, más pesados o por título; los que no
+  tienen título van al final.
+- **Seleccionar varios:** el botón de la barra, o *mantener pulsada una miniatura → Seleccionar*,
+  activa el modo selección. Tocar marca o desmarca; la barra de abajo comparte, copia a la
+  galería o elimina (con confirmación) todo lo elegido. Las galerías aportan todas sus piezas, y
+  el botón atrás sale de la selección sin cerrar la pantalla.
 
 ### Fotos, slideshows y carruseles
 
