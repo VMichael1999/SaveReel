@@ -7,7 +7,9 @@ import '../../../../core/utils/app_enums.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_message.dart';
+import '../../../../localization/app_texts.dart';
 import '../bloc/library_cubit/library_cubit.dart';
+import '../bloc/locale_cubit/locale_cubit.dart';
 import '../bloc/settings_cubit/settings_cubit.dart';
 import '../models/app_settings.dart';
 import '../models/download_format.dart';
@@ -43,45 +45,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     showAppMessage(
       context,
-      msg: AppStrings.settingsCacheCleared,
+      msg: context.strings.settingsCacheCleared,
       type: MessageType.info,
     );
   }
 
   String _formatName(DownloadFormat format) => switch (format) {
-    DownloadFormat.withCredits => AppStrings.settingsFormatValueCredits,
-    DownloadFormat.noWatermark => AppStrings.settingsFormatValueNoWatermark,
-    DownloadFormat.audio => AppStrings.settingsFormatValueAudio,
-    DownloadFormat.gallery => AppStrings.settingsFormatValueCredits,
+    DownloadFormat.withCredits => context.strings.settingsFormatValueCredits,
+    DownloadFormat.noWatermark =>
+      context.strings.settingsFormatValueNoWatermark,
+    DownloadFormat.audio => context.strings.settingsFormatValueAudio,
+    DownloadFormat.gallery => context.strings.settingsFormatValueCredits,
   };
 
   String _mobileDataName(MobileDataPolicy policy) => switch (policy) {
-    MobileDataPolicy.ask => AppStrings.settingsMobileDataAskShort,
-    MobileDataPolicy.allow => AppStrings.settingsMobileDataAllowShort,
-    MobileDataPolicy.wifiOnly => AppStrings.settingsMobileDataWifiOnlyShort,
+    MobileDataPolicy.ask => context.strings.settingsMobileDataAskShort,
+    MobileDataPolicy.allow => context.strings.settingsMobileDataAllowShort,
+    MobileDataPolicy.wifiOnly =>
+      context.strings.settingsMobileDataWifiOnlyShort,
   };
 
   Future<void> _pickMobileData(AppSettings settings) async {
     final cubit = context.read<SettingsCubit>();
     final chosen = await showChoiceSheet<MobileDataPolicy>(
       context,
-      title: AppStrings.settingsMobileData,
+      title: context.strings.settingsMobileData,
       selected: settings.mobileData,
-      options: const [
+      options: [
         ChoiceOption(
           value: MobileDataPolicy.ask,
-          title: AppStrings.settingsMobileDataAsk,
-          subtitle: AppStrings.settingsMobileDataAskHint,
+          title: context.strings.settingsMobileDataAsk,
+          subtitle: context.strings.settingsMobileDataAskHint,
         ),
         ChoiceOption(
           value: MobileDataPolicy.wifiOnly,
-          title: AppStrings.settingsMobileDataWifiOnly,
-          subtitle: AppStrings.settingsMobileDataWifiOnlyHint,
+          title: context.strings.settingsMobileDataWifiOnly,
+          subtitle: context.strings.settingsMobileDataWifiOnlyHint,
         ),
         ChoiceOption(
           value: MobileDataPolicy.allow,
-          title: AppStrings.settingsMobileDataAllow,
-          subtitle: AppStrings.settingsMobileDataAllowHint,
+          title: context.strings.settingsMobileDataAllow,
+          subtitle: context.strings.settingsMobileDataAllowHint,
         ),
       ],
     );
@@ -89,52 +93,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   String _themeName(AppThemeChoice theme) => switch (theme) {
-    AppThemeChoice.system => AppStrings.themeSystem,
-    AppThemeChoice.light => AppStrings.themeLight,
-    AppThemeChoice.dark => AppStrings.themeDark,
+    AppThemeChoice.system => context.strings.themeSystem,
+    AppThemeChoice.light => context.strings.themeLight,
+    AppThemeChoice.dark => context.strings.themeDark,
   };
 
   Future<void> _pickFormat(AppSettings settings) async {
     final cubit = context.read<SettingsCubit>();
     final chosen = await showChoiceSheet<DownloadFormat>(
       context,
-      title: AppStrings.settingsFormat,
+      title: context.strings.settingsFormat,
       selected: settings.defaultFormat,
-      options: const [
+      options: [
         ChoiceOption(
           value: DownloadFormat.withCredits,
-          title: AppStrings.formatWithCredits,
-          subtitle: AppStrings.settingsFormatHintCredits,
+          title: context.strings.formatWithCredits,
+          subtitle: context.strings.settingsFormatHintCredits,
         ),
         ChoiceOption(
           value: DownloadFormat.noWatermark,
-          title: AppStrings.formatNoWatermark,
-          subtitle: AppStrings.formatNoWatermarkHint,
+          title: context.strings.formatNoWatermark,
+          subtitle: context.strings.formatNoWatermarkHint,
         ),
         ChoiceOption(
           value: DownloadFormat.audio,
-          title: AppStrings.formatAudio,
-          subtitle: AppStrings.formatAudioHint,
+          title: context.strings.formatAudio,
+          subtitle: context.strings.formatAudioHint,
         ),
       ],
     );
     if (chosen != null) await cubit.setDefaultFormat(chosen);
   }
 
+  Future<void> _pickLanguage() async {
+    final cubit = context.read<LocaleCubit>();
+    final chosen = await showChoiceSheet<String>(
+      context,
+      title: context.strings.settingsLanguage,
+      selected: cubit.state.languageCode,
+      options: [
+        for (final code in AppLanguages.codes)
+          ChoiceOption(value: code, title: AppLanguages.names[code]!),
+      ],
+    );
+    if (chosen != null) await cubit.setLanguage(chosen);
+  }
+
   Future<void> _pickTheme(AppSettings settings) async {
     final cubit = context.read<SettingsCubit>();
     final chosen = await showChoiceSheet<AppThemeChoice>(
       context,
-      title: AppStrings.settingsTheme,
+      title: context.strings.settingsTheme,
       selected: settings.theme,
-      options: const [
+      options: [
         ChoiceOption(
           value: AppThemeChoice.system,
-          title: AppStrings.themeSystem,
-          subtitle: AppStrings.themeSystemHint,
+          title: context.strings.themeSystem,
+          subtitle: context.strings.themeSystemHint,
         ),
-        ChoiceOption(value: AppThemeChoice.light, title: AppStrings.themeLight),
-        ChoiceOption(value: AppThemeChoice.dark, title: AppStrings.themeDark),
+        ChoiceOption(
+          value: AppThemeChoice.light,
+          title: context.strings.themeLight,
+        ),
+        ChoiceOption(
+          value: AppThemeChoice.dark,
+          title: context.strings.themeDark,
+        ),
       ],
     );
     if (chosen != null) await cubit.setTheme(chosen);
@@ -148,7 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final cache = _cacheBytes;
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.settingsTitle)),
+      appBar: AppBar(title: Text(context.strings.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
@@ -158,18 +182,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         children: [
           SettingsGroup(
-            title: AppStrings.sectionOnDownload,
+            title: context.strings.sectionOnDownload,
             children: [
               SettingsRow(
                 icon: Icons.high_quality_outlined,
-                title: AppStrings.settingsFormat,
+                title: context.strings.settingsFormat,
                 value: _formatName(settings.defaultFormat),
                 showChevron: true,
                 onTap: () => _pickFormat(settings),
               ),
               SettingsRow(
                 icon: Icons.signal_cellular_alt_rounded,
-                title: AppStrings.settingsMobileData,
+                title: context.strings.settingsMobileData,
                 value: _mobileDataName(settings.mobileData),
                 showChevron: true,
                 onTap: () => _pickMobileData(settings),
@@ -186,11 +210,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: context.colors.muted,
                   ),
                   title: Text(
-                    AppStrings.settingsGallery,
+                    context.strings.settingsGallery,
                     style: theme.textTheme.bodyLarge,
                   ),
                   subtitle: Text(
-                    AppStrings.settingsGalleryHint,
+                    context.strings.settingsGalleryHint,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: context.colors.muted,
                     ),
@@ -206,11 +230,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           SettingsGroup(
-            title: AppStrings.sectionSpace,
+            title: context.strings.sectionSpace,
             children: [
               SettingsRow(
                 icon: Icons.storage_outlined,
-                title: AppStrings.settingsDownloads,
+                title: context.strings.settingsDownloads,
                 subtitle:
                     library.videos.length == 1
                         ? '1 archivo'
@@ -219,21 +243,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               SettingsRow(
                 icon: Icons.delete_outline_rounded,
-                title: AppStrings.settingsClearCache,
+                title: context.strings.settingsClearCache,
                 value: cache == null ? null : formatMegabytes(cache),
                 onTap: cache == 0 ? null : _clearCache,
               ),
             ],
           ),
           SettingsGroup(
-            title: AppStrings.sectionAppearance,
+            title: context.strings.sectionAppearance,
             children: [
               SettingsRow(
                 icon: Icons.brightness_6_outlined,
-                title: AppStrings.settingsTheme,
+                title: context.strings.settingsTheme,
                 value: _themeName(settings.theme),
                 showChevron: true,
                 onTap: () => _pickTheme(settings),
+              ),
+              SettingsRow(
+                icon: Icons.language,
+                title: context.strings.settingsLanguage,
+                value:
+                    AppLanguages.names[context
+                        .watch<LocaleCubit>()
+                        .state
+                        .languageCode],
+                showChevron: true,
+                onTap: _pickLanguage,
               ),
             ],
           ),
@@ -245,7 +280,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               0,
             ),
             child: Text(
-              AppStrings.legalNotice,
+              context.strings.legalNotice,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: context.colors.muted,
               ),

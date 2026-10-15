@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/locale_cubit/locale_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/app_settings.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/download_format.dart';
@@ -41,12 +42,14 @@ Future<_Opened> _open(
   final library = fakeLibraryCubit(repo);
   await library.load();
   final settings = fakeSettingsCubit(initial);
+  final locale = fakeLocaleCubit();
 
   await tester.pumpWidget(
     MultiBlocProvider(
       providers: [
         BlocProvider<LibraryCubit>.value(value: library),
         BlocProvider<SettingsCubit>.value(value: settings),
+        BlocProvider<LocaleCubit>.value(value: locale),
       ],
       child: MaterialApp(theme: AppTheme.dark, home: const SettingsScreen()),
     ),
@@ -89,13 +92,17 @@ void main() {
     expect(find.text('3.2 MB'), findsOneWidget);
   });
 
-  testWidgets('el aviso de que no está afiliada a TikTok ni a Instagram está a la vista', (
-    tester,
-  ) async {
-    await _open(tester);
+  testWidgets(
+    'el aviso de que no está afiliada a TikTok ni a Instagram está a la vista',
+    (tester) async {
+      await _open(tester);
 
-    expect(find.textContaining('no está afiliada a TikTok ni a Instagram'), findsOneWidget);
-  });
+      expect(
+        find.textContaining('no está afiliada a TikTok ni a Instagram'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('apagar «Guardar en la Galería» se aplica y se guarda', (
     tester,
