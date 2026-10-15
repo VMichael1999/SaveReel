@@ -48,6 +48,7 @@ Todavía **no está publicada** en las tiendas.
 | Slideshows de TikTok y carruseles o fotos de Instagram | Hecho con pruebas; **el formato de las fuentes está supuesto y falta verificarlo con publicaciones reales** |
 | Compartir desde otras apps (extensión en iOS, intent en Android) | Hecho |
 | Biblioteca con filtros por red, tipo y audio | Hecho |
+| Atajos del sistema: «Guardar enlace copiado» | Android: atajo del ícono y mosaico de Ajustes rápidos, probados en emulador. iOS: acción de Atajos y Siri, probada solo en simulador (compila y se registra); falta verla en un iPhone real |
 | Descarga en segundo plano | **Android:** servicio en primer plano con notificación de progreso, probado en emulador. **iOS:** tiempo extra y reanudación automática al volver, sin verificar en un iPhone real |
 | Reanudar descargas cortadas y cuidar los datos móviles | Hecho con pruebas; la detección de la red usa código nativo y no se probó en un teléfono con datos móviles |
 | Servidor propio que reemplace a los servicios de terceros | Pendiente |
@@ -141,6 +142,25 @@ inserción de Instagram, que no pide clave ni sesión. Es una fuente no oficial:
 funcionar si Instagram la cambia. Como respaldo se puede apuntar a una instancia de
 [Cobalt](https://github.com/imputnet/cobalt) con `--dart-define=COBALT_URL=https://…` (y
 `--dart-define=COBALT_KEY=…` si pide clave). Solo funciona con contenido público.
+
+### Atajos del sistema
+
+Todos abren `savetic://clipboard`: la app lee el portapapeles, saca el enlace de TikTok o de
+Instagram que haya dentro (aunque venga con más texto), lo busca y muestra los formatos, igual
+que al compartir. Si no hay ningún enlace copiado, lo explica en lugar de abrirse sin decir nada.
+
+- **Android:** al mantener pulsado el ícono aparece *Guardar el enlace copiado*
+  (`res/xml/shortcuts.xml`). Además hay un mosaico para los Ajustes rápidos, *Guardar enlace*
+  (`SaveLinkTileService`); el usuario lo agrega desde el editor de Ajustes rápidos.
+- **iPhone:** la acción *Guardar enlace copiado* (`ios/Runner/SaveLinkIntent.swift`, App Intents,
+  iOS 16 o más) aparece sola en la app Atajos y se puede usar por voz con frases como «Guardar
+  enlace copiado en SaveReel». iOS pide permiso de pegado la primera vez que la app lee el
+  portapapeles. Las frases de Siri están en español.
+- En Android 10 o más el portapapeles solo se puede leer con la app en primer plano, por eso la
+  lectura reintenta unos instantes hasta que la app tiene el foco.
+- Flutter toma por defecto la dirección de un enlace como ruta de pantalla (`/clipboard`), que la
+  app no conoce; por eso `flutter_deeplinking_enabled` está apagado en el manifiesto y las rutas
+  desconocidas vuelven al arranque.
 
 ### Fotos, slideshows y carruseles
 
