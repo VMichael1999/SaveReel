@@ -153,6 +153,18 @@ Future<void> _settle(WidgetTester tester) async {
   }
 }
 
+/// Como [_settle], pero sigue esperando (hasta unos 10 s) a que se cumpla
+/// [done]: el disco de un runner de CI puede tardar mucho más que el de un
+/// Mac, y una espera fija deja la prueba a merced de la velocidad.
+Future<void> _settleUntil(WidgetTester tester, bool Function() done) async {
+  for (var i = 0; i < 200 && !done(); i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+  }
+}
+
 const _reel = TikTokVideo(
   code: 0,
   msg: 'success',
@@ -248,7 +260,7 @@ void main() {
 
     await tester.tap(find.text('Descargar 3 fotos'));
     await tester.pump();
-    await _settle(tester);
+    await _settleUntil(tester, () => repo.saved.length >= 3);
 
     expect(repo.saved, [
       'https://ejemplo.pe/1.jpg',
