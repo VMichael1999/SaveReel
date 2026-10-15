@@ -39,7 +39,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     required this.saveVideoUseCase,
     required this.getFileSizeUseCase,
     this.shouldSaveToGallery = _always,
-    this.gallerySaver = DirHelper.saveVideoToGallery,
+    this.gallerySaver = DirHelper.saveMediaToGallery,
   }) : super(DownloaderInitial()) {
     on<DownloaderGetVideo>(_getVideo);
     on<DownloaderSaveVideo>(_saveVideo);
@@ -102,6 +102,9 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     final videoData = event.tikTokVideo.videoData!;
     final format = event.format;
     final path = await _getPathFor(videoData.id, format);
+    if (format == DownloadFormat.gallery) {
+      return _saveGallery(event, emit, folder: path);
+    }
     final link =
         format.isAudio || videoData.network != VideoNetwork.tiktok
             ? format.urlOf(videoData)
@@ -184,6 +187,110 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     );
   }
 
+  /// Baja las piezas de un slideshow o carrusel una tras otra en una carpeta,
+  /// con un solo avance general: cada pieza aporta una parte igual.
+  Future<void> _saveGallery(
+    DownloaderSaveVideo event,
+    Emitter<DownloaderState> emit, {
+    required String folder,
+  }) async {
+    final items = event.tikTokVideo.videoData!.gallery;
+    final signal = CancelSignal();
+    _signals[folder] = signal;
+    _formats[folder] = DownloadFormat.gallery;
+    _upsert(
+      DownloadItem(
+        video: event.tikTokVideo,
+        status: DownloadStatus.downloading,
+        path: folder,
+        startedAt: DateTime.now(),
+        totalBytes: items.length * _milli,
+        unitsTotal: items.length,
+      ),
+    );
+    emit(const DownloaderSaveVideoLoading());
+    await Directory(folder).create(recursive: true);
+
+    final files = <String>[];
+    Failure? failure;
+    for (var i = 0; i < items.length; i++) {
+      final number = (i + 1).toString().padLeft(2, '0');
+      final file = '$folder/$number.${items[i].extension}';
+      var lastPermille = -1;
+      final result = await saveVideoUseCase(
+        SaveVideoParams(
+          savePath: file,
+          videoLink: items[i].url,
+          cancelSignal: signal,
+          onProgress: (received, total) {
+            final inside = total > 0 ? received * _milli ~/ total : 0;
+            final permille = i * _milli + inside;
+            if (permille == lastPermille) return;
+            lastPermille = permille;
+            _update(
+              folder,
+              (item) => item.copyWith(receivedBytes: permille, unitsDone: i),
+            );
+            emit(
+              DownloaderSaveVideoProgress(
+                path: folder,
+                receivedBytes: permille,
+                totalBytes: items.length * _milli,
+              ),
+            );
+          },
+        ),
+      );
+      failure = result.fold((f) => f, (_) => null);
+      if (failure != null) break;
+      files.add(file);
+      _update(
+        folder,
+        (item) =>
+            item.copyWith(receivedBytes: (i + 1) * _milli, unitsDone: i + 1),
+      );
+    }
+
+    _signals.remove(folder);
+    if (failure is CancelRequestFailure) {
+      await _discard(folder);
+      emit(DownloaderSaveVideoCancelled(folder));
+      return;
+    }
+    if (failure != null) {
+      final message = failure.message;
+      _update(
+        folder,
+        (item) => item.copyWith(
+          status: DownloadStatus.error,
+          failureMessage: message,
+        ),
+      );
+      emit(DownloaderSaveVideoFailure(message));
+      return;
+    }
+    _update(
+      folder,
+      (item) => item.copyWith(
+        status: DownloadStatus.success,
+        receivedBytes: item.totalBytes,
+        unitsDone: item.unitsTotal,
+        clearFailure: true,
+      ),
+    );
+    if (shouldSaveToGallery()) {
+      var all = true;
+      for (final file in files) {
+        all = await _saveToGallery(file) && all;
+      }
+      if (all) _inGallery.add(folder);
+    }
+    emit(DownloaderSaveVideoSuccess(message: '', path: folder));
+  }
+
+  /// Las piezas de una galería avanzan en milésimas para poder promediar.
+  static const int _milli = 1000;
+
   void _cancelVideo(
     DownloaderCancelVideo event,
     Emitter<DownloaderState> emit,
@@ -216,6 +323,11 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     newDownloads.removeWhere((d) => d.path == path);
     _formats.remove(path);
     try {
+      final folder = Directory(path);
+      if (await folder.exists()) {
+        await folder.delete(recursive: true);
+        return;
+      }
       final file = File(path);
       if (await file.exists()) await file.delete();
     } catch (_) {}
