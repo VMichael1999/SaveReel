@@ -1,3 +1,5 @@
+import '../../core/helpers/language_store.dart';
+import 'presentation/bloc/locale_cubit/locale_cubit.dart';
 import 'package:dio/dio.dart';
 
 import '../../container_injector.dart';
@@ -93,6 +95,9 @@ void initDownloader() {
   sl.registerLazySingleton(() => SettingsStore());
   sl.registerLazySingleton(() => SettingsCubit(store: sl()));
   // primer uso
+  sl.registerLazySingleton(() => LanguageStore());
+  sl.registerLazySingleton(() => LocaleCubit(store: sl()));
+
   sl.registerLazySingleton(() => OnboardingStore());
   sl.registerLazySingleton(() => FirstUseCubit(store: sl()));
   // downloader bloc
