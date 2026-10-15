@@ -12,6 +12,7 @@ import 'features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit
 import 'features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import 'features/tiktok_downloader/presentation/models/app_settings.dart';
+import 'features/tiktok_downloader/presentation/widgets/app_lifecycle_bridge.dart';
 
 /// En depuración, `--dart-define=CATALOG=true` abre el catálogo de componentes.
 const bool _showCatalog = kDebugMode && bool.fromEnvironment('CATALOG');
@@ -36,18 +37,20 @@ class MyApp extends StatelessWidget {
         listener: _goHomeForSharedLink,
         child: BlocListener<DownloaderBloc, DownloaderState>(
           listener: _syncLibrary,
-          child: BlocBuilder<SettingsCubit, AppSettings>(
-            buildWhen: (a, b) => a.theme != b.theme,
-            builder:
-                (context, settings) => MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
-                  onGenerateRoute: AppRouter.getRoute,
-                  theme: AppTheme.light,
-                  darkTheme: AppTheme.dark,
-                  themeMode: settings.theme.themeMode,
-                  navigatorKey: _navigatorKey,
-                ),
+          child: AppLifecycleBridge(
+            child: BlocBuilder<SettingsCubit, AppSettings>(
+              buildWhen: (a, b) => a.theme != b.theme,
+              builder:
+                  (context, settings) => MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
+                    onGenerateRoute: AppRouter.getRoute,
+                    theme: AppTheme.light,
+                    darkTheme: AppTheme.dark,
+                    themeMode: settings.theme.themeMode,
+                    navigatorKey: _navigatorKey,
+                  ),
+            ),
           ),
         ),
       ),
