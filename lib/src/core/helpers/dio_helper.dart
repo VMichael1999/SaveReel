@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../container_injector.dart';
 import '../api/interceptors.dart';
 import '../utils/app_constants.dart';
+import 'resumable_download.dart';
 
 const String _apiKey = String.fromEnvironment('RAPIDAPI_KEY');
 const String _apiHost = String.fromEnvironment(
@@ -53,17 +54,20 @@ class DioHelper {
     );
   }
 
-  Future<Response> download({
+  late final ResumableDownload _resumable = ResumableDownload(_fileDio);
+
+  /// Baja [downloadLink] a [savePath]. Si un intento anterior se cortó,
+  /// continúa desde donde quedó (ver [ResumableDownload]).
+  Future<void> download({
     required String downloadLink,
     required String savePath,
-    Map<String, dynamic>? queryParams,
     ProgressCallback? onReceiveProgress,
     CancelToken? cancelToken,
-  }) async {
-    return await _fileDio.download(
-      downloadLink,
-      savePath,
-      onReceiveProgress: onReceiveProgress,
+  }) {
+    return _resumable.run(
+      url: downloadLink,
+      savePath: savePath,
+      onProgress: onReceiveProgress,
       cancelToken: cancelToken,
     );
   }
