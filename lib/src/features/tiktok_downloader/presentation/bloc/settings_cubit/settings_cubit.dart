@@ -24,6 +24,9 @@ class SettingsCubit extends Cubit<AppSettings> {
   Future<void> setTheme(AppThemeChoice theme) =>
       _apply(state.copyWith(theme: theme));
 
+  Future<void> setMobileData(MobileDataPolicy policy) =>
+      _apply(state.copyWith(mobileData: policy));
+
   Future<void> _apply(AppSettings next) async {
     emit(next);
     await store.write(next.toJson());

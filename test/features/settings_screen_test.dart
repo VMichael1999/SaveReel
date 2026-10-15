@@ -23,7 +23,7 @@ Future<_Opened> _open(
   AppSettings initial = const AppSettings(),
   int cacheBytes = 3355443, // 3.2 MB
 }) async {
-  tester.view.physicalSize = const Size(1080, 2400);
+  tester.view.physicalSize = const Size(1080, 3200);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
 
@@ -126,6 +126,34 @@ void main() {
 
     expect(opened.settings.state.defaultFormat, DownloadFormat.audio);
     expect(find.text('Solo audio'), findsOneWidget);
+  });
+
+  testWidgets('los datos móviles preguntan si pesa mucho por omisión', (
+    tester,
+  ) async {
+    await _open(tester);
+
+    expect(find.text('Datos móviles'), findsOneWidget);
+    expect(find.text('Preguntar'), findsOneWidget);
+  });
+
+  testWidgets('elegir «Solo con Wi-Fi» cambia la política y se muestra', (
+    tester,
+  ) async {
+    final opened = await _open(tester);
+
+    await tester.tap(find.text('Datos móviles'));
+    await _settle(tester);
+    expect(
+      find.text('Con datos móviles te pregunta antes de cada descarga'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Solo con Wi-Fi'));
+    await _settle(tester);
+
+    expect(opened.settings.state.mobileData, MobileDataPolicy.wifiOnly);
+    expect(find.text('Solo Wi-Fi'), findsOneWidget);
   });
 
   testWidgets('elegir el tema lo cambia y la hoja se cierra', (tester) async {
