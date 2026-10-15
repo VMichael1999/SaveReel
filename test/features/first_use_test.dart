@@ -128,7 +128,7 @@ void main() {
       await _pump(tester);
 
       expect(find.text('Guarda cualquier video en 3 pasos'), findsOneWidget);
-      expect(find.text('En TikTok, toca Compartir'), findsOneWidget);
+      expect(find.text('En TikTok o Instagram, toca Compartir'), findsOneWidget);
       expect(find.text('Elige «Copiar enlace»'), findsOneWidget);
       expect(find.text('Vuelve aquí'), findsOneWidget);
       expect(find.textContaining('álbum "SaveReel"'), findsOneWidget);

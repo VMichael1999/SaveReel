@@ -121,8 +121,8 @@ class AppStrings {
 
   // Primer uso
   static const String firstUseTitle = "Guarda cualquier video en 3 pasos";
-  static const String step1Title = "En TikTok, toca Compartir";
-  static const String step1Body = "Es la flecha en el lado derecho del video.";
+  static const String step1Title = "En TikTok o Instagram, toca Compartir";
+  static const String step1Body = "Es la flecha o el avioncito junto al video.";
   static const String step2Title = "Elige «Copiar enlace»";
   static const String step2Body = "Aparece en la fila de opciones que se abre.";
   static const String step3Title = "Vuelve aquí";
