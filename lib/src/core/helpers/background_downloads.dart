@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 
+import '../utils/app_strings.dart';
+
 /// Lo que se muestra mientras hay descargas en curso: cuántas son, qué título
 /// poner y cuánto llevan (nulo si no se sabe).
 class BackgroundSnapshot extends Equatable {
@@ -58,16 +60,26 @@ class PlatformBackgroundDownloads implements BackgroundDownloads {
 
   static const MethodChannel _channel = MethodChannel('savetic/background');
 
+  /// Los textos los pone Dart, para que el código nativo no lleve ninguno y
+  /// se traduzcan con el resto de la app.
   @override
   Future<void> sync(BackgroundSnapshot snapshot) => _call('sync', {
     'count': snapshot.count,
-    'title': snapshot.title,
+    'heading':
+        snapshot.count > 1
+            ? AppStrings.downloadsCount(snapshot.count)
+            : AppStrings.downloadingNow,
+    'detail': snapshot.count > 1 ? '' : snapshot.title,
     'percent': snapshot.percent,
   });
 
   @override
   Future<void> notifyFinished({required String title, required bool success}) =>
-      _call('finished', {'title': title, 'success': success});
+      _call('finished', {
+        'heading': success ? AppStrings.downloadReady : AppStrings.downloadFall,
+        'detail': title,
+        'success': success,
+      });
 
   Future<void> _call(String method, Map<String, Object?> arguments) async {
     try {

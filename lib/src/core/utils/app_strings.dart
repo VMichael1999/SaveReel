@@ -6,6 +6,7 @@ class AppStrings {
   static const String downloading = "Descargando";
   static const String downloads = "Descargas";
   static String downloadsCount(int n) => "$n descargas";
+  static const String downloadReady = "Descarga lista";
   static const String downloadSuccess = "Descarga exitosa";
   static const String play = "Reproducir";
   static const String downloadFall = "Error en la descarga";
