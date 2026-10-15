@@ -110,6 +110,82 @@ void main() {
     },
   );
 
+  Future<Directory> gallery(String name, List<String> files) async {
+    final folder = await Directory('${dir.path}/$name').create();
+    for (final file in files) {
+      await File('${folder.path}/$file').writeAsString('xx');
+    }
+    return folder;
+  }
+
+  test(
+    'una carpeta de galería se lista como un solo elemento ordenado',
+    () async {
+      final folder = await gallery('C9z', [
+        '03.webp',
+        '01.jpg',
+        '02.mp4',
+        'x.txt',
+      ]);
+      await source.record(
+        SavedVideoMetadata(
+          path: folder.path,
+          title: 'Viaje',
+          authorHandle: 'viajes.peru',
+          network: VideoNetwork.instagram,
+        ),
+      );
+      await touch('suelto.mp4');
+
+      final videos = {for (final v in await source.list()) v.path: v};
+      final item = videos[folder.path]!;
+
+      expect(item.isGallery, isTrue);
+      expect(item.files.map((f) => f.split('/').last), [
+        '01.jpg',
+        '02.mp4',
+        '03.webp',
+      ]);
+      expect(item.sizeBytes, 6); // tres piezas de 2 bytes; x.txt no cuenta
+      expect(item.title, 'Viaje');
+      expect(item.authorHandle, 'viajes.peru');
+      expect(item.source, VideoNetwork.instagram);
+      expect(item.isAudio, isFalse);
+      expect(videos.length, 2); // la galería y el video suelto
+      expect(
+        videos[(await File('${dir.path}/suelto.mp4').resolveSymbolicLinks())],
+        isNull,
+      );
+    },
+  );
+
+  test('una carpeta sin fotos ni videos no aparece', () async {
+    await gallery('vacia', ['notas.txt']);
+    await Directory('${dir.path}/otra').create();
+
+    expect(await source.list(), isEmpty);
+  });
+
+  test('olvidar una galería borra su archivo de datos', () async {
+    final folder = await gallery('C9z', ['01.jpg']);
+    await source.record(SavedVideoMetadata(path: folder.path, title: 'x'));
+    expect(File('${folder.path}.json').existsSync(), isTrue);
+
+    await source.forget(folder.path);
+
+    expect(File('${folder.path}.json').existsSync(), isFalse);
+  });
+
+  test('la portada de una foto es la foto misma', () async {
+    final real = SavedVideosLocalDataSource(
+      rootPath: () async => dir.path,
+      cacheDirectory: () async => cache,
+    );
+    expect(await real.thumbnailFor('/x/01.jpg'), '/x/01.jpg');
+    expect(await real.thumbnailFor('/x/02.webp'), '/x/02.webp');
+    expect(await real.thumbnailFor('/x/musica.mp3'), isNull);
+  });
+
   test('un archivo de datos dañado no esconde el video', () async {
     final file = await touch('v.mp4');
     await File('${file.path}.json').writeAsString('{no es json');
