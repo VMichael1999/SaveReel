@@ -10,10 +10,14 @@ import 'features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_
 import 'features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
+import 'features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import 'features/tiktok_downloader/presentation/models/app_settings.dart';
 
 /// En depuración, `--dart-define=CATALOG=true` abre el catálogo de componentes.
 const bool _showCatalog = kDebugMode && bool.fromEnvironment('CATALOG');
+
+/// Para volver a Inicio cuando llega un enlace desde «Compartir».
+final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -26,22 +30,36 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => sl<LibraryCubit>()..load()),
         BlocProvider(create: (context) => sl<FirstUseCubit>()..load()),
         BlocProvider(create: (context) => sl<SettingsCubit>()..load()),
+        BlocProvider(create: (context) => sl<SharedLinkCubit>()..start()),
       ],
-      child: BlocListener<DownloaderBloc, DownloaderState>(
-        listener: _syncLibrary,
-        child: BlocBuilder<SettingsCubit, AppSettings>(
-          buildWhen: (a, b) => a.theme != b.theme,
-          builder:
-              (context, settings) => MaterialApp(
-                debugShowCheckedModeBanner: false,
-                initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
-                onGenerateRoute: AppRouter.getRoute,
-                theme: AppTheme.light,
-                darkTheme: AppTheme.dark,
-                themeMode: settings.theme.themeMode,
-              ),
+      child: BlocListener<SharedLinkCubit, SharedLinkState>(
+        listener: _goHomeForSharedLink,
+        child: BlocListener<DownloaderBloc, DownloaderState>(
+          listener: _syncLibrary,
+          child: BlocBuilder<SettingsCubit, AppSettings>(
+            buildWhen: (a, b) => a.theme != b.theme,
+            builder:
+                (context, settings) => MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  initialRoute: _showCatalog ? Routes.catalog : Routes.splash,
+                  onGenerateRoute: AppRouter.getRoute,
+                  theme: AppTheme.light,
+                  darkTheme: AppTheme.dark,
+                  themeMode: settings.theme.themeMode,
+                  navigatorKey: _navigatorKey,
+                ),
+          ),
         ),
       ),
+    );
+  }
+
+  /// Si llega un enlace con la app en otra pantalla, vuelve al inicio, donde
+  /// el enlace se pone solo y se busca el video.
+  void _goHomeForSharedLink(BuildContext context, SharedLinkState state) {
+    if (state.pending == null) return;
+    _navigatorKey.currentState?.popUntil(
+      (route) => route.isFirst || route.settings.name == Routes.downloader,
     );
   }
 

@@ -19,6 +19,21 @@ herramienta llama a `lipo -verify_arch` con una sintaxis que ese Xcode ya no ace
 
 Por omisión consulta el servicio público de [tikwm.com](https://www.tikwm.com), que no pide clave.
 
+## Recibir enlaces desde «Compartir»
+
+SaveTic aparece en la hoja de Compartir de las demás apps (por ejemplo TikTok). Al
+elegirla, la app se abre con el enlace ya puesto, busca el video y muestra los formatos.
+
+- **Android:** `MainActivity.kt` recibe el texto compartido (`ACTION_SEND`) y se lo pasa a
+  Flutter por el canal `savetic/share`. Se prueba con
+  `adb shell am start -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT "https://vm.tiktok.com/ZMh7K2pQx/" -n com.michaeldevtool.savetic/.MainActivity`.
+- **iPhone:** la extensión `ios/ShareExtension` recibe el enlace y abre `savetic://share?text=…`.
+  No usa grupos de app, así que funciona con una cuenta de desarrollo gratuita. Para correr
+  en un iPhone real hay que elegir tu equipo de desarrollo (Signing & Capabilities) tanto en
+  `Runner` como en `ShareExtension`.
+- En la app de TikTok, el menú propio de Compartir no lista SaveTic: hay que tocar «Más» o
+  «…» para abrir la hoja del sistema, donde sí aparece.
+
 ## Servicio de descargas
 
 La URL del servicio se cambia al compilar, sin tocar el código:

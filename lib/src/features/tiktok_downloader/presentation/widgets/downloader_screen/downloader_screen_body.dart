@@ -12,6 +12,7 @@ import '../../../../../core/widgets/motion.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
 import '../../bloc/first_use_cubit/first_use_cubit.dart';
 import '../../bloc/library_cubit/library_cubit.dart';
+import '../../bloc/shared_link_cubit/shared_link_cubit.dart';
 import '../video_preview/video_preview_sheet.dart';
 import '../video_preview/video_preview_skeleton.dart';
 import 'clipboard_link_card.dart';
@@ -61,6 +62,23 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       }
     });
     _checkClipboard();
+    // Si la app se abrió desde «Compartir», el enlace ya espera aquí.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _useSharedLink());
+  }
+
+  /// Pone el enlace compartido en el campo y busca el video, para que lo
+  /// siguiente que vea el usuario sea elegir el formato.
+  void _useSharedLink() {
+    if (!mounted) return;
+    final link = context.read<SharedLinkCubit>().consume();
+    if (link == null) return;
+    _controller.text = link;
+    setState(() {
+      _handledLink = link;
+      _clipboardLink = null;
+      _touched = true;
+    });
+    _search();
   }
 
   @override
@@ -85,7 +103,12 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final link = VideoLink.find(data?.text ?? '');
     if (!mounted || link == null) return;
-    if (link == _handledLink || link == _controller.text.trim()) return;
+    // El mismo video puede venir con y sin parámetros de seguimiento.
+    final clean = VideoLink.normalize(link);
+    if (clean == VideoLink.normalize(_handledLink ?? '') ||
+        clean == VideoLink.normalize(_controller.text)) {
+      return;
+    }
     setState(() => _clipboardLink = link);
   }
 
@@ -202,87 +225,91 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BlocConsumer<DownloaderBloc, DownloaderState>(
-      listener: _onBlocState,
-      builder: (context, state) {
-        if (_showFirstUse(context)) {
-          return FirstUseView(
-            onOpenTikTok: _openTikTok,
-            errorText: _firstUseError,
-            onHaveLink: () => context.read<FirstUseCubit>().dismiss(),
-          );
-        }
-        final searching = state is DownloaderGetVideoLoading;
-        final canSearch = _check.isValid && !searching;
-        final errorText = _errorText;
+    return BlocListener<SharedLinkCubit, SharedLinkState>(
+      listenWhen: (_, current) => current.pending != null,
+      listener: (_, __) => _useSharedLink(),
+      child: BlocConsumer<DownloaderBloc, DownloaderState>(
+        listener: _onBlocState,
+        builder: (context, state) {
+          if (_showFirstUse(context)) {
+            return FirstUseView(
+              onOpenTikTok: _openTikTok,
+              errorText: _firstUseError,
+              onHaveLink: () => context.read<FirstUseCubit>().dismiss(),
+            );
+          }
+          final searching = state is DownloaderGetVideoLoading;
+          final canSearch = _check.isValid && !searching;
+          final errorText = _errorText;
 
-        return SafeArea(
-          child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.sm,
-              AppSpacing.lg,
-              AppSpacing.xl,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  AppStrings.homeTitle,
-                  style: theme.textTheme.headlineMedium,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                if (_clipboardLink != null) ...[
-                  ClipboardLinkCard(
-                    link: _clipboardLink!,
-                    onUse: _useClipboardLink,
-                  ).enter(context),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
-                ListenableBuilder(
-                  listenable: _controller,
-                  builder:
-                      (context, _) => DownloaderBodyInputField(
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        errorText: errorText,
-                        onSubmit: _search,
-                        onPasted: () => setState(() => _touched = true),
-                      ),
-                ),
-                if (errorText != null &&
-                    _check.status == VideoLinkStatus.notTikTok) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  const ValidLinksHint().enter(context),
-                ],
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton.icon(
-                  onPressed: canSearch ? _search : null,
-                  icon:
-                      searching
-                          ? const SizedBox.square(
-                            dimension: AppSizes.loader,
-                            child: CircularProgressIndicator(
-                              strokeWidth: AppSizes.loaderStroke,
-                            ),
-                          )
-                          : const Icon(Icons.search_rounded),
-                  label: Text(
-                    searching ? AppStrings.searching : AppStrings.searchVideo,
+          return SafeArea(
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                AppSpacing.xl,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    AppStrings.homeTitle,
+                    style: theme.textTheme.headlineMedium,
                   ),
-                ),
-                if (searching) ...[
                   const SizedBox(height: AppSpacing.xl),
-                  const VideoPreviewSkeleton(),
+                  if (_clipboardLink != null) ...[
+                    ClipboardLinkCard(
+                      link: _clipboardLink!,
+                      onUse: _useClipboardLink,
+                    ).enter(context),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+                  ListenableBuilder(
+                    listenable: _controller,
+                    builder:
+                        (context, _) => DownloaderBodyInputField(
+                          controller: _controller,
+                          focusNode: _focusNode,
+                          errorText: errorText,
+                          onSubmit: _search,
+                          onPasted: () => setState(() => _touched = true),
+                        ),
+                  ),
+                  if (errorText != null &&
+                      _check.status == VideoLinkStatus.notTikTok) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    const ValidLinksHint().enter(context),
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  FilledButton.icon(
+                    onPressed: canSearch ? _search : null,
+                    icon:
+                        searching
+                            ? const SizedBox.square(
+                              dimension: AppSizes.loader,
+                              child: CircularProgressIndicator(
+                                strokeWidth: AppSizes.loaderStroke,
+                              ),
+                            )
+                            : const Icon(Icons.search_rounded),
+                    label: Text(
+                      searching ? AppStrings.searching : AppStrings.searchVideo,
+                    ),
+                  ),
+                  if (searching) ...[
+                    const SizedBox(height: AppSpacing.xl),
+                    const VideoPreviewSkeleton(),
+                  ],
+                  const SizedBox(height: AppSpacing.xl),
+                  const RecentDownloadsStrip(),
                 ],
-                const SizedBox(height: AppSpacing.xl),
-                const RecentDownloadsStrip(),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

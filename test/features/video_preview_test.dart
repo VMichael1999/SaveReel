@@ -11,6 +11,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_u
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/settings_cubit/settings_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/app_settings.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/download_format.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/shared_link_cubit/shared_link_cubit.dart';
 import '../support/fake_library.dart';
 import 'package:savetic/src/core/error/failure.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/cancel_signal.dart';
@@ -113,6 +114,7 @@ Future<_FakeRepo> _openPreview(
         providers: [
           BlocProvider<LibraryCubit>.value(value: fakeLibraryCubit()),
           BlocProvider<FirstUseCubit>.value(value: fakeFirstUseCubit()),
+          BlocProvider<SharedLinkCubit>.value(value: fakeSharedLinkCubit()),
           BlocProvider<SettingsCubit>.value(value: fakeSettingsCubit(settings)),
         ],
         child: MaterialApp(
