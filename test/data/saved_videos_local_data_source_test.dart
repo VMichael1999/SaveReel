@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:savetic/src/core/utils/video_link.dart';
 import 'package:savetic/src/features/tiktok_downloader/data/datasources/local/saved_videos_local_data_source.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 
@@ -76,6 +77,20 @@ void main() {
     expect(video.title, 'Lomo saltado');
     expect(video.authorHandle, 'cocinaconlucia');
     expect(video.durationSeconds, 34);
+  });
+
+  test('anota la red y los archivos sin dato cuentan como de TikTok', () async {
+    final reel = await touch('reel.mp4');
+    final viejo = await touch('viejo.mp4');
+    await source.record(
+      SavedVideoMetadata(path: reel.path, network: VideoNetwork.instagram),
+    );
+
+    final videos = {for (final v in await source.list()) v.path: v};
+
+    expect(videos[reel.path]!.network, VideoNetwork.instagram);
+    expect(videos[viejo.path]!.network, isNull);
+    expect(videos[viejo.path]!.source, VideoNetwork.tiktok);
   });
 
   test('un archivo de datos dañado no esconde el video', () async {

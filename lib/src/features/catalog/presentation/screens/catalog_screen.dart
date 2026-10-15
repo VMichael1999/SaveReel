@@ -114,7 +114,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
             children: [
               const SaveticMark(size: AppSizes.markLarge),
               const SizedBox(width: AppSpacing.lg),
-              Text('SaveTic', style: text.titleLarge),
+              Text('SaveReel', style: text.titleLarge),
             ],
           ),
           const _Section('Colores'),

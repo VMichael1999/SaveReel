@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/usecase/base_usecase.dart';
+import '../../../../../core/utils/video_link.dart';
 import '../../../domain/entities/saved_video.dart';
 import '../../../domain/usecases/clear_thumbnail_cache_usecase.dart';
 import '../../../domain/usecases/forget_saved_video_usecase.dart';

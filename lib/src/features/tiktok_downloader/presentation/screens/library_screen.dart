@@ -5,6 +5,7 @@ import '../../../../config/theme/app_tokens.dart';
 import '../../../../config/theme/savetic_colors.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/utils/video_link.dart';
 import '../../domain/entities/saved_video.dart';
 import '../bloc/library_cubit/library_cubit.dart';
 import '../widgets/downloads_screen/downloads_empty_state.dart';
@@ -32,6 +33,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     LibraryFilter.all => all,
     LibraryFilter.videos => all.where((v) => !v.isAudio).toList(),
     LibraryFilter.audio => all.where((v) => v.isAudio).toList(),
+    LibraryFilter.tiktok =>
+      all.where((v) => v.source == VideoNetwork.tiktok).toList(),
+    LibraryFilter.instagram =>
+      all.where((v) => v.source == VideoNetwork.instagram).toList(),
   };
 
   @override
@@ -78,7 +83,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         LibraryFilter.all: state.videos.length,
                         LibraryFilter.videos: state.videoCount,
                         LibraryFilter.audio: state.audioCount,
+                        LibraryFilter.tiktok: state.countOf(VideoNetwork.tiktok),
+                        LibraryFilter.instagram: state.countOf(
+                          VideoNetwork.instagram,
+                        ),
                       },
+                      filters: [
+                        LibraryFilter.all,
+                        LibraryFilter.videos,
+                        LibraryFilter.audio,
+                        if (state.countOf(VideoNetwork.tiktok) > 0 &&
+                            state.countOf(VideoNetwork.instagram) > 0) ...[
+                          LibraryFilter.tiktok,
+                          LibraryFilter.instagram,
+                        ],
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
                   ],

@@ -59,6 +59,7 @@ class FakeSavedVideosRepo implements SavedVideosBaseRepo {
         title: metadata.title,
         authorHandle: metadata.authorHandle,
         durationSeconds: metadata.durationSeconds,
+        network: metadata.network,
       ),
     );
     return const Right(unit);

@@ -39,7 +39,7 @@ abstract final class AppSizes {
   static const double loader = 24;
   static const double loaderStroke = 2.5;
 
-  /// Marca de SaveTic: en la barra, en el splash y en el catálogo.
+  /// Marca de SaveReel: en la barra, en el splash y en el catálogo.
   static const double markBar = 26;
   static const double markSplash = 88;
   static const double markLarge = 48;

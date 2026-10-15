@@ -4,7 +4,7 @@ import '../utils/video_link.dart';
 
 /// Glifo de cada red, dibujado aquí (no son los logos oficiales): una nota
 /// con el desfase cian y rosa para TikTok, y una cámara con el degradado de
-/// SaveTic para Instagram.
+/// SaveReel para Instagram.
 class NetworkMark extends StatelessWidget {
   const NetworkMark({super.key, required this.network, this.size = 24});
 

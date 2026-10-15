@@ -6,7 +6,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 /**
- * Recibe el texto que otra app comparte hacia SaveTic (por ejemplo el enlace de
+ * Recibe el texto que otra app comparte hacia SaveReel (por ejemplo el enlace de
  * un video desde «Compartir») y se lo pasa a Flutter por el canal `savetic/share`.
  */
 class MainActivity : FlutterActivity() {

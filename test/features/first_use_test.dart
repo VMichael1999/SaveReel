@@ -128,10 +128,10 @@ void main() {
       await _pump(tester);
 
       expect(find.text('Guarda cualquier video en 3 pasos'), findsOneWidget);
-      expect(find.text('En TikTok, toca Compartir'), findsOneWidget);
+      expect(find.text('En TikTok o Instagram, toca Compartir'), findsOneWidget);
       expect(find.text('Elige «Copiar enlace»'), findsOneWidget);
       expect(find.text('Vuelve aquí'), findsOneWidget);
-      expect(find.textContaining('álbum "SaveTic"'), findsOneWidget);
+      expect(find.textContaining('álbum "SaveReel"'), findsOneWidget);
       expect(find.text('Abrir TikTok'), findsOneWidget);
       expect(find.text('Ya tengo un enlace'), findsOneWidget);
       // El campo del enlace todavía no aparece.

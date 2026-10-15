@@ -82,6 +82,7 @@ class MyApp extends StatelessWidget {
             title: data?.title,
             authorHandle: data?.authorHandle,
             durationSeconds: data?.duration,
+            network: data?.network,
           ),
         );
       case DownloaderVideoDeleted(:final path):

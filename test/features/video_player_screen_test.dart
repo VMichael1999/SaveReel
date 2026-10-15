@@ -211,7 +211,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('¿Eliminar este video?'), findsOneWidget);
-    expect(find.text('Se borrará de SaveTic para siempre.'), findsOneWidget);
+    expect(find.text('Se borrará de SaveReel para siempre.'), findsOneWidget);
 
     await tester.tap(find.text('Cancelar'));
     await tester.pump();

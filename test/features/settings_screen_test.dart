@@ -89,12 +89,12 @@ void main() {
     expect(find.text('3.2 MB'), findsOneWidget);
   });
 
-  testWidgets('el aviso de que no está afiliada a TikTok está a la vista', (
+  testWidgets('el aviso de que no está afiliada a TikTok ni a Instagram está a la vista', (
     tester,
   ) async {
     await _open(tester);
 
-    expect(find.textContaining('no está afiliada a TikTok'), findsOneWidget);
+    expect(find.textContaining('no está afiliada a TikTok ni a Instagram'), findsOneWidget);
   });
 
   testWidgets('apagar «Guardar en la Galería» se aplica y se guarda', (

@@ -4,7 +4,7 @@ import '../../../../../config/theme/app_text.dart';
 import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../core/utils/app_strings.dart';
 
-enum LibraryFilter { all, videos, audio }
+enum LibraryFilter { all, videos, audio, tiktok, instagram }
 
 /// Filtros de la biblioteca con la cantidad de cada uno.
 class LibraryFilterChips extends StatelessWidget {
@@ -13,16 +13,26 @@ class LibraryFilterChips extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     required this.counts,
+    this.filters = const [
+      LibraryFilter.all,
+      LibraryFilter.videos,
+      LibraryFilter.audio,
+    ],
   });
 
   final LibraryFilter selected;
   final ValueChanged<LibraryFilter> onSelected;
   final Map<LibraryFilter, int> counts;
 
+  /// Los filtros que se muestran; los de red solo cuando hay de ambas.
+  final List<LibraryFilter> filters;
+
   static const _labels = {
     LibraryFilter.all: AppStrings.libraryAll,
     LibraryFilter.videos: AppStrings.libraryVideos,
     LibraryFilter.audio: AppStrings.libraryAudio,
+    LibraryFilter.tiktok: 'TikTok',
+    LibraryFilter.instagram: 'Instagram',
   };
 
   @override
@@ -32,7 +42,7 @@ class LibraryFilterChips extends StatelessWidget {
     return Wrap(
       spacing: AppSpacing.sm,
       children: [
-        for (final filter in LibraryFilter.values)
+        for (final filter in filters)
           ChoiceChip(
             label: Text.rich(
               TextSpan(

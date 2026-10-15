@@ -5,18 +5,26 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
+import 'package:savetic/src/core/utils/video_link.dart';
+import 'package:savetic/src/core/widgets/network_mark.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/library_screen.dart';
 
 import '../support/fake_library.dart';
 
-SavedVideo _video(String name, {int? seconds, String? title}) => SavedVideo(
+SavedVideo _video(
+  String name, {
+  int? seconds,
+  String? title,
+  VideoNetwork? network,
+}) => SavedVideo(
   path: '/app/$name',
   sizeBytes: 5 * 1048576,
   modified: DateTime(2026, 1, 1),
   title: title,
   durationSeconds: seconds,
+  network: network,
 );
 
 Future<LibraryCubit> _open(WidgetTester tester, List<SavedVideo> videos) async {
@@ -91,6 +99,55 @@ void main() {
 
     expect(find.text('0:34'), findsNothing);
     expect(find.text('0:59'), findsOneWidget);
+  });
+
+  testWidgets('con una sola red no se ofrecen los filtros por red', (
+    tester,
+  ) async {
+    await _open(tester, [_video('a.mp4', seconds: 34)]);
+
+    expect(find.textContaining('TikTok 1'), findsNothing);
+    expect(find.textContaining('Instagram'), findsNothing);
+  });
+
+  testWidgets('con TikTok e Instagram se puede filtrar por red', (
+    tester,
+  ) async {
+    await _open(tester, [
+      _video('a.mp4', seconds: 34), // sin dato: cuenta como TikTok
+      _video('b.mp4', seconds: 72, network: VideoNetwork.instagram),
+      _video('c.mp4', seconds: 59, network: VideoNetwork.instagram),
+    ]);
+
+    expect(find.textContaining('TikTok 1'), findsOneWidget);
+    expect(find.textContaining('Instagram 2'), findsOneWidget);
+
+    await tester.tap(find.textContaining('Instagram 2'));
+    await tester.pump();
+
+    expect(find.text('0:34'), findsNothing);
+    expect(find.text('1:12'), findsOneWidget);
+    expect(find.text('0:59'), findsOneWidget);
+  });
+
+  testWidgets('cada miniatura marca de qué red viene', (tester) async {
+    await _open(tester, [
+      _video('a.mp4', seconds: 34),
+      _video('b.mp4', seconds: 72, network: VideoNetwork.instagram),
+    ]);
+
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is NetworkMark && w.network == VideoNetwork.tiktok,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is NetworkMark && w.network == VideoNetwork.instagram,
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('un filtro sin resultados lo dice', (tester) async {
