@@ -89,7 +89,19 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       title: data?.title,
       authorHandle: data?.authorHandle,
       inGallery: isInGallery(path),
+      files: _filesOf(path),
     );
+  }
+
+  /// Las piezas de una galería, en orden; vacío si [path] es un archivo.
+  List<String> _filesOf(String path) {
+    final folder = Directory(path);
+    if (!folder.existsSync()) return const [];
+    final files = [
+      for (final entity in folder.listSync())
+        if (entity is File) entity.path,
+    ]..sort();
+    return files;
   }
 
   /// Formato con que se pidió la descarga de [path], si sigue en la lista.
