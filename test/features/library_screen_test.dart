@@ -7,11 +7,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
 import 'package:savetic/src/core/utils/video_link.dart';
 import 'package:savetic/src/core/widgets/network_mark.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/widgets/library_screen/library_tile.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/library_screen.dart';
 
 import '../support/fake_library.dart';
+
+SavedVideo _gallery(String name, int pieces, {String? title}) => SavedVideo(
+  path: '/app/$name',
+  sizeBytes: 3 * 1048576,
+  modified: DateTime(2026, 1, 1),
+  title: title,
+  files: [for (var i = 1; i <= pieces; i++) '/app/$name/0$i.jpg'],
+);
 
 SavedVideo _video(
   String name, {
@@ -148,6 +157,46 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('una galería es un solo elemento con su conteo de piezas', (
+    tester,
+  ) async {
+    await _open(tester, [
+      _gallery('C9z', 5, title: 'Viaje'),
+      _video('a.mp4', seconds: 34),
+    ]);
+
+    expect(find.byType(LibraryTile), findsNWidgets(2));
+    expect(find.text('5'), findsOneWidget);
+    expect(find.byIcon(Icons.photo_library_outlined), findsOneWidget);
+    expect(find.text('0:34'), findsOneWidget);
+  });
+
+  testWidgets('el filtro Fotos solo aparece con galerías y las separa', (
+    tester,
+  ) async {
+    await _open(tester, [_video('a.mp4', seconds: 34)]);
+    expect(find.textContaining('Fotos'), findsNothing);
+  });
+
+  testWidgets('el filtro Fotos deja solo las galerías; Videos las excluye', (
+    tester,
+  ) async {
+    await _open(tester, [_gallery('C9z', 4), _video('a.mp4', seconds: 34)]);
+
+    expect(find.textContaining('Videos 1'), findsOneWidget);
+    expect(find.textContaining('Fotos 1'), findsOneWidget);
+
+    await tester.tap(find.textContaining('Fotos 1'));
+    await tester.pump();
+    expect(find.text('0:34'), findsNothing);
+    expect(find.text('4'), findsOneWidget);
+
+    await tester.tap(find.textContaining('Videos 1'));
+    await tester.pump();
+    expect(find.text('0:34'), findsOneWidget);
+    expect(find.text('4'), findsNothing);
   });
 
   testWidgets('un filtro sin resultados lo dice', (tester) async {
