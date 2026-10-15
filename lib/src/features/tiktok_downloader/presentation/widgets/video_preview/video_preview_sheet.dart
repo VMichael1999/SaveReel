@@ -14,6 +14,7 @@ import '../../bloc/downloader_bloc/downloader_bloc.dart';
 import '../../bloc/settings_cubit/settings_cubit.dart';
 import '../../models/download_format.dart';
 import 'format_option.dart';
+import 'mobile_data_dialog.dart';
 
 /// Abre la vista previa como una hoja que sube desde abajo.
 Future<void> showVideoPreviewSheet(BuildContext context, TikTokVideo video) {
@@ -100,10 +101,15 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
     return bytes == null ? null : formatMegabytes(bytes);
   }
 
-  void _download() {
-    context.read<DownloaderBloc>().add(
-      DownloaderSaveVideo(tikTokVideo: widget.video, format: _format),
+  Future<void> _download() async {
+    final bloc = context.read<DownloaderBloc>();
+    final allowed = await confirmMobileData(
+      context,
+      policy: context.read<SettingsCubit>().state.mobileData,
+      bytes: _sizes[_format],
     );
+    if (!allowed) return;
+    bloc.add(DownloaderSaveVideo(tikTokVideo: widget.video, format: _format));
   }
 
   bool get _onlyPhotos => _data.photoCount == _data.gallery.length;
