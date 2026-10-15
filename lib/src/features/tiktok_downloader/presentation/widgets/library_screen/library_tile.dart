@@ -9,8 +9,9 @@ import '../../../../../core/utils/formatters.dart';
 import '../../../../../core/widgets/network_mark.dart';
 import '../../../domain/entities/saved_video.dart';
 import '../../screens/video_player_screen.dart';
-import '../../screens/gallery_viewer_screen.dart';
 import '../../models/video_player_args.dart';
+import '../../screens/gallery_viewer_screen.dart';
+import 'library_actions_sheet.dart';
 import 'library_thumbnail.dart';
 
 /// Pantalla que abre un video guardado: el visor si es una galería.
@@ -58,8 +59,10 @@ class LibraryTile extends StatelessWidget {
             ),
             excludeSemantics: true,
             onTap: open,
+            onLongPress: () => showLibraryActionsSheet(context, video),
             child: InkWell(
               onTap: open,
+              onLongPress: () => showLibraryActionsSheet(context, video),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
