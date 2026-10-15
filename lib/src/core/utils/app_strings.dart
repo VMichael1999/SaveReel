@@ -95,7 +95,8 @@ class AppStrings {
   static const String withCreditsShort = "con créditos";
   static const String noWatermarkShort = "sin marca";
   static const String audioShort = "solo audio";
-  static String stoppedAt(int percent) => "se quedó en $percent %";
+  static String stoppedAt(int percent) =>
+      "se quedó en $percent %; al reintentar sigue desde ahí";
   static String shareText(String handle) => "Video de @$handle";
 
   // Reproductor

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/utils/video_link.dart';
 import '../../../../../core/error/failure.dart';
 import '../../../../../core/helpers/dir_helper.dart';
+import '../../../../../core/helpers/resumable_download.dart';
 import '../../../../../core/utils/app_enums.dart';
 import '../../../domain/entities/cancel_signal.dart';
 import '../../../domain/entities/download_item.dart';
@@ -207,6 +208,14 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     required String folder,
   }) async {
     final items = event.tikTokVideo.videoData!.gallery;
+    // Si el intento anterior falló, se retoma: las piezas completas se
+    // conservan y la cortada sigue desde donde quedó. Si no, se empieza limpio.
+    final resuming = newDownloads.any(
+      (d) => d.path == folder && d.status == DownloadStatus.error,
+    );
+    if (!resuming && await Directory(folder).exists()) {
+      await Directory(folder).delete(recursive: true);
+    }
     final signal = CancelSignal();
     _signals[folder] = signal;
     _formats[folder] = DownloadFormat.gallery;
@@ -228,6 +237,15 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     for (var i = 0; i < items.length; i++) {
       final number = (i + 1).toString().padLeft(2, '0');
       final file = '$folder/$number.${items[i].extension}';
+      if (resuming && await File(file).exists()) {
+        files.add(file);
+        _update(
+          folder,
+          (item) =>
+              item.copyWith(receivedBytes: (i + 1) * _milli, unitsDone: i + 1),
+        );
+        continue;
+      }
       var lastPermille = -1;
       final result = await saveVideoUseCase(
         SaveVideoParams(
@@ -342,6 +360,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       }
       final file = File(path);
       if (await file.exists()) await file.delete();
+      await ResumableDownload.discard(path);
     } catch (_) {}
   }
 

@@ -131,12 +131,15 @@ void main() {
       await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoProgress);
       final path = bloc.newDownloads.single.path;
       await File(path).writeAsString('parcial');
+      await File('$path.part').writeAsString('parcial');
 
       bloc.add(DownloaderCancelVideo(path));
       await bloc.stream.firstWhere((s) => s is DownloaderSaveVideoCancelled);
 
       expect(bloc.newDownloads, isEmpty);
       expect(await File(path).exists(), isFalse);
+      // Cancelar descarta también lo que habría servido para reanudar.
+      expect(await File('$path.part').exists(), isFalse);
       await bloc.close();
     },
   );
