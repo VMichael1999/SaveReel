@@ -6,9 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/utils/video_link.dart';
 import '../../../../../core/error/failure.dart';
+import '../../../../../core/helpers/background_downloads.dart';
 import '../../../../../core/helpers/dir_helper.dart';
 import '../../../../../core/helpers/resumable_download.dart';
 import '../../../../../core/utils/app_enums.dart';
+import '../../../../../core/utils/app_strings.dart';
 import '../../../domain/entities/cancel_signal.dart';
 import '../../../domain/entities/download_item.dart';
 import '../../../domain/entities/tiktok_video.dart';
@@ -33,6 +35,12 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   /// Cómo se copia un video a la galería; las pruebas lo reemplazan.
   final Future<void> Function(String path) gallerySaver;
 
+  /// Mantiene viva la descarga con la app en segundo plano y avisa al terminar.
+  final BackgroundDownloads background;
+
+  /// Espera antes de retomar sola una descarga que se cortó.
+  final Duration autoRetryDelay;
+
   static bool _always() => true;
 
   DownloaderBloc({
@@ -41,12 +49,98 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     required this.getFileSizeUseCase,
     this.shouldSaveToGallery = _always,
     this.gallerySaver = DirHelper.saveMediaToGallery,
+    this.background = const NoBackgroundDownloads(),
+    this.autoRetryDelay = const Duration(seconds: 1),
   }) : super(DownloaderInitial()) {
     on<DownloaderGetVideo>(_getVideo);
     on<DownloaderSaveVideo>(_saveVideo);
     on<DownloaderCancelVideo>(_cancelVideo);
     on<DownloaderRetryVideo>(_retryVideo);
     on<DownloaderDeleteVideo>(_deleteVideo);
+    on<DownloaderAppLifecycleChanged>(_lifecycleChanged);
+  }
+
+  /// La app está fuera de primer plano, o acaba de volver.
+  bool _away = false;
+  DateTime? _resumedAt;
+
+  /// Reintentos automáticos por descarga, para no insistir sin fin.
+  final Map<String, int> _autoRetries = {};
+
+  /// Descargas de galería que deben retomarse sin pasar por el estado de error.
+  final Set<String> _autoResume = {};
+
+  static const int _maxAutoRetries = 3;
+  static const Duration _justResumed = Duration(seconds: 10);
+
+  void _lifecycleChanged(
+    DownloaderAppLifecycleChanged event,
+    Emitter<DownloaderState> emit,
+  ) {
+    _away = event.away;
+    if (!event.away) _resumedAt = DateTime.now();
+  }
+
+  /// Con la app fuera de pantalla el sistema puede cortar la conexión (iOS la
+  /// suspende a los ~30 s). Si el corte es pasajero y ocurrió así, se retoma
+  /// solo desde donde quedó, sin molestar con un error.
+  bool _retryAutomatically(String path, Failure failure) {
+    if (!failure.retryable) return false;
+    final resumedAt = _resumedAt;
+    final recentlyBack =
+        resumedAt != null &&
+        DateTime.now().difference(resumedAt) < _justResumed;
+    if (!_away && !recentlyBack) return false;
+    final attempts = _autoRetries[path] ?? 0;
+    if (attempts >= _maxAutoRetries) return false;
+    _autoRetries[path] = attempts + 1;
+    _autoResume.add(path);
+    Future<void>.delayed(autoRetryDelay, () {
+      if (!isClosed) add(DownloaderRetryVideo(path));
+    });
+    return true;
+  }
+
+  /// Resumen de las descargas en curso para la notificación del sistema.
+  BackgroundSnapshot _snapshot() {
+    final active =
+        newDownloads
+            .where((d) => d.status == DownloadStatus.downloading)
+            .toList();
+    if (active.isEmpty) return BackgroundSnapshot.none;
+    final known = [
+      for (final d in active)
+        if (d.progress != null) d.progress!,
+    ];
+    return BackgroundSnapshot(
+      count: active.length,
+      title:
+          active.length == 1
+              ? active.first.video.videoData?.title ?? ''
+              : AppStrings.downloadsCount(active.length),
+      progress:
+          known.length == active.length && known.isNotEmpty
+              ? known.reduce((a, b) => a + b) / known.length
+              : null,
+    );
+  }
+
+  BackgroundSnapshot _lastSnapshot = BackgroundSnapshot.none;
+
+  void _syncBackground() {
+    final next = _snapshot();
+    if (next == _lastSnapshot) return;
+    _lastSnapshot = next;
+    background.sync(next);
+  }
+
+  /// Avisa que terminó, solo si la app no se está viendo.
+  void _notifyIfAway(DownloadItem? item, {required bool success}) {
+    if (!_away) return;
+    background.notifyFinished(
+      title: item?.video.videoData?.title ?? '',
+      success: success,
+    );
   }
 
   /// Peso de un archivo en bytes, o nulo si no se pudo saber.
@@ -169,6 +263,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       return;
     }
     if (failure != null) {
+      if (_retryAutomatically(path, failure)) return;
       _update(
         path,
         (item) => item.copyWith(
@@ -176,9 +271,11 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
           failureMessage: failure.message,
         ),
       );
+      _notifyIfAway(_itemAt(path), success: false);
       emit(DownloaderSaveVideoFailure(failure.message));
       return;
     }
+    _autoRetries.remove(path);
     _update(
       path,
       (item) => item.copyWith(
@@ -187,6 +284,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
         clearFailure: true,
       ),
     );
+    _notifyIfAway(_itemAt(path), success: true);
     if (!format.isAudio &&
         shouldSaveToGallery() &&
         await _saveToGallery(path)) {
@@ -210,9 +308,11 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     final items = event.tikTokVideo.videoData!.gallery;
     // Si el intento anterior falló, se retoma: las piezas completas se
     // conservan y la cortada sigue desde donde quedó. Si no, se empieza limpio.
-    final resuming = newDownloads.any(
-      (d) => d.path == folder && d.status == DownloadStatus.error,
-    );
+    final resuming =
+        _autoResume.remove(folder) ||
+        newDownloads.any(
+          (d) => d.path == folder && d.status == DownloadStatus.error,
+        );
     if (!resuming && await Directory(folder).exists()) {
       await Directory(folder).delete(recursive: true);
     }
@@ -288,6 +388,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       return;
     }
     if (failure != null) {
+      if (_retryAutomatically(folder, failure)) return;
       final message = failure.message;
       _update(
         folder,
@@ -296,9 +397,11 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
           failureMessage: message,
         ),
       );
+      _notifyIfAway(_itemAt(folder), success: false);
       emit(DownloaderSaveVideoFailure(message));
       return;
     }
+    _autoRetries.remove(folder);
     _update(
       folder,
       (item) => item.copyWith(
@@ -308,6 +411,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
         clearFailure: true,
       ),
     );
+    _notifyIfAway(_itemAt(folder), success: true);
     if (shouldSaveToGallery()) {
       var all = true;
       for (final file in files) {
@@ -351,7 +455,10 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   /// Quita la descarga de la lista y borra lo que alcanzó a bajar.
   Future<void> _discard(String path) async {
     newDownloads.removeWhere((d) => d.path == path);
+    _syncBackground();
     _formats.remove(path);
+    _autoRetries.remove(path);
+    _autoResume.remove(path);
     try {
       final folder = Directory(path);
       if (await folder.exists()) {
@@ -394,10 +501,15 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     } else {
       newDownloads[index] = item;
     }
+    _syncBackground();
   }
+
+  DownloadItem? _itemAt(String path) =>
+      newDownloads.where((d) => d.path == path).firstOrNull;
 
   void _update(String path, DownloadItem Function(DownloadItem) change) {
     final index = newDownloads.indexWhere((d) => d.path == path);
     if (index != -1) newDownloads[index] = change(newDownloads[index]);
+    _syncBackground();
   }
 }

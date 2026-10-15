@@ -52,3 +52,14 @@ class DownloaderDeleteVideo extends DownloaderEvent {
   @override
   List<Object?> get props => [path];
 }
+
+/// La app pasó a segundo plano (`away: true`) o volvió a verse.
+class DownloaderAppLifecycleChanged extends DownloaderEvent {
+  final bool away;
+
+  const DownloaderAppLifecycleChanged({required this.away});
+
+  @override
+  List<Object?> get props => [away];
+}
+
