@@ -28,10 +28,13 @@ class DownloaderGetVideoSuccess extends DownloaderState {
 class DownloaderGetVideoFailure extends DownloaderState {
   final String message;
 
-  const DownloaderGetVideoFailure(this.message);
+  /// Si la causa es pasajera y conviene ofrecer «Reintentar».
+  final bool retryable;
+
+  const DownloaderGetVideoFailure(this.message, {this.retryable = false});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, retryable];
 }
 
 class DownloaderSaveVideoLoading extends DownloaderState {

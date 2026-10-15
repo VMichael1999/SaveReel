@@ -7,6 +7,10 @@ abstract class Failure extends Equatable {
 
   const Failure({required this.message});
 
+  /// Si vale la pena volver a intentarlo tal cual: la causa es pasajera
+  /// (sin señal, servicio caído) y no del enlace ni del video.
+  bool get retryable => false;
+
   @override
   List<Object?> get props => [message];
 }
@@ -17,6 +21,9 @@ class BadRequestFailure extends Failure {
 
 class ServerFailure extends Failure {
   const ServerFailure() : super(message: Authorized.internalServerError);
+
+  @override
+  bool get retryable => true;
 }
 
 class NotFoundFailure extends Failure {
@@ -26,14 +33,23 @@ class NotFoundFailure extends Failure {
 class NoInternetConnectionFailure extends Failure {
   const NoInternetConnectionFailure()
       : super(message: Authorized.noInternetConnection);
+
+  @override
+  bool get retryable => true;
 }
 
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure() : super(message: Authorized.unexpected);
+
+  @override
+  bool get retryable => true;
 }
 
 class ConnectTimeOutFailure extends Failure {
   const ConnectTimeOutFailure() : super(message: Authorized.connectTimeOut);
+
+  @override
+  bool get retryable => true;
 }
 
 class CancelRequestFailure extends Failure {
@@ -46,4 +62,7 @@ class TooManyRequestsFailure extends Failure {
 
 class NotSubscribedFailure extends Failure {
   const NotSubscribedFailure() : super(message: Authorized.notSubscribed);
+
+  @override
+  bool get retryable => true;
 }
