@@ -93,6 +93,23 @@ void main() {
     expect(videos[viejo.path]!.source, VideoNetwork.tiktok);
   });
 
+  test(
+    'una duración de 0 se trata como desconocida y se lee del archivo',
+    () async {
+      final file = await touch('reel.mp4');
+      await source.record(
+        SavedVideoMetadata(path: file.path, durationSeconds: 0),
+      );
+      // Archivo anotado por una versión anterior, con el 0 ya guardado.
+      await File('${file.path}.json').writeAsString('{"durationSeconds":0}');
+
+      expect((await source.list()).single.durationSeconds, isNull);
+
+      expect(await source.probeDuration(file.path), 34);
+      expect((await source.list()).single.durationSeconds, 34);
+    },
+  );
+
   test('un archivo de datos dañado no esconde el video', () async {
     final file = await touch('v.mp4');
     await File('${file.path}.json').writeAsString('{no es json');

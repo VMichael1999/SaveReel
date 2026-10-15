@@ -71,7 +71,7 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
           modified: stat.modified,
           title: meta?['title'] as String?,
           authorHandle: meta?['author'] as String?,
-          durationSeconds: meta?['durationSeconds'] as int?,
+          durationSeconds: _knownDuration(meta?['durationSeconds']),
           network: VideoNetwork.values.asNameMap()[meta?['network']],
         ),
       );
@@ -79,6 +79,11 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
     videos.sort((a, b) => b.modified.compareTo(a.modified));
     return videos;
   }
+
+  /// Una duración de 0 es lo que informa una red que no la sabe (Instagram):
+  /// se trata como desconocida para que se lea del archivo.
+  static int? _knownDuration(Object? seconds) =>
+      seconds is int && seconds > 0 ? seconds : null;
 
   Future<Map<String, dynamic>?> _readMetadata(String path) async {
     final file = _sidecar(path);
@@ -100,7 +105,7 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
     final current = <String, dynamic>{
       if (metadata.title != null) 'title': metadata.title,
       if (metadata.authorHandle != null) 'author': metadata.authorHandle,
-      if (metadata.durationSeconds != null)
+      if (_knownDuration(metadata.durationSeconds) != null)
         'durationSeconds': metadata.durationSeconds,
       if (metadata.network != null) 'network': metadata.network!.name,
     };
