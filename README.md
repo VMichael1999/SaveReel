@@ -1,8 +1,8 @@
-# SaveTic
+# SaveReel
 
-Guarda videos cortos en tu teléfono a partir de su enlace, para verlos sin conexión.
+Guarda videos cortos de TikTok e Instagram en tu teléfono a partir de su enlace, para verlos sin conexión.
 
-App Flutter para Android e iOS. SaveTic no está afiliada a TikTok.
+App Flutter para Android e iOS. SaveReel no está afiliada a TikTok ni a Instagram.
 
 ## Cómo correrla
 
@@ -21,7 +21,7 @@ Por omisión consulta el servicio público de [tikwm.com](https://www.tikwm.com)
 
 ## Recibir enlaces desde «Compartir»
 
-SaveTic aparece en la hoja de Compartir de las demás apps (por ejemplo TikTok). Al
+SaveReel aparece en la hoja de Compartir de las demás apps (por ejemplo TikTok). Al
 elegirla, la app se abre con el enlace ya puesto, busca el video y muestra los formatos.
 
 - **Android:** `MainActivity.kt` recibe el texto compartido (`ACTION_SEND`) y se lo pasa a
@@ -31,7 +31,7 @@ elegirla, la app se abre con el enlace ya puesto, busca el video y muestra los f
   No usa grupos de app, así que funciona con una cuenta de desarrollo gratuita. Para correr
   en un iPhone real hay que elegir tu equipo de desarrollo (Signing & Capabilities) tanto en
   `Runner` como en `ShareExtension`.
-- En la app de TikTok, el menú propio de Compartir no lista SaveTic: hay que tocar «Más» o
+- En la app de TikTok, el menú propio de Compartir no lista SaveReel: hay que tocar «Más» o
   «…» para abrir la hoja del sistema, donde sí aparece.
 
 ## Servicio de descargas
