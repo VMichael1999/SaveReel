@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>SaveTic guarda los videos que descargas en tu galería.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SaveTic necesita acceso a tu galería para crear el álbum «SaveTic» y guardar ahí tus videos.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

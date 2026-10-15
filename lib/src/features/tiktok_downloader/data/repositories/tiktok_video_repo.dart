@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/error_handler.dart';
 import '../../../../core/error/failure.dart';
-import '../../../../core/network/network_info.dart';
 import '../../domain/entities/cancel_signal.dart';
 import '../../domain/entities/tiktok_video.dart';
 import '../../domain/mappers.dart';
@@ -13,15 +12,11 @@ import '../models/tiktok_video_model.dart';
 
 class TiktokVideoRepo implements TiktokVideoBaseRepo {
   final TiktokVideoBaseRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
-  TiktokVideoRepo({required this.remoteDataSource, required this.networkInfo});
+  TiktokVideoRepo({required this.remoteDataSource});
 
   @override
   Future<Either<Failure, TikTokVideo>> getVideo(String videoLink) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NoInternetConnectionFailure());
-    }
     try {
       final TiktokVideoModel video = await remoteDataSource.getVideo(videoLink);
       return Right(video.toDomain());
@@ -32,9 +27,6 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
 
   @override
   Future<Either<Failure, int?>> getFileSize(String url) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NoInternetConnectionFailure());
-    }
     try {
       return Right(await remoteDataSource.getFileSize(url));
     } on DioException catch (error) {
@@ -49,9 +41,6 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
     void Function(int received, int total)? onProgress,
     CancelSignal? cancelSignal,
   }) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NoInternetConnectionFailure());
-    }
     try {
       final String message = await remoteDataSource.saveVideo(
         savePath: savePath,
