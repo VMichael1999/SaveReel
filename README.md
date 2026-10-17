@@ -53,7 +53,7 @@ Todavía **no está publicada** en las tiendas.
 | Reanudar descargas cortadas y cuidar los datos móviles | Hecho con pruebas; la detección de la red usa código nativo y no se probó en un teléfono con datos móviles |
 | Servidor propio que reemplace a los servicios de terceros | Pendiente |
 | Publicar en App Store y Google Play | Pendiente (nombre, cuenta de Apple de pago y política de privacidad) |
-| Reemplazar `video_thumbnail`, que está abandonado | Pendiente |
+| Reemplazar `video_thumbnail`, que está abandonado | Hecho: ahora usa `fc_native_video_thumbnail`, con APIs nativas |
 
 ## Métricas
 
@@ -66,7 +66,7 @@ Medidas el 14 de octubre de 2026 sobre el proyecto completo.
 | Código Dart | 7 051 líneas en `lib` (102 archivos) y 3 139 en pruebas, sin líneas en blanco |
 | Pantallas | **7** (inicio, primer uso, vista previa, descargas, biblioteca, reproductor y ajustes) |
 | Redes compatibles | **2** (TikTok e Instagram) |
-| Versiones | Flutter 3.47.5 (estable), Dart 3.13, iOS 15 o superior, Android con Gradle 8.14 |
+| Versiones | Flutter 3.47.5 (estable), Dart 3.13, iOS 16 o superior, Android con Gradle 8.14 |
 
 La cobertura cuenta las líneas ejecutables que cargan las pruebas. No se prueban de forma
 automática la descarga real de archivos, la galería ni la extensión de Compartir (dependen
