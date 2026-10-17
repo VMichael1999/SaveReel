@@ -155,6 +155,10 @@ funcionar si Instagram la cambia. Como respaldo se puede apuntar a una instancia
   galería o elimina (con confirmación) todo lo elegido. Las galerías aportan todas sus piezas, y
   el botón atrás sale de la selección sin cerrar la pantalla.
 
+- **Favoritos:** *mantener pulsada una miniatura → Agregar a favoritos* pone un corazón en la
+  miniatura y activa el filtro **Favoritos**, que solo aparece cuando hay alguno. La marca se
+  guarda junto al archivo y sobrevive a volver a descargarlo.
+
 ### Atajos del sistema
 
 Todos abren `savetic://clipboard`: la app lee el portapapeles, saca el enlace de TikTok o de

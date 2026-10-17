@@ -4,7 +4,7 @@ import '../../../../../config/theme/app_text.dart';
 import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../core/utils/app_strings.dart';
 
-enum LibraryFilter { all, videos, audio, photos, tiktok, instagram }
+enum LibraryFilter { all, videos, audio, photos, favorites, tiktok, instagram }
 
 /// Filtros de la biblioteca con la cantidad de cada uno.
 class LibraryFilterChips extends StatelessWidget {
@@ -33,6 +33,7 @@ class LibraryFilterChips extends StatelessWidget {
         LibraryFilter.videos => context.strings.libraryVideos,
         LibraryFilter.audio => context.strings.libraryAudio,
         LibraryFilter.photos => context.strings.libraryPhotos,
+        LibraryFilter.favorites => context.strings.libraryFavorites,
         LibraryFilter.tiktok => 'TikTok',
         LibraryFilter.instagram => 'Instagram',
       };

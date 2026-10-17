@@ -130,4 +130,46 @@ void main() {
     );
     await drainToasts(tester);
   });
+
+  testWidgets('«Agregar a favoritos» marca el video y muestra el corazón', (
+    tester,
+  ) async {
+    await _openLibrary(tester, [_video('a.mp4', title: 'Lomo saltado')]);
+    expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+
+    await tester.longPress(find.byType(LibraryTile));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Agregar a favoritos'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+
+    await tester.longPress(find.byType(LibraryTile));
+    await tester.pumpAndSettle();
+    expect(find.text('Quitar de favoritos'), findsOneWidget);
+    await tester.tap(find.text('Quitar de favoritos'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+  });
+
+  testWidgets('el filtro Favoritos solo aparece con favoritos y los filtra', (
+    tester,
+  ) async {
+    await _openLibrary(tester, [
+      _video('a.mp4', title: 'Lomo saltado'),
+      _video('b.mp4', title: 'Ceviche'),
+    ]);
+    expect(find.text('Favoritos'), findsNothing);
+
+    await tester.longPress(find.byType(LibraryTile).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Agregar a favoritos'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.textContaining('Favoritos'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LibraryTile), findsOneWidget);
+  });
 }

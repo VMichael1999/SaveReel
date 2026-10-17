@@ -151,6 +151,19 @@ class LibraryTile extends StatelessWidget {
                       bottom: AppSpacing.sm,
                       child: _SelectionMark(selected: selected),
                     ),
+                  if (video.favorite && !selecting)
+                    Positioned(
+                      right: AppSpacing.sm,
+                      bottom: AppSpacing.sm,
+                      child: _Badge(
+                        child: Icon(
+                          Icons.favorite_rounded,
+                          size: AppSizes.iconBadge,
+                          color: colors.accent,
+                          semanticLabel: context.strings.favoriteBadge,
+                        ),
+                      ),
+                    ),
                   if (video.isAudio)
                     Positioned(
                       right: AppSpacing.sm,
