@@ -53,6 +53,10 @@ class MyApp extends StatelessWidget {
                             debugShowCheckedModeBanner: false,
                             initialRoute:
                                 _showCatalog ? Routes.catalog : Routes.splash,
+                            onGenerateInitialRoutes: (_) =>
+                                AppRouter.initialRoutes(
+                                  _showCatalog ? Routes.catalog : Routes.splash,
+                                ),
                             onGenerateRoute: AppRouter.getRoute,
                             theme: AppTheme.light,
                             darkTheme: AppTheme.dark,
