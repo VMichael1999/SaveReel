@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../../../core/utils/video_link.dart';
 import '../../../domain/entities/saved_video.dart';
@@ -238,15 +238,16 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
     final cache = await _cacheDirectory();
     if (!await cache.exists()) await cache.create(recursive: true);
     final name = videoPath.split(Platform.pathSeparator).last;
-    final target = File('${cache.path}/$name.png');
+    final target = File('${cache.path}/$name.jpg');
     if (await target.exists()) return target.path;
-    return VideoThumbnail.thumbnailFile(
-      video: videoPath,
-      thumbnailPath: target.path,
-      imageFormat: ImageFormat.PNG,
+    final created = await FcNativeVideoThumbnail().saveThumbnailToFile(
+      srcFile: videoPath,
+      destFile: target.path,
+      width: 360,
+      height: 640,
       quality: 50,
-      maxWidth: 360,
     );
+    return created ? target.path : null;
   }
 
   static Future<int?> _defaultDuration(String videoPath) async {
