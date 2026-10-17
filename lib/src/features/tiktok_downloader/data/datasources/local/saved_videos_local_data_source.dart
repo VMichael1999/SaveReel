@@ -24,6 +24,9 @@ abstract class SavedVideosBaseLocalDataSource {
 
   Future<void> forget(String path);
 
+  /// Marca o desmarca un archivo como favorito.
+  Future<void> setFavorite(String path, bool favorite);
+
   /// Peso en bytes de las portadas guardadas en caché.
   Future<int> thumbnailCacheSize();
 
@@ -82,6 +85,7 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
           authorHandle: meta?['author'] as String?,
           durationSeconds: _knownDuration(meta?['durationSeconds']),
           network: VideoNetwork.values.asNameMap()[meta?['network']],
+          favorite: meta?['favorite'] == true,
         ),
       );
     }
@@ -121,6 +125,7 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
       authorHandle: meta?['author'] as String?,
       network: VideoNetwork.values.asNameMap()[meta?['network']],
       files: [for (final file in files) file.path],
+      favorite: meta?['favorite'] == true,
     );
   }
 
@@ -160,15 +165,30 @@ class SavedVideosLocalDataSource implements SavedVideosBaseLocalDataSource {
       _sidecar(path).writeAsString(jsonEncode(data));
 
   @override
-  Future<void> record(SavedVideoMetadata metadata) {
+  Future<void> record(SavedVideoMetadata metadata) async {
+    // Volver a descargar el mismo archivo no le quita lo de favorito.
+    final wasFavorite =
+        (await _readMetadata(metadata.path))?['favorite'] == true;
     final current = <String, dynamic>{
+      if (wasFavorite) 'favorite': true,
       if (metadata.title != null) 'title': metadata.title,
       if (metadata.authorHandle != null) 'author': metadata.authorHandle,
       if (_knownDuration(metadata.durationSeconds) != null)
         'durationSeconds': metadata.durationSeconds,
       if (metadata.network != null) 'network': metadata.network!.name,
     };
-    return _writeMetadata(metadata.path, current);
+    await _writeMetadata(metadata.path, current);
+  }
+
+  @override
+  Future<void> setFavorite(String path, bool favorite) async {
+    final data = await _readMetadata(path) ?? <String, dynamic>{};
+    if (favorite) {
+      data['favorite'] = true;
+    } else {
+      data.remove('favorite');
+    }
+    await _writeMetadata(path, data);
   }
 
   @override

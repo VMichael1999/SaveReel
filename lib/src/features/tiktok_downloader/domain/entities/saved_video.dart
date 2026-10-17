@@ -22,6 +22,9 @@ class SavedVideo extends Equatable {
   /// [path] es la carpeta. Vacío en un video o audio suelto.
   final List<String> files;
 
+  /// Si el usuario lo marcó como favorito.
+  final bool favorite;
+
   const SavedVideo({
     required this.path,
     required this.sizeBytes,
@@ -31,6 +34,7 @@ class SavedVideo extends Equatable {
     this.durationSeconds,
     this.network,
     this.files = const [],
+    this.favorite = false,
   });
 
   bool get isGallery => files.isNotEmpty;
@@ -43,7 +47,7 @@ class SavedVideo extends Equatable {
 
   bool get isAudio => path.toLowerCase().endsWith('.mp3');
 
-  SavedVideo copyWith({int? durationSeconds}) => SavedVideo(
+  SavedVideo copyWith({int? durationSeconds, bool? favorite}) => SavedVideo(
     path: path,
     sizeBytes: sizeBytes,
     modified: modified,
@@ -52,6 +56,7 @@ class SavedVideo extends Equatable {
     durationSeconds: durationSeconds ?? this.durationSeconds,
     network: network,
     files: files,
+    favorite: favorite ?? this.favorite,
   );
 
   @override
@@ -64,6 +69,7 @@ class SavedVideo extends Equatable {
     durationSeconds,
     network,
     files,
+    favorite,
   ];
 }
 

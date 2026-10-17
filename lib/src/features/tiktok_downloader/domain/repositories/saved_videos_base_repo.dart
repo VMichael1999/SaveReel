@@ -18,6 +18,9 @@ abstract class SavedVideosBaseRepo {
   /// Quita los datos anotados del archivo (el archivo ya se borró aparte).
   Future<Either<Failure, Unit>> forget(String path);
 
+  /// Marca o desmarca un archivo como favorito.
+  Future<Either<Failure, Unit>> setFavorite(String path, bool favorite);
+
   Future<Either<Failure, int>> thumbnailCacheSize();
 
   Future<Either<Failure, Unit>> clearThumbnailCache();

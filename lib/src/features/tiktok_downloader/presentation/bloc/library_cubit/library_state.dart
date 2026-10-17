@@ -17,6 +17,7 @@ class LibraryState extends Equatable {
   int get videoCount => videos.where((v) => !v.isAudio && !v.isGallery).length;
   int get galleryCount => videos.where((v) => v.isGallery).length;
   int get audioCount => videos.where((v) => v.isAudio).length;
+  int get favoriteCount => videos.where((v) => v.favorite).length;
   int countOf(VideoNetwork network) =>
       videos.where((v) => v.source == network).length;
 
