@@ -9,17 +9,20 @@ import '../../../domain/entities/saved_video.dart';
 import '../../bloc/library_cubit/library_cubit.dart';
 import '../library_screen/library_thumbnail.dart';
 
-/// Los últimos videos guardados, para reproducirlos con un toque.
+/// Los últimos videos guardados, en filas de tres, para reproducirlos con un
+/// toque. Con seis se llena la parte baja del inicio.
 class RecentDownloadsStrip extends StatelessWidget {
   const RecentDownloadsStrip({super.key});
 
-  static const int _count = 3;
+  static const int _perRow = 3;
+  static const int _count = 6;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<LibraryCubit, LibraryState>(
       builder: (context, state) {
-        final recents = state.videos.where((v) => !v.isAudio).take(_count);
+        final recents =
+            state.videos.where((v) => !v.isAudio).take(_count).toList();
         if (recents.isEmpty) return const SizedBox.shrink();
         final theme = Theme.of(context);
 
@@ -43,18 +46,22 @@ class RecentDownloadsStrip extends StatelessWidget {
                 ),
               ],
             ),
-            Row(
-              children: [
-                for (final (i, video) in recents.indexed) ...[
-                  if (i > 0) const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: _RecentThumb(video: video)),
+            for (var start = 0; start < recents.length; start += _perRow) ...[
+              if (start > 0) const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  for (var i = 0; i < _perRow; i++) ...[
+                    if (i > 0) const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child:
+                          start + i < recents.length
+                              ? _RecentThumb(video: recents[start + i])
+                              : const SizedBox.shrink(),
+                    ),
+                  ],
                 ],
-                for (var i = recents.length; i < _count; i++) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  const Expanded(child: SizedBox.shrink()),
-                ],
-              ],
-            ),
+              ),
+            ],
           ],
         );
       },
