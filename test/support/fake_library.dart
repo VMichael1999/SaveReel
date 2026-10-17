@@ -17,6 +17,7 @@ import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_thumb
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/get_video_thumbnail_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/probe_video_duration_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/usecases/record_saved_video_usecase.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/usecases/set_favorite_usecase.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/locale_cubit/locale_cubit.dart';
@@ -39,8 +40,14 @@ class FakeSavedVideosRepo implements SavedVideosBaseRepo {
   final List<SavedVideoMetadata> recorded = [];
   final List<String> forgotten = [];
 
+  /// Rutas marcadas como favoritas.
+  final Set<String> favorites = {};
+
   @override
-  Future<Either<Failure, List<SavedVideo>>> list() async => Right([...videos]);
+  Future<Either<Failure, List<SavedVideo>>> list() async => Right([
+    for (final v in videos)
+      favorites.contains(v.path) ? v.copyWith(favorite: true) : v,
+  ]);
 
   @override
   Future<Either<Failure, String?>> thumbnailFor(String path) async =>
@@ -65,6 +72,12 @@ class FakeSavedVideosRepo implements SavedVideosBaseRepo {
         network: metadata.network,
       ),
     );
+    return const Right(unit);
+  }
+
+  @override
+  Future<Either<Failure, Unit>> setFavorite(String path, bool favorite) async {
+    favorite ? favorites.add(path) : favorites.remove(path);
     return const Right(unit);
   }
 
@@ -97,6 +110,7 @@ LibraryCubit fakeLibraryCubit([FakeSavedVideosRepo? repo]) {
     probeDuration: ProbeVideoDurationUseCase(repo: r),
     recordSavedVideo: RecordSavedVideoUseCase(repo: r),
     forgetSavedVideo: ForgetSavedVideoUseCase(repo: r),
+    setFavoriteUseCase: SetFavoriteUseCase(repo: r),
     getThumbnailCacheSize: GetThumbnailCacheSizeUseCase(repo: r),
     clearThumbnailCacheUseCase: ClearThumbnailCacheUseCase(repo: r),
   );

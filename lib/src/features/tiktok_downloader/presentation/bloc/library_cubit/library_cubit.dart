@@ -11,6 +11,7 @@ import '../../../domain/usecases/get_thumbnail_cache_size_usecase.dart';
 import '../../../domain/usecases/get_video_thumbnail_usecase.dart';
 import '../../../domain/usecases/probe_video_duration_usecase.dart';
 import '../../../domain/usecases/record_saved_video_usecase.dart';
+import '../../../domain/usecases/set_favorite_usecase.dart';
 
 part 'library_state.dart';
 
@@ -23,6 +24,7 @@ class LibraryCubit extends Cubit<LibraryState> {
     required this.probeDuration,
     required this.recordSavedVideo,
     required this.forgetSavedVideo,
+    required this.setFavoriteUseCase,
     required this.getThumbnailCacheSize,
     required this.clearThumbnailCacheUseCase,
   }) : super(const LibraryState());
@@ -32,6 +34,7 @@ class LibraryCubit extends Cubit<LibraryState> {
   final ProbeVideoDurationUseCase probeDuration;
   final RecordSavedVideoUseCase recordSavedVideo;
   final ForgetSavedVideoUseCase forgetSavedVideo;
+  final SetFavoriteUseCase setFavoriteUseCase;
   final GetThumbnailCacheSizeUseCase getThumbnailCacheSize;
   final ClearThumbnailCacheUseCase clearThumbnailCacheUseCase;
 
@@ -92,9 +95,32 @@ class LibraryCubit extends Cubit<LibraryState> {
     );
   }
 
+  /// Marca o desmarca un favorito. La lista cambia al instante y el dato se
+  /// guarda después.
+  Future<void> setFavorite(String path, bool favorite) async {
+    _emitFavorite(path, favorite);
+    final result = await setFavoriteUseCase(FavoriteParams(path, favorite));
+    // Si no se pudo guardar, la marca vuelve a como estaba.
+    if (result.isLeft()) _emitFavorite(path, !favorite);
+  }
+
+  void _emitFavorite(String path, bool favorite) {
+    if (isClosed) return;
+    emit(
+      LibraryState(
+        status: state.status,
+        videos: [
+          for (final v in state.videos)
+            if (v.path == path) v.copyWith(favorite: favorite) else v,
+        ],
+      ),
+    );
+  }
+
   /// Peso en bytes de las portadas guardadas en caché.
-  Future<int> thumbnailCacheBytes() async =>
-      (await getThumbnailCacheSize(NoParams())).fold((_) => 0, (bytes) => bytes);
+  Future<int> thumbnailCacheBytes() async => (await getThumbnailCacheSize(
+    NoParams(),
+  )).fold((_) => 0, (bytes) => bytes);
 
   /// Borra las portadas en caché; se vuelven a crear cuando hacen falta.
   Future<void> clearThumbnailCache() async {

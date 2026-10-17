@@ -107,4 +107,35 @@ void main() {
     expect(await cubit.thumbnailCacheBytes(), 0);
     await cubit.close();
   });
+
+  test('setFavorite cambia la lista al instante y guarda el dato', () async {
+    final repo = FakeSavedVideosRepo(
+      videos: [_video('a.mp4', seconds: 10), _video('b.mp4', seconds: 20)],
+    );
+    final cubit = fakeLibraryCubit(repo);
+    await cubit.load();
+    expect(cubit.state.favoriteCount, 0);
+
+    await cubit.setFavorite('/app/a.mp4', true);
+
+    expect(cubit.state.favoriteCount, 1);
+    expect(cubit.state.videos.firstWhere((v) => v.favorite).path, '/app/a.mp4');
+    expect(repo.favorites, {'/app/a.mp4'});
+
+    await cubit.setFavorite('/app/a.mp4', false);
+    expect(cubit.state.favoriteCount, 0);
+    expect(repo.favorites, isEmpty);
+  });
+
+  test('un favorito sigue siéndolo tras recargar la biblioteca', () async {
+    final cubit = fakeLibraryCubit(
+      FakeSavedVideosRepo(videos: [_video('a.mp4', seconds: 10)]),
+    );
+    await cubit.load();
+    await cubit.setFavorite('/app/a.mp4', true);
+
+    await cubit.load();
+
+    expect(cubit.state.favoriteCount, 1);
+  });
 }

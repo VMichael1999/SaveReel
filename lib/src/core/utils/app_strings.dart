@@ -190,6 +190,11 @@ class AppStrings {
   String get settingsLanguage => _t('settingsLanguage');
   String get settingsLanguageHint => _t('settingsLanguageHint');
 
+  String get libraryFavorites => _t('libraryFavorites');
+  String get favoriteAdd => _t('favoriteAdd');
+  String get favoriteRemove => _t('favoriteRemove');
+  String get favoriteBadge => _t('favoriteBadge');
+
   // Con datos o plurales
   String downloadsCount(int n) => _t('downloadsCount', {'n': n});
   String linkOtherPlatform(String platform) =>

@@ -11,6 +11,7 @@ import '../../../../../core/utils/app_strings.dart';
 import '../../../../../core/widgets/app_message.dart';
 import '../../../domain/entities/saved_video.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
+import '../../bloc/library_cubit/library_cubit.dart';
 import '../video_player/delete_video_dialog.dart';
 
 /// Hoja que se abre al mantener pulsada una miniatura: compartir, guardar en
@@ -27,6 +28,7 @@ Future<void> showLibraryActionsSheet(
   final messenger = context;
   return showModalBottomSheet<void>(
     context: context,
+    isScrollControlled: true,
     useSafeArea: true,
     sheetAnimationStyle:
         reduceMotion
@@ -47,6 +49,13 @@ Future<void> showLibraryActionsSheet(
                     Navigator.of(sheetContext).pop();
                     onSelect();
                   },
+          onFavorite: () {
+            Navigator.of(sheetContext).pop();
+            messenger.read<LibraryCubit>().setFavorite(
+              video.path,
+              !video.favorite,
+            );
+          },
           onShare: () {
             Navigator.of(sheetContext).pop();
             final handle = video.authorHandle;
@@ -100,6 +109,7 @@ class _LibraryActions extends StatelessWidget {
   const _LibraryActions({
     required this.video,
     required this.onSelect,
+    required this.onFavorite,
     required this.onShare,
     required this.onSaveToGallery,
     required this.onDelete,
@@ -107,6 +117,7 @@ class _LibraryActions extends StatelessWidget {
 
   final SavedVideo video;
   final VoidCallback? onSelect;
+  final VoidCallback onFavorite;
   final VoidCallback onShare;
   final VoidCallback onSaveToGallery;
   final VoidCallback onDelete;
@@ -117,7 +128,7 @@ class _LibraryActions extends StatelessWidget {
     final colors = context.colors;
     final title = video.title?.trim();
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         0,
@@ -151,6 +162,17 @@ class _LibraryActions extends StatelessWidget {
               label: context.strings.select,
               onTap: onSelect!,
             ),
+          _ActionRow(
+            icon:
+                video.favorite
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+            label:
+                video.favorite
+                    ? context.strings.favoriteRemove
+                    : context.strings.favoriteAdd,
+            onTap: onFavorite,
+          ),
           _ActionRow(
             icon: Icons.ios_share_rounded,
             label: context.strings.share,

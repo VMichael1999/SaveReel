@@ -258,4 +258,48 @@ void main() {
 
     expect(await source.thumbnailCacheSize(), 0);
   });
+
+  group('favoritos', () {
+    test('se marcan, se leen al listar y se pueden quitar', () async {
+      final file = await touch('v.mp4');
+      expect((await source.list()).single.favorite, isFalse);
+
+      await source.setFavorite(file.path, true);
+      expect((await source.list()).single.favorite, isTrue);
+
+      await source.setFavorite(file.path, false);
+      expect((await source.list()).single.favorite, isFalse);
+    });
+
+    test('marcar uno no borra los datos que ya tenía', () async {
+      final file = await touch('v.mp4');
+      await source.record(
+        SavedVideoMetadata(path: file.path, title: 'Lomo', authorHandle: 'lu'),
+      );
+      await source.setFavorite(file.path, true);
+
+      final video = (await source.list()).single;
+      expect(video.title, 'Lomo');
+      expect(video.authorHandle, 'lu');
+      expect(video.favorite, isTrue);
+    });
+
+    test('anotar de nuevo la descarga no le quita lo de favorito', () async {
+      final file = await touch('v.mp4');
+      await source.setFavorite(file.path, true);
+      await source.record(SavedVideoMetadata(path: file.path, title: 'Nuevo'));
+
+      final video = (await source.list()).single;
+      expect(video.title, 'Nuevo');
+      expect(video.favorite, isTrue);
+    });
+
+    test('una galería también puede ser favorita', () async {
+      final folder = await Directory('${dir.path}/carrusel').create();
+      await File('${folder.path}/1.jpg').writeAsString('x');
+      await source.setFavorite(folder.path, true);
+
+      expect((await source.list()).single.favorite, isTrue);
+    });
+  });
 }

@@ -1,3 +1,4 @@
+import 'domain/usecases/set_favorite_usecase.dart';
 import '../../core/helpers/language_store.dart';
 import 'presentation/bloc/locale_cubit/locale_cubit.dart';
 import 'package:dio/dio.dart';
@@ -75,6 +76,7 @@ void initDownloader() {
   sl.registerLazySingleton(() => ProbeVideoDurationUseCase(repo: sl()));
   sl.registerLazySingleton(() => RecordSavedVideoUseCase(repo: sl()));
   sl.registerLazySingleton(() => ForgetSavedVideoUseCase(repo: sl()));
+  sl.registerLazySingleton(() => SetFavoriteUseCase(repo: sl()));
   sl.registerLazySingleton(() => GetThumbnailCacheSizeUseCase(repo: sl()));
   sl.registerLazySingleton(() => ClearThumbnailCacheUseCase(repo: sl()));
   sl.registerLazySingleton(
@@ -84,6 +86,7 @@ void initDownloader() {
       probeDuration: sl(),
       recordSavedVideo: sl(),
       forgetSavedVideo: sl(),
+      setFavoriteUseCase: sl(),
       getThumbnailCacheSize: sl(),
       clearThumbnailCacheUseCase: sl(),
     ),
