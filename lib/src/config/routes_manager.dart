@@ -21,6 +21,15 @@ class Routes {
 }
 
 class AppRouter {
+  /// Las rutas con las que arranca la app: siempre una sola. Si el sistema
+  /// abre la app con un enlace (`savetic://share?text=…`), Flutter lo toma
+  /// como ruta inicial y, partido por las barras, armaría varias pantallas
+  /// de inicio apiladas, cada una reaccionando a lo que pase en la app.
+  static List<Route<dynamic>> initialRoutes(String initial) => [
+    getRoute(RouteSettings(name: initial))!,
+  ];
+
+
   static Route? getRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
       case Routes.splash:
