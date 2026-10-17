@@ -112,6 +112,17 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
     });
   }
 
+  /// Vacía el campo y su aviso. El enlace se recuerda como ya usado para que
+  /// la tarjeta del portapapeles no lo vuelva a ofrecer.
+  void _clearField() {
+    _handledLink = _controller.text.isEmpty ? _handledLink : _controller.text;
+    _controller.clear();
+    setState(() {
+      _touched = false;
+      _clipboardLink = null;
+    });
+  }
+
   Future<void> _checkClipboard() async {
     if (!await Clipboard.hasStrings()) return;
     final data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -195,6 +206,8 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
   void _onBlocState(BuildContext context, DownloaderState state) {
     switch (state) {
       case DownloaderSaveVideoLoading():
+        // La descarga ya empezó: el campo queda libre para el próximo enlace.
+        _clearField();
         Navigator.of(context).popAndPushNamed(Routes.downloads);
       case DownloaderGetVideoFailure():
         setState(() {

@@ -356,6 +356,24 @@ void main() {
     await drainToasts(tester);
   });
 
+  testWidgets('al empezar la descarga el campo del enlace queda vacío', (
+    tester,
+  ) async {
+    fakeNetwork(metered: false);
+    final repo = await _openPreview(tester);
+    final field = find.byType(TextField, skipOffstage: false);
+    expect(
+      tester.widget<TextField>(field).controller!.text,
+      'https://vm.tiktok.com/ZMh7K2pQx/',
+    );
+
+    await tapDownload(tester, 'Descargar video · 9.1 MB');
+    await _settleUntil(tester, () => repo.saved.isNotEmpty);
+
+    expect(tester.widget<TextField>(field).controller!.text, isEmpty);
+    await drainToasts(tester);
+  });
+
   testWidgets('«descargar siempre» ni consulta la red', (tester) async {
     final calls = fakeNetwork(metered: true);
     final repo = await _openPreview(
