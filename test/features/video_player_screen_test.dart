@@ -17,6 +17,10 @@ import 'package:savetic/src/features/tiktok_downloader/domain/usecases/save_vide
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/video_player_args.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/video_player_screen.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
+import 'package:savetic/src/core/layout/duo_side_bar.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import '../support/fake_library.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 
 /// Reproductor falso: registra las llamadas y simula un video de 34 s.
@@ -100,8 +104,10 @@ Future<_FakePlayer> _open(
   WidgetTester tester,
   VideoPlayerArgs args, {
   bool failOnCreate = false,
+  Size physicalSize = const Size(1080, 2400),
+  LibraryCubit? library,
 }) async {
-  tester.view.physicalSize = const Size(1080, 2400);
+  tester.view.physicalSize = physicalSize;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
 
@@ -116,8 +122,11 @@ Future<_FakePlayer> _open(
   );
 
   await tester.pumpWidget(
-    BlocProvider.value(
-      value: bloc,
+    MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: bloc),
+        BlocProvider<LibraryCubit>.value(value: library ?? fakeLibraryCubit()),
+      ],
       child: MaterialApp(
         theme: AppTheme.dark,
         home: Builder(
@@ -248,5 +257,50 @@ void main() {
     await _open(tester, _args, failOnCreate: true);
 
     expect(find.text('No pudimos reproducir este video.'), findsOneWidget);
+  });
+
+  group('iPhone Duo cerrado', () {
+    const closed = Size(466 * 3, 678 * 3);
+
+    testWidgets('Volver y Favorito van en la franja sobre el video', (
+      tester,
+    ) async {
+      await _open(tester, _args, physicalSize: closed);
+
+      expect(find.byType(DuoSideBar), findsOneWidget);
+      expect(find.byTooltip('Volver'), findsOneWidget);
+      expect(find.byTooltip('Agregar a favoritos'), findsOneWidget);
+      // El resto sigue como hoy.
+      expect(find.text('@cocinaconlucia'), findsOneWidget);
+      expect(find.text('Compartir'), findsOneWidget);
+    });
+
+    testWidgets('Favorito marca el video y se puede quitar', (tester) async {
+      final repo = FakeSavedVideosRepo(
+        videos: [
+          SavedVideo(
+            path: 'video.mp4',
+            sizeBytes: 1,
+            modified: DateTime(2026, 1, 1),
+          ),
+        ],
+      );
+      final library = fakeLibraryCubit(repo);
+      await library.load();
+      await _open(tester, _args, physicalSize: closed, library: library);
+
+      await tester.tap(find.byTooltip('Agregar a favoritos'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(repo.favorites, contains('video.mp4'));
+      expect(find.byTooltip('Quitar de favoritos'), findsOneWidget);
+    });
+
+    testWidgets('en un iPhone normal no hay franja', (tester) async {
+      await _open(tester, _args);
+
+      expect(find.byType(DuoSideBar), findsNothing);
+    });
   });
 }

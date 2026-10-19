@@ -8,10 +8,14 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../config/theme/app_tokens.dart';
 import '../../../../core/helpers/dir_helper.dart';
+import '../../../../core/layout/duo_context.dart';
+import '../../../../core/layout/duo_side_bar.dart';
 import '../../../../core/utils/app_enums.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../../core/widgets/app_message.dart';
 import '../bloc/downloader_bloc/downloader_bloc.dart';
+import '../bloc/library_cubit/library_cubit.dart';
+import '../../domain/entities/saved_video.dart';
 import '../models/video_player_args.dart';
 import '../widgets/video_player/delete_video_dialog.dart';
 import '../widgets/video_player/player_action.dart';
@@ -145,38 +149,39 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   ),
                 ),
               ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppOverlay.shadeTop, AppOverlay.clear],
+            if (!context.hasDuoSideBar)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppOverlay.shadeTop, AppOverlay.clear],
+                    ),
                   ),
-                ),
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: IconButton.filled(
-                        tooltip: context.strings.back,
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppOverlay.controlFill,
-                          foregroundColor: AppOverlay.onVideo,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: IconButton.filled(
+                          tooltip: context.strings.back,
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppOverlay.controlFill,
+                            foregroundColor: AppOverlay.onVideo,
+                          ),
+                          icon: const Icon(Icons.arrow_back_rounded),
                         ),
-                        icon: const Icon(Icons.arrow_back_rounded),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
             Positioned(
               left: 0,
               right: 0,
@@ -271,11 +276,63 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 ),
               ),
             ),
+            if (context.hasDuoSideBar)
+              Positioned(
+                top: 0,
+                right: 0,
+                bottom: 0,
+                child: _PlayerSideBar(path: _args.path),
+              ),
           ],
         ),
       ),
     );
   }
+}
+
+/// La franja sobre el video: Volver arriba y Favorito abajo.
+class _PlayerSideBar extends StatelessWidget {
+  const _PlayerSideBar({required this.path});
+
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<LibraryCubit, LibraryState>(
+      buildWhen: (a, b) => _favorite(a.videos) != _favorite(b.videos),
+      builder: (context, state) {
+        final favorite = _favorite(state.videos);
+        return DuoSideBar(
+          overVideo: true,
+          top: [
+            DuoAction(
+              icon: Icons.arrow_back_rounded,
+              tooltip: context.strings.back,
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+          ],
+          bottom: [
+            DuoAction(
+              icon:
+                  favorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+              tooltip:
+                  favorite
+                      ? context.strings.favoriteRemove
+                      : context.strings.favoriteAdd,
+              onPressed:
+                  () =>
+                      context.read<LibraryCubit>().setFavorite(path, !favorite),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  bool _favorite(List<SavedVideo> videos) =>
+      videos.any((v) => v.path == path && v.favorite);
 }
 
 /// El video, o lo que lo reemplaza mientras carga, si falla o si es un audio.
