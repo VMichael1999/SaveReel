@@ -82,6 +82,11 @@ Future<void> _pumpHome(
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
   }
+  tester.view.padding = const FakeViewPadding(right: 84 * 3, bottom: 34 * 3);
+  tester.view.viewPadding = const FakeViewPadding(
+    right: 84 * 3,
+    bottom: 34 * 3,
+  );
 
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -144,7 +149,8 @@ void main() {
     expect(find.byTooltip('Tus descargas'), findsOneWidget);
     expect(find.byTooltip('Ajustes'), findsOneWidget);
     expect(find.text('SaveReel'), findsOneWidget);
-    expect(tester.getSize(find.byType(DuoSideBar)).width, kDuoSideBarWidth);
+    // El sistema reserva 84 pt en ese borde y la franja usa todo ese ancho.
+    expect(tester.getSize(find.byType(DuoSideBar)).width, 84);
     expect(tester.getTopRight(find.byType(DuoSideBar)).dx, 466);
   });
 

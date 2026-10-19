@@ -18,6 +18,11 @@ Future<SettingsCubit> _pump(WidgetTester tester, Size size) async {
   tester.view.physicalSize = size * 3;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
+  tester.view.padding = const FakeViewPadding(right: 84 * 3, bottom: 34 * 3);
+  tester.view.viewPadding = const FakeViewPadding(
+    right: 84 * 3,
+    bottom: 34 * 3,
+  );
 
   final library = fakeLibraryCubit(FakeSavedVideosRepo());
   await library.load();

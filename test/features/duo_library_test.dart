@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
-import 'package:savetic/src/core/layout/duo_layout.dart';
 import 'package:savetic/src/core/layout/duo_side_bar.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/library_screen.dart';
@@ -17,6 +16,11 @@ Future<void> _open(WidgetTester tester, Size size) async {
   tester.view.physicalSize = size * 3;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
+  tester.view.padding = const FakeViewPadding(right: 84 * 3, bottom: 34 * 3);
+  tester.view.viewPadding = const FakeViewPadding(
+    right: 84 * 3,
+    bottom: 34 * 3,
+  );
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/path_provider'),
@@ -136,8 +140,8 @@ void main() {
       final gapCenter = (row[2].right + row[3].left) / 2;
       expect(gapCenter, closeTo(951 / 2, 0.01));
       // Simetría: lo que sobra a cada lado del conjunto es la franja.
-      expect(row.first.left, kDuoSideBarWidth);
-      expect(951 - row.last.right, kDuoSideBarWidth);
+      expect(row.first.left, closeTo(84, 0.01));
+      expect(951 - row.last.right, closeTo(84, 0.01));
     });
 
     testWidgets('abierto en horizontal: la franja trae las mismas acciones', (
