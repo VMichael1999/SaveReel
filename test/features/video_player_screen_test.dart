@@ -22,6 +22,7 @@ import 'package:savetic/src/core/layout/duo_side_bar.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/library_screen.dart';
 import '../support/fake_library.dart';
+import '../support/golden.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 
 /// Reproductor falso: registra las llamadas y simula un video de 34 s.
@@ -321,9 +322,9 @@ void main() {
         tester.getTopLeft(find.text('@cocinaconlucia')).dx,
         greaterThan(951 / 2),
       );
-      await expectLater(
+      await expectGolden(
         find.byType(MaterialApp),
-        matchesGoldenFile('goldens/duo/biblioteca_y_reproductor_abierto.png'),
+        'goldens/duo/biblioteca_y_reproductor_abierto.png',
       );
     });
 

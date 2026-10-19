@@ -28,6 +28,7 @@ import 'package:savetic/src/core/layout/duo_split.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/downloader_screen.dart';
 
 import '../support/fake_library.dart';
+import '../support/golden.dart';
 
 class _Repo implements TiktokVideoBaseRepo {
   _Repo({this.finds = false});
@@ -157,9 +158,9 @@ void main() {
   testWidgets('cerrado: golden del inicio', (tester) async {
     await _pumpHome(tester, const Size(466, 678));
 
-    await expectLater(
+    await expectGolden(
       find.byType(MaterialApp),
-      matchesGoldenFile('goldens/duo/inicio_cerrado.png'),
+      'goldens/duo/inicio_cerrado.png',
     );
   });
 
@@ -205,9 +206,9 @@ void main() {
         greaterThanOrEqualTo(951 / 2 + kDuoFoldGap),
       );
       expect(find.text('Ruta en bici por la Costa Verde'), findsOneWidget);
-      await expectLater(
+      await expectGolden(
         find.byType(MaterialApp),
-        matchesGoldenFile('goldens/duo/inicio_y_vista_previa_abierto.png'),
+        'goldens/duo/inicio_y_vista_previa_abierto.png',
       );
     });
 

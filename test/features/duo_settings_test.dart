@@ -10,6 +10,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/models/app_s
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/settings_screen.dart';
 
 import '../support/fake_library.dart';
+import '../support/golden.dart';
 
 const _open = Size(951, 669);
 const _closed = Size(466, 678);
@@ -77,9 +78,9 @@ void main() {
       greaterThan(951 / 2),
     );
 
-    await expectLater(
+    await expectGolden(
       find.byType(MaterialApp),
-      matchesGoldenFile('goldens/duo/ajustes_abierto.png'),
+      'goldens/duo/ajustes_abierto.png',
     );
 
     await tester.tap(find.text('Solo con Wi-Fi'));
