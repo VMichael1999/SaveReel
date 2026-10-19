@@ -20,6 +20,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/screens/vide
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/core/layout/duo_side_bar.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/screens/library_screen.dart';
 import '../support/fake_library.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 
@@ -37,6 +38,7 @@ class _FakePlayer extends VideoPlayerPlatform with MockPlatformInterfaceMixin {
   @override
   Future<int?> create(DataSource dataSource) async {
     if (failOnCreate) throw PlatformException(code: 'sin_archivo');
+    calls.add('create');
     _events.add(
       VideoEvent(
         eventType: VideoEventType.initialized,
@@ -128,6 +130,7 @@ Future<_FakePlayer> _open(
         BlocProvider<LibraryCubit>.value(value: library ?? fakeLibraryCubit()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         home: Builder(
           builder:
@@ -301,6 +304,51 @@ void main() {
       await _open(tester, _args);
 
       expect(find.byType(DuoSideBar), findsNothing);
+    });
+
+    testWidgets('abierto: lista a la izquierda, video a la derecha y las '
+        'acciones del video en la franja', (tester) async {
+      await _open(tester, _args, physicalSize: const Size(951, 669) * 3);
+
+      expect(find.byType(LibraryScreen), findsOneWidget);
+      expect(find.byType(DuoSideBar), findsOneWidget);
+      expect(find.byTooltip('Agregar a favoritos'), findsOneWidget);
+      expect(find.byTooltip('Compartir'), findsOneWidget);
+      expect(find.byTooltip('Eliminar'), findsOneWidget);
+      // Las acciones no se repiten bajo el video.
+      expect(find.text('Compartir'), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('@cocinaconlucia')).dx,
+        greaterThan(951 / 2),
+      );
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('goldens/duo/biblioteca_y_reproductor_abierto.png'),
+      );
+    });
+
+    testWidgets('abrir y cerrar el teléfono no recrea el reproductor', (
+      tester,
+    ) async {
+      final player = await _open(
+        tester,
+        _args,
+        physicalSize: const Size(466, 678) * 3,
+      );
+      expect(player.calls.where((c) => c == 'create').length, 1);
+
+      tester.view.physicalSize = const Size(951, 669) * 3;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(LibraryScreen), findsOneWidget);
+
+      tester.view.physicalSize = const Size(466, 678) * 3;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(LibraryScreen), findsNothing);
+
+      expect(player.calls.where((c) => c == 'create').length, 1);
+      expect(find.text('@cocinaconlucia'), findsOneWidget);
     });
   });
 }
