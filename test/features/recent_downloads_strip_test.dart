@@ -16,8 +16,12 @@ SavedVideo _video(String name) => SavedVideo(
   durationSeconds: 10,
 );
 
-Future<void> _pump(WidgetTester tester, int count) async {
-  tester.view.physicalSize = const Size(1080, 2400);
+Future<void> _pump(
+  WidgetTester tester,
+  int count, {
+  Size physicalSize = const Size(1080, 2400),
+}) async {
+  tester.view.physicalSize = physicalSize;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
   final cubit = fakeLibraryCubit(
@@ -65,5 +69,25 @@ void main() {
     await _pump(tester, 0);
     expect(find.byType(LibraryThumbnail), findsNothing);
     expect(find.text('Recientes'), findsNothing);
+  });
+
+  testWidgets(
+    'Duo abierto en vertical: ocho videos, de a cuatro en dos filas',
+    (tester) async {
+      await _pump(tester, 12, physicalSize: const Size(669, 951) * 3);
+
+      expect(find.byType(LibraryThumbnail), findsNWidgets(8));
+      final tops = {
+        for (final e in tester.widgetList(find.byType(LibraryThumbnail)))
+          tester.getTopLeft(find.byWidget(e)).dy,
+      };
+      expect(tops, hasLength(2));
+    },
+  );
+
+  testWidgets('Duo cerrado: las seis de siempre, de a tres', (tester) async {
+    await _pump(tester, 12, physicalSize: const Size(466, 678) * 3);
+
+    expect(find.byType(LibraryThumbnail), findsNWidgets(6));
   });
 }

@@ -9,6 +9,7 @@ import 'container_injector.dart';
 import 'localization/app_texts.dart';
 import 'features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
+import 'features/tiktok_downloader/presentation/bloc/duo_pane_cubit/duo_pane_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/first_use_cubit/first_use_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
 import 'features/tiktok_downloader/presentation/bloc/locale_cubit/locale_cubit.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => sl<LocaleCubit>()..load()),
         BlocProvider(create: (context) => sl<SettingsCubit>()..load()),
         BlocProvider(create: (context) => sl<SharedLinkCubit>()..start()),
+        BlocProvider(create: (context) => DuoPaneCubit()),
       ],
       child: BlocListener<SharedLinkCubit, SharedLinkState>(
         listener: _goHomeForSharedLink,

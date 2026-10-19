@@ -29,6 +29,8 @@ class LibraryTile extends StatelessWidget {
     this.selected = false,
     this.onToggle,
     this.onStartSelecting,
+    this.current = false,
+    this.onPlay,
   });
 
   final SavedVideo video;
@@ -40,6 +42,13 @@ class LibraryTile extends StatelessWidget {
 
   /// Para empezar a seleccionar desde la hoja de acciones, con este elegido.
   final VoidCallback? onStartSelecting;
+
+  /// La que está sonando en el reproductor de al lado: lleva borde de acento.
+  final bool current;
+
+  /// Si se da, tocar la miniatura llama a esto en vez de expandirse al
+  /// reproductor (con el video ya abierto en la otra mitad).
+  final VoidCallback? onPlay;
 
   void _openActions(BuildContext context) =>
       showLibraryActionsSheet(context, video, onSelect: onStartSelecting);
@@ -77,10 +86,10 @@ class LibraryTile extends StatelessWidget {
                       : formatDuration(video.durationSeconds!),
             ),
             excludeSemantics: true,
-            onTap: selecting ? onToggle : open,
+            onTap: selecting ? onToggle : (onPlay ?? open),
             onLongPress: selecting ? onToggle : () => _openActions(context),
             child: InkWell(
-              onTap: selecting ? onToggle : open,
+              onTap: selecting ? onToggle : (onPlay ?? open),
               onLongPress: selecting ? onToggle : () => _openActions(context),
               child: Stack(
                 fit: StackFit.expand,
@@ -131,6 +140,20 @@ class LibraryTile extends StatelessWidget {
                           formatDuration(video.durationSeconds!),
                           style: Theme.of(context).textTheme.labelSmall?.tabular
                               .copyWith(color: AppOverlay.onVideo),
+                        ),
+                      ),
+                    ),
+                  if (current)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: colors.accent,
+                              width: AppSizes.borderThin * 2,
+                            ),
+                            borderRadius: BorderRadius.circular(AppRadii.sm),
+                          ),
                         ),
                       ),
                     ),

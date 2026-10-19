@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/theme/app_tokens.dart';
 import '../../../../config/theme/savetic_colors.dart';
+import '../../../../core/layout/duo_context.dart';
+import '../../../../core/layout/duo_layout.dart';
+import '../../../../core/layout/duo_side_bar.dart';
+import '../../../../core/layout/duo_split.dart';
 import '../../../../core/utils/app_enums.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
@@ -14,6 +18,7 @@ import '../bloc/settings_cubit/settings_cubit.dart';
 import '../models/app_settings.dart';
 import '../models/download_format.dart';
 import '../widgets/settings_screen/choice_sheet.dart';
+import '../widgets/video_preview/format_option.dart';
 import '../widgets/settings_screen/settings_group.dart';
 import '../widgets/settings_screen/settings_row.dart';
 
@@ -65,31 +70,99 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context.strings.settingsMobileDataWifiOnlyShort,
   };
 
-  Future<void> _pickMobileData(AppSettings settings) async {
-    final cubit = context.read<SettingsCubit>();
-    final chosen = await showChoiceSheet<MobileDataPolicy>(
+  /// La opción que se muestra en la mitad derecha (Duo abierto) o en una
+  /// hoja; la misma en los dos, para que abrir o cerrar el teléfono no pierda
+  /// lo que se estaba eligiendo.
+  _Choice? _choice;
+
+  /// La hoja que está abierta, si la hay.
+  _Choice? _sheetChoice;
+
+  DuoLayout? _lastLayout;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final layout = context.duoLayout;
+    final previous = _lastLayout;
+    _lastLayout = layout;
+    if (previous == null || previous == layout) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onLayoutChanged(previous, layout);
+    });
+  }
+
+  void _onLayoutChanged(DuoLayout previous, DuoLayout next) {
+    if (next == DuoLayout.openLandscape) {
+      final open = _sheetChoice;
+      if (open == null) return;
+      _sheetChoice = null;
+      Navigator.of(context).pop();
+      setState(() => _choice = open);
+    } else if (previous == DuoLayout.openLandscape) {
+      final shown = _choice;
+      if (shown == null) return;
+      setState(() => _choice = null);
+      _showSheet(shown);
+    }
+  }
+
+  Future<void> _showSheet(_Choice choice) async {
+    _sheetChoice = choice;
+    final chosen = await showChoiceSheet<int>(
       context,
-      title: context.strings.settingsMobileData,
-      selected: settings.mobileData,
+      title: choice.title,
+      selected: choice.options.indexWhere((o) => o.isSelected()),
       options: [
-        ChoiceOption(
-          value: MobileDataPolicy.ask,
-          title: context.strings.settingsMobileDataAsk,
-          subtitle: context.strings.settingsMobileDataAskHint,
-        ),
-        ChoiceOption(
-          value: MobileDataPolicy.wifiOnly,
-          title: context.strings.settingsMobileDataWifiOnly,
-          subtitle: context.strings.settingsMobileDataWifiOnlyHint,
-        ),
-        ChoiceOption(
-          value: MobileDataPolicy.allow,
-          title: context.strings.settingsMobileDataAllow,
-          subtitle: context.strings.settingsMobileDataAllowHint,
-        ),
+        for (var i = 0; i < choice.options.length; i++)
+          ChoiceOption(
+            value: i,
+            title: choice.options[i].title,
+            subtitle: choice.options[i].subtitle,
+          ),
       ],
     );
-    if (chosen != null) await cubit.setMobileData(chosen);
+    if (_sheetChoice == choice) _sheetChoice = null;
+    if (chosen != null) await choice.options[chosen].apply();
+  }
+
+  void _open(_Choice choice) {
+    if (context.duoLayout == DuoLayout.openLandscape) {
+      setState(() => _choice = choice);
+    } else {
+      _showSheet(choice);
+    }
+  }
+
+  void _pickMobileData() {
+    final cubit = context.read<SettingsCubit>();
+    bool is_(MobileDataPolicy p) => cubit.state.mobileData == p;
+    _open(
+      _Choice(
+        id: 'mobileData',
+        title: context.strings.settingsMobileData,
+        options: [
+          _Option(
+            title: context.strings.settingsMobileDataAsk,
+            subtitle: context.strings.settingsMobileDataAskHint,
+            isSelected: () => is_(MobileDataPolicy.ask),
+            apply: () => cubit.setMobileData(MobileDataPolicy.ask),
+          ),
+          _Option(
+            title: context.strings.settingsMobileDataWifiOnly,
+            subtitle: context.strings.settingsMobileDataWifiOnlyHint,
+            isSelected: () => is_(MobileDataPolicy.wifiOnly),
+            apply: () => cubit.setMobileData(MobileDataPolicy.wifiOnly),
+          ),
+          _Option(
+            title: context.strings.settingsMobileDataAllow,
+            subtitle: context.strings.settingsMobileDataAllowHint,
+            isSelected: () => is_(MobileDataPolicy.allow),
+            apply: () => cubit.setMobileData(MobileDataPolicy.allow),
+          ),
+        ],
+      ),
+    );
   }
 
   String _themeName(AppThemeChoice theme) => switch (theme) {
@@ -98,70 +171,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
     AppThemeChoice.dark => context.strings.themeDark,
   };
 
-  Future<void> _pickFormat(AppSettings settings) async {
+  void _pickFormat() {
     final cubit = context.read<SettingsCubit>();
-    final chosen = await showChoiceSheet<DownloadFormat>(
-      context,
-      title: context.strings.settingsFormat,
-      selected: settings.defaultFormat,
-      options: [
-        ChoiceOption(
-          value: DownloadFormat.withCredits,
-          title: context.strings.formatWithCredits,
-          subtitle: context.strings.settingsFormatHintCredits,
-        ),
-        ChoiceOption(
-          value: DownloadFormat.noWatermark,
-          title: context.strings.formatNoWatermark,
-          subtitle: context.strings.formatNoWatermarkHint,
-        ),
-        ChoiceOption(
-          value: DownloadFormat.audio,
-          title: context.strings.formatAudio,
-          subtitle: context.strings.formatAudioHint,
-        ),
-      ],
+    bool is_(DownloadFormat f) => cubit.state.defaultFormat == f;
+    _open(
+      _Choice(
+        id: 'format',
+        title: context.strings.settingsFormat,
+        options: [
+          _Option(
+            title: context.strings.formatWithCredits,
+            subtitle: context.strings.settingsFormatHintCredits,
+            isSelected: () => is_(DownloadFormat.withCredits),
+            apply: () => cubit.setDefaultFormat(DownloadFormat.withCredits),
+          ),
+          _Option(
+            title: context.strings.formatNoWatermark,
+            subtitle: context.strings.formatNoWatermarkHint,
+            isSelected: () => is_(DownloadFormat.noWatermark),
+            apply: () => cubit.setDefaultFormat(DownloadFormat.noWatermark),
+          ),
+          _Option(
+            title: context.strings.formatAudio,
+            subtitle: context.strings.formatAudioHint,
+            isSelected: () => is_(DownloadFormat.audio),
+            apply: () => cubit.setDefaultFormat(DownloadFormat.audio),
+          ),
+        ],
+      ),
     );
-    if (chosen != null) await cubit.setDefaultFormat(chosen);
   }
 
-  Future<void> _pickLanguage() async {
+  void _pickLanguage() {
     final cubit = context.read<LocaleCubit>();
-    final chosen = await showChoiceSheet<String>(
-      context,
-      title: context.strings.settingsLanguage,
-      selected: cubit.state.languageCode,
-      options: [
-        for (final code in AppLanguages.codes)
-          ChoiceOption(value: code, title: AppLanguages.names[code]!),
-      ],
+    _open(
+      _Choice(
+        id: 'language',
+        title: context.strings.settingsLanguage,
+        options: [
+          for (final code in AppLanguages.codes)
+            _Option(
+              title: AppLanguages.names[code]!,
+              isSelected: () => cubit.state.languageCode == code,
+              apply: () => cubit.setLanguage(code),
+            ),
+        ],
+      ),
     );
-    if (chosen != null) await cubit.setLanguage(chosen);
   }
 
-  Future<void> _pickTheme(AppSettings settings) async {
+  void _pickTheme() {
     final cubit = context.read<SettingsCubit>();
-    final chosen = await showChoiceSheet<AppThemeChoice>(
-      context,
-      title: context.strings.settingsTheme,
-      selected: settings.theme,
-      options: [
-        ChoiceOption(
-          value: AppThemeChoice.system,
-          title: context.strings.themeSystem,
-          subtitle: context.strings.themeSystemHint,
-        ),
-        ChoiceOption(
-          value: AppThemeChoice.light,
-          title: context.strings.themeLight,
-        ),
-        ChoiceOption(
-          value: AppThemeChoice.dark,
-          title: context.strings.themeDark,
-        ),
-      ],
+    bool is_(AppThemeChoice t) => cubit.state.theme == t;
+    _open(
+      _Choice(
+        id: 'theme',
+        title: context.strings.settingsTheme,
+        options: [
+          _Option(
+            title: context.strings.themeSystem,
+            subtitle: context.strings.themeSystemHint,
+            isSelected: () => is_(AppThemeChoice.system),
+            apply: () => cubit.setTheme(AppThemeChoice.system),
+          ),
+          _Option(
+            title: context.strings.themeLight,
+            isSelected: () => is_(AppThemeChoice.light),
+            apply: () => cubit.setTheme(AppThemeChoice.light),
+          ),
+          _Option(
+            title: context.strings.themeDark,
+            isSelected: () => is_(AppThemeChoice.dark),
+            apply: () => cubit.setTheme(AppThemeChoice.dark),
+          ),
+        ],
+      ),
     );
-    if (chosen != null) await cubit.setTheme(chosen);
   }
 
   @override
@@ -170,6 +255,157 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final library = context.watch<LibraryCubit>().state;
     final settings = context.watch<SettingsCubit>().state;
     final cache = _cacheBytes;
+
+    final children = <Widget>[
+      SettingsGroup(
+        title: context.strings.sectionOnDownload,
+        children: [
+          SettingsRow(
+            icon: Icons.high_quality_outlined,
+            title: context.strings.settingsFormat,
+            value: _formatName(settings.defaultFormat),
+            showChevron: true,
+            selected: _choice?.id == 'format',
+            onTap: _pickFormat,
+          ),
+          SettingsRow(
+            icon: Icons.signal_cellular_alt_rounded,
+            title: context.strings.settingsMobileData,
+            value: _mobileDataName(settings.mobileData),
+            showChevron: true,
+            selected: _choice?.id == 'mobileData',
+            onTap: _pickMobileData,
+          ),
+          // Mismo ritmo que las demás filas: ícono, 12 de espacio y texto.
+          ListTileTheme(
+            data: const ListTileThemeData(
+              minLeadingWidth: 24,
+              horizontalTitleGap: AppSpacing.md,
+            ),
+            child: SwitchListTile(
+              secondary: Icon(
+                Icons.photo_library_outlined,
+                color: context.colors.muted,
+              ),
+              title: Text(
+                context.strings.settingsGallery,
+                style: theme.textTheme.bodyLarge,
+              ),
+              subtitle: Text(
+                context.strings.settingsGalleryHint,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: context.colors.muted,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+              ),
+              value: settings.saveToGallery,
+              onChanged:
+                  (v) => context.read<SettingsCubit>().setSaveToGallery(v),
+            ),
+          ),
+        ],
+      ),
+      SettingsGroup(
+        title: context.strings.sectionSpace,
+        children: [
+          SettingsRow(
+            icon: Icons.storage_outlined,
+            title: context.strings.settingsDownloads,
+            subtitle:
+                library.videos.length == 1
+                    ? '1 archivo'
+                    : '${library.videos.length} archivos',
+            value: formatMegabytes(library.totalBytes),
+          ),
+          SettingsRow(
+            icon: Icons.delete_outline_rounded,
+            title: context.strings.settingsClearCache,
+            value: cache == null ? null : formatMegabytes(cache),
+            onTap: cache == 0 ? null : _clearCache,
+          ),
+        ],
+      ),
+      SettingsGroup(
+        title: context.strings.sectionAppearance,
+        children: [
+          SettingsRow(
+            icon: Icons.brightness_6_outlined,
+            title: context.strings.settingsTheme,
+            value: _themeName(settings.theme),
+            showChevron: true,
+            selected: _choice?.id == 'theme',
+            onTap: _pickTheme,
+          ),
+          SettingsRow(
+            icon: Icons.language,
+            title: context.strings.settingsLanguage,
+            value:
+                AppLanguages.names[context
+                    .watch<LocaleCubit>()
+                    .state
+                    .languageCode],
+            showChevron: true,
+            selected: _choice?.id == 'language',
+            onTap: _pickLanguage,
+          ),
+        ],
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xs,
+          AppSpacing.lg,
+          AppSpacing.xs,
+          0,
+        ),
+        child: Text(
+          context.strings.legalNotice,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: context.colors.muted,
+          ),
+        ),
+      ),
+    ];
+
+    if (context.duoLayout == DuoLayout.openLandscape) {
+      return Scaffold(
+        body: DuoSplit(
+          left: SafeArea(
+            bottom: false,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.xl,
+              ),
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    context.strings.settingsTitle,
+                    style: theme.textTheme.headlineSmall,
+                  ),
+                ),
+                ...children,
+              ],
+            ),
+          ),
+          right:
+              _choice == null ? const SizedBox.shrink() : _ChoicePane(_choice!),
+          sideBar: DuoSideBar(
+            top: [
+              DuoAction(
+                icon: Icons.arrow_back_rounded,
+                tooltip: context.strings.back,
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.settingsTitle)),
@@ -180,112 +416,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppSpacing.lg,
           AppSpacing.xl,
         ),
+        children: children,
+      ),
+    );
+  }
+}
+
+/// Una opción de la lista de elecciones.
+class _Option {
+  const _Option({
+    required this.title,
+    required this.isSelected,
+    required this.apply,
+    this.subtitle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final bool Function() isSelected;
+  final Future<void> Function() apply;
+}
+
+/// Lo que se elige en una fila de Ajustes, con sus opciones.
+class _Choice {
+  const _Choice({required this.id, required this.title, required this.options});
+
+  final String id;
+  final String title;
+  final List<_Option> options;
+}
+
+/// Las opciones de la fila elegida, en la mitad derecha.
+class _ChoicePane extends StatelessWidget {
+  const _ChoicePane(this.choice);
+
+  final _Choice choice;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.xl,
+        ),
         children: [
-          SettingsGroup(
-            title: context.strings.sectionOnDownload,
-            children: [
-              SettingsRow(
-                icon: Icons.high_quality_outlined,
-                title: context.strings.settingsFormat,
-                value: _formatName(settings.defaultFormat),
-                showChevron: true,
-                onTap: () => _pickFormat(settings),
-              ),
-              SettingsRow(
-                icon: Icons.signal_cellular_alt_rounded,
-                title: context.strings.settingsMobileData,
-                value: _mobileDataName(settings.mobileData),
-                showChevron: true,
-                onTap: () => _pickMobileData(settings),
-              ),
-              // Mismo ritmo que las demás filas: ícono, 12 de espacio y texto.
-              ListTileTheme(
-                data: const ListTileThemeData(
-                  minLeadingWidth: 24,
-                  horizontalTitleGap: AppSpacing.md,
-                ),
-                child: SwitchListTile(
-                  secondary: Icon(
-                    Icons.photo_library_outlined,
-                    color: context.colors.muted,
-                  ),
-                  title: Text(
-                    context.strings.settingsGallery,
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  subtitle: Text(
-                    context.strings.settingsGalleryHint,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: context.colors.muted,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  value: settings.saveToGallery,
-                  onChanged:
-                      (v) => context.read<SettingsCubit>().setSaveToGallery(v),
-                ),
-              ),
-            ],
-          ),
-          SettingsGroup(
-            title: context.strings.sectionSpace,
-            children: [
-              SettingsRow(
-                icon: Icons.storage_outlined,
-                title: context.strings.settingsDownloads,
-                subtitle:
-                    library.videos.length == 1
-                        ? '1 archivo'
-                        : '${library.videos.length} archivos',
-                value: formatMegabytes(library.totalBytes),
-              ),
-              SettingsRow(
-                icon: Icons.delete_outline_rounded,
-                title: context.strings.settingsClearCache,
-                value: cache == null ? null : formatMegabytes(cache),
-                onTap: cache == 0 ? null : _clearCache,
-              ),
-            ],
-          ),
-          SettingsGroup(
-            title: context.strings.sectionAppearance,
-            children: [
-              SettingsRow(
-                icon: Icons.brightness_6_outlined,
-                title: context.strings.settingsTheme,
-                value: _themeName(settings.theme),
-                showChevron: true,
-                onTap: () => _pickTheme(settings),
-              ),
-              SettingsRow(
-                icon: Icons.language,
-                title: context.strings.settingsLanguage,
-                value:
-                    AppLanguages.names[context
-                        .watch<LocaleCubit>()
-                        .state
-                        .languageCode],
-                showChevron: true,
-                onTap: _pickLanguage,
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xs,
-              AppSpacing.lg,
-              AppSpacing.xs,
-              0,
-            ),
+          Semantics(
+            header: true,
             child: Text(
-              context.strings.legalNotice,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: context.colors.muted,
-              ),
+              choice.title,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
+          for (final option in choice.options) ...[
+            FormatOption(
+              title: option.title,
+              subtitle: option.subtitle,
+              selected: option.isSelected(),
+              onTap: () => option.apply(),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
         ],
       ),
     );

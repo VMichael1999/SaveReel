@@ -14,6 +14,7 @@ class SettingsRow extends StatelessWidget {
     this.value,
     this.onTap,
     this.showChevron = false,
+    this.selected = false,
   });
 
   final IconData icon;
@@ -24,6 +25,10 @@ class SettingsRow extends StatelessWidget {
   final String? value;
   final VoidCallback? onTap;
   final bool showChevron;
+
+  /// La fila cuyas opciones se ven al lado (Duo abierto): fondo elevado y una
+  /// línea de acento a la izquierda.
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -42,44 +47,55 @@ class SettingsRow extends StatelessWidget {
       onTap: onTap,
       child: InkWell(
         onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: AppSizes.touch + 8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: colors.muted),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: theme.textTheme.bodyLarge),
-                      if (subtitle != null)
-                        Text(
-                          subtitle!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.muted,
+        child: DecoratedBox(
+          decoration:
+              selected
+                  ? BoxDecoration(
+                    color: colors.raised,
+                    border: Border(
+                      left: BorderSide(color: colors.accent, width: 3),
+                    ),
+                  )
+                  : const BoxDecoration(),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: AppSizes.touch + 8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              child: Row(
+                children: [
+                  Icon(icon, color: colors.muted),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: theme.textTheme.bodyLarge),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.muted,
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
-                ),
-                if (value != null) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    value!,
-                    style: theme.textTheme.labelMedium?.tabular.copyWith(
-                      color: colors.muted,
+                      ],
                     ),
                   ),
+                  if (value != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      value!,
+                      style: theme.textTheme.labelMedium?.tabular.copyWith(
+                        color: colors.muted,
+                      ),
+                    ),
+                  ],
+                  if (showChevron)
+                    Icon(Icons.chevron_right_rounded, color: colors.muted),
                 ],
-                if (showChevron)
-                  Icon(Icons.chevron_right_rounded, color: colors.muted),
-              ],
+              ),
             ),
           ),
         ),

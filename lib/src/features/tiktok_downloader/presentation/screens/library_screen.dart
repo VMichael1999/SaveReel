@@ -4,6 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/theme/app_tokens.dart';
 import '../../../../config/theme/savetic_colors.dart';
+import '../../../../config/routes_manager.dart';
+import '../../../../core/layout/duo_context.dart';
+import '../../../../core/layout/duo_layout.dart';
+import '../../../../core/layout/duo_side_bar.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/text_search.dart';
@@ -15,11 +19,18 @@ import '../models/library_sort.dart';
 import '../widgets/downloads_screen/downloads_empty_state.dart';
 import '../widgets/library_screen/library_bulk_actions.dart';
 import '../widgets/library_screen/library_filter_chips.dart';
+import '../widgets/library_screen/library_thumbnail.dart';
 import '../widgets/library_screen/library_tile.dart';
+import '../widgets/settings_screen/choice_sheet.dart';
 
 /// Todos los videos y audios guardados, en una cuadrícula vertical.
 class LibraryScreen extends StatefulWidget {
-  const LibraryScreen({super.key});
+  const LibraryScreen({super.key, this.playingPath});
+
+  /// Con el iPhone Duo abierto, la biblioteca va a la izquierda del
+  /// reproductor: este es el video que suena, marcado con borde de acento.
+  /// Nulo en la pantalla normal.
+  final String? playingPath;
 
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();
@@ -36,6 +47,37 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Set<String>? _selected;
 
   bool get _selecting => _selected != null;
+
+  bool get _embedded => widget.playingPath != null;
+
+  /// Columnas de la cuadrícula: 6 con el Duo abierto en horizontal, a todo el
+  /// ancho; 4 en vertical; 3 en lo demás, y 3 junto al reproductor.
+  int get _columns {
+    if (_embedded) return 3;
+    return switch (context.duoLayout) {
+      DuoLayout.openLandscape => 6,
+      DuoLayout.openPortrait => 4,
+      _ => 3,
+    };
+  }
+
+  /// Márgenes laterales. Con 6 columnas, el margen izquierdo es el ancho de la
+  /// franja y el derecho cero: así el hueco entre la tercera y la cuarta
+  /// columna cae en el centro de la pantalla, donde está el pliegue.
+  EdgeInsets _horizontal({double top = 0, double bottom = 0}) {
+    if (!_embedded && context.duoLayout == DuoLayout.openLandscape) {
+      return EdgeInsets.fromLTRB(DuoSideBar.widthFor(context), top, 0, bottom);
+    }
+    return EdgeInsets.fromLTRB(AppSpacing.lg, top, AppSpacing.lg, bottom);
+  }
+
+  void _playOther(SavedVideo video) {
+    if (video.path == widget.playingPath) return;
+    Navigator.of(context).pushReplacementNamed(
+      Routes.viewVideo,
+      arguments: videoPlayerArgsFor(context, video),
+    );
+  }
 
   @override
   void initState() {
@@ -115,6 +157,145 @@ class _LibraryScreenState extends State<LibraryScreen> {
     LibrarySort.biggest => context.strings.sortBiggest,
     LibrarySort.title => context.strings.sortTitle,
   };
+
+  Future<void> _pickSort() async {
+    final chosen = await showChoiceSheet<LibrarySort>(
+      context,
+      title: context.strings.sort,
+      options: [
+        for (final sort in LibrarySort.values)
+          ChoiceOption(value: sort, title: _sortName(sort)),
+      ],
+      selected: _sort,
+    );
+    if (chosen != null && mounted) setState(() => _sort = chosen);
+  }
+
+  /// La franja lateral: Volver primero y, en el modo normal, las acciones de
+  /// la barra. Buscando o eligiendo, la barra con su campo o su conteo queda
+  /// en el contenido y la franja solo trae Volver.
+  DuoSideBar _sideBar() => DuoSideBar(
+    top: [
+      DuoAction(
+        icon: Icons.arrow_back_rounded,
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
+      if (!_selecting && !_searching) ...[
+        DuoAction(
+          icon: Icons.search_rounded,
+          tooltip: context.strings.search,
+          onPressed: _openSearch,
+        ),
+        DuoAction(
+          icon: Icons.sort_rounded,
+          tooltip: context.strings.sort,
+          onPressed: _pickSort,
+        ),
+        DuoAction(
+          icon: Icons.checklist_rounded,
+          tooltip: context.strings.select,
+          onPressed: _startSelecting,
+        ),
+      ],
+    ],
+  );
+
+  /// Con franja, el cuerpo comparte la fila con ella y, si hay búsqueda o
+  /// selección, la barra de esos modos queda arriba del contenido.
+  Widget _withSideBar(
+    BuildContext context,
+    List<SavedVideo> all,
+    List<SavedVideo> visible,
+    Widget body,
+  ) {
+    final modeBar = _selecting || _searching;
+    return Row(
+      children: [
+        Expanded(
+          child: MediaQuery.removePadding(
+            context: context,
+            removeRight: true,
+            child: Column(
+              children: [
+                if (modeBar)
+                  SafeArea(
+                    bottom: false,
+                    child: SizedBox(
+                      height: kToolbarHeight,
+                      child: _appBar(all, visible),
+                    ),
+                  ),
+                Expanded(
+                  child:
+                      modeBar
+                          ? MediaQuery.removePadding(
+                            context: context,
+                            removeTop: true,
+                            child: body,
+                          )
+                          : SafeArea(
+                            bottom: false,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                top: AppSpacing.lg,
+                              ),
+                              child: body,
+                            ),
+                          ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        _sideBar(),
+      ],
+    );
+  }
+
+  /// Junto al reproductor: Volver, Buscar y Ordenar quedan sobre la lista,
+  /// al lado de su contenido, no en la franja.
+  Widget _embeddedLayout(
+    BuildContext context,
+    List<SavedVideo> all,
+    List<SavedVideo> visible,
+    Widget body,
+  ) {
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          if (_searching)
+            SizedBox(height: kToolbarHeight, child: _appBar(all, visible))
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip:
+                        MaterialLocalizations.of(context).backButtonTooltip,
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                  IconButton(
+                    tooltip: context.strings.search,
+                    icon: const Icon(Icons.search_rounded),
+                    onPressed: _openSearch,
+                  ),
+                  IconButton(
+                    tooltip: context.strings.sort,
+                    icon: const Icon(Icons.sort_rounded),
+                    onPressed: _pickSort,
+                  ),
+                ],
+              ),
+            ),
+          Expanded(child: body),
+        ],
+      ),
+    );
+  }
 
   AppBar _appBar(List<SavedVideo> all, List<SavedVideo> visible) {
     if (_selecting) {
@@ -272,11 +453,31 @@ class _LibraryScreenState extends State<LibraryScreen> {
             if (didPop) return;
             _selecting ? _stopSelecting() : _closeSearch();
           },
-          child: Scaffold(
-            appBar: _appBar(state.videos, videos),
-            bottomNavigationBar: _selectionBar(state.videos),
-            body: _body(context, state, videos, theme),
-          ),
+          child:
+              _embedded
+                  ? Scaffold(
+                    body: _embeddedLayout(
+                      context,
+                      state.videos,
+                      videos,
+                      _body(context, state, videos, theme),
+                    ),
+                  )
+                  : context.hasDuoSideBar
+                  ? Scaffold(
+                    bottomNavigationBar: _selectionBar(state.videos),
+                    body: _withSideBar(
+                      context,
+                      state.videos,
+                      videos,
+                      _body(context, state, videos, theme),
+                    ),
+                  )
+                  : Scaffold(
+                    appBar: _appBar(state.videos, videos),
+                    bottomNavigationBar: _selectionBar(state.videos),
+                    body: _body(context, state, videos, theme),
+                  ),
         );
       },
     );
@@ -295,7 +496,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: _horizontal(),
           sliver: SliverList.list(
             children: [
               Semantics(
@@ -350,7 +551,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
         if (state.status == LibraryStatus.loading)
-          const _GridSkeleton()
+          _GridSkeleton(columns: _columns, padding: _horizontal())
         else if (videos.isEmpty)
           SliverToBoxAdapter(
             child: Padding(
@@ -368,15 +569,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
           )
         else
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.xl,
-            ),
+            padding: _horizontal(bottom: AppSpacing.xl),
             sliver: SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _columns,
                 mainAxisSpacing: AppSpacing.sm,
                 crossAxisSpacing: AppSpacing.sm,
                 childAspectRatio: 9 / 16,
@@ -388,6 +584,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     video: videos[i],
                     selecting: _selecting,
                     selected: _selected?.contains(videos[i].path) ?? false,
+                    current: videos[i].path == widget.playingPath,
+                    onPlay: _embedded ? () => _playOther(videos[i]) : null,
                     onToggle: () => _toggle(videos[i].path),
                     onStartSelecting: () => _startSelecting(videos[i].path),
                   ),
@@ -449,16 +647,19 @@ class _BarAction extends StatelessWidget {
 
 /// Mientras carga: cuadros con la forma de las miniaturas.
 class _GridSkeleton extends StatelessWidget {
-  const _GridSkeleton();
+  const _GridSkeleton({required this.columns, required this.padding});
+
+  final int columns;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: padding,
       sliver: SliverGrid.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
           mainAxisSpacing: AppSpacing.sm,
           crossAxisSpacing: AppSpacing.sm,
           childAspectRatio: 9 / 16,

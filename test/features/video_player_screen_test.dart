@@ -17,6 +17,11 @@ import 'package:savetic/src/features/tiktok_downloader/domain/usecases/save_vide
 import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/models/video_player_args.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/video_player_screen.dart';
+import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
+import 'package:savetic/src/core/layout/duo_side_bar.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/bloc/library_cubit/library_cubit.dart';
+import 'package:savetic/src/features/tiktok_downloader/presentation/screens/library_screen.dart';
+import '../support/fake_library.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 
 /// Reproductor falso: registra las llamadas y simula un video de 34 s.
@@ -33,6 +38,7 @@ class _FakePlayer extends VideoPlayerPlatform with MockPlatformInterfaceMixin {
   @override
   Future<int?> create(DataSource dataSource) async {
     if (failOnCreate) throw PlatformException(code: 'sin_archivo');
+    calls.add('create');
     _events.add(
       VideoEvent(
         eventType: VideoEventType.initialized,
@@ -100,8 +106,10 @@ Future<_FakePlayer> _open(
   WidgetTester tester,
   VideoPlayerArgs args, {
   bool failOnCreate = false,
+  Size physicalSize = const Size(1080, 2400),
+  LibraryCubit? library,
 }) async {
-  tester.view.physicalSize = const Size(1080, 2400);
+  tester.view.physicalSize = physicalSize;
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
 
@@ -116,9 +124,13 @@ Future<_FakePlayer> _open(
   );
 
   await tester.pumpWidget(
-    BlocProvider.value(
-      value: bloc,
+    MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: bloc),
+        BlocProvider<LibraryCubit>.value(value: library ?? fakeLibraryCubit()),
+      ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         home: Builder(
           builder:
@@ -248,5 +260,95 @@ void main() {
     await _open(tester, _args, failOnCreate: true);
 
     expect(find.text('No pudimos reproducir este video.'), findsOneWidget);
+  });
+
+  group('iPhone Duo cerrado', () {
+    const closed = Size(466 * 3, 678 * 3);
+
+    testWidgets('Volver y Favorito van en la franja sobre el video', (
+      tester,
+    ) async {
+      await _open(tester, _args, physicalSize: closed);
+
+      expect(find.byType(DuoSideBar), findsOneWidget);
+      expect(find.byTooltip('Volver'), findsOneWidget);
+      expect(find.byTooltip('Agregar a favoritos'), findsOneWidget);
+      // El resto sigue como hoy.
+      expect(find.text('@cocinaconlucia'), findsOneWidget);
+      expect(find.text('Compartir'), findsOneWidget);
+    });
+
+    testWidgets('Favorito marca el video y se puede quitar', (tester) async {
+      final repo = FakeSavedVideosRepo(
+        videos: [
+          SavedVideo(
+            path: 'video.mp4',
+            sizeBytes: 1,
+            modified: DateTime(2026, 1, 1),
+          ),
+        ],
+      );
+      final library = fakeLibraryCubit(repo);
+      await library.load();
+      await _open(tester, _args, physicalSize: closed, library: library);
+
+      await tester.tap(find.byTooltip('Agregar a favoritos'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(repo.favorites, contains('video.mp4'));
+      expect(find.byTooltip('Quitar de favoritos'), findsOneWidget);
+    });
+
+    testWidgets('en un iPhone normal no hay franja', (tester) async {
+      await _open(tester, _args);
+
+      expect(find.byType(DuoSideBar), findsNothing);
+    });
+
+    testWidgets('abierto: lista a la izquierda, video a la derecha y las '
+        'acciones del video en la franja', (tester) async {
+      await _open(tester, _args, physicalSize: const Size(951, 669) * 3);
+
+      expect(find.byType(LibraryScreen), findsOneWidget);
+      expect(find.byType(DuoSideBar), findsOneWidget);
+      expect(find.byTooltip('Agregar a favoritos'), findsOneWidget);
+      expect(find.byTooltip('Compartir'), findsOneWidget);
+      expect(find.byTooltip('Eliminar'), findsOneWidget);
+      // Las acciones no se repiten bajo el video.
+      expect(find.text('Compartir'), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('@cocinaconlucia')).dx,
+        greaterThan(951 / 2),
+      );
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('goldens/duo/biblioteca_y_reproductor_abierto.png'),
+      );
+    });
+
+    testWidgets('abrir y cerrar el teléfono no recrea el reproductor', (
+      tester,
+    ) async {
+      final player = await _open(
+        tester,
+        _args,
+        physicalSize: const Size(466, 678) * 3,
+      );
+      expect(player.calls.where((c) => c == 'create').length, 1);
+
+      tester.view.physicalSize = const Size(951, 669) * 3;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(LibraryScreen), findsOneWidget);
+
+      tester.view.physicalSize = const Size(466, 678) * 3;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(LibraryScreen), findsNothing);
+
+      expect(player.calls.where((c) => c == 'create').length, 1);
+      expect(find.text('@cocinaconlucia'), findsOneWidget);
+    });
   });
 }
