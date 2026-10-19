@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/theme/app_tokens.dart';
 import '../../../../config/theme/savetic_colors.dart';
+import '../../../../core/layout/duo_context.dart';
+import '../../../../core/layout/duo_side_bar.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/text_search.dart';
@@ -16,6 +18,7 @@ import '../widgets/downloads_screen/downloads_empty_state.dart';
 import '../widgets/library_screen/library_bulk_actions.dart';
 import '../widgets/library_screen/library_filter_chips.dart';
 import '../widgets/library_screen/library_tile.dart';
+import '../widgets/settings_screen/choice_sheet.dart';
 
 /// Todos los videos y audios guardados, en una cuadrícula vertical.
 class LibraryScreen extends StatefulWidget {
@@ -115,6 +118,101 @@ class _LibraryScreenState extends State<LibraryScreen> {
     LibrarySort.biggest => context.strings.sortBiggest,
     LibrarySort.title => context.strings.sortTitle,
   };
+
+  Future<void> _pickSort() async {
+    final chosen = await showChoiceSheet<LibrarySort>(
+      context,
+      title: context.strings.sort,
+      options: [
+        for (final sort in LibrarySort.values)
+          ChoiceOption(value: sort, title: _sortName(sort)),
+      ],
+      selected: _sort,
+    );
+    if (chosen != null && mounted) setState(() => _sort = chosen);
+  }
+
+  /// La franja lateral: Volver primero y, en el modo normal, las acciones de
+  /// la barra. Buscando o eligiendo, la barra con su campo o su conteo queda
+  /// en el contenido y la franja solo trae Volver.
+  DuoSideBar _sideBar() => DuoSideBar(
+    top: [
+      DuoAction(
+        icon: Icons.arrow_back_rounded,
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
+      if (!_selecting && !_searching) ...[
+        DuoAction(
+          icon: Icons.search_rounded,
+          tooltip: context.strings.search,
+          onPressed: _openSearch,
+        ),
+        DuoAction(
+          icon: Icons.sort_rounded,
+          tooltip: context.strings.sort,
+          onPressed: _pickSort,
+        ),
+        DuoAction(
+          icon: Icons.checklist_rounded,
+          tooltip: context.strings.select,
+          onPressed: _startSelecting,
+        ),
+      ],
+    ],
+  );
+
+  /// Con franja, el cuerpo comparte la fila con ella y, si hay búsqueda o
+  /// selección, la barra de esos modos queda arriba del contenido.
+  Widget _withSideBar(
+    BuildContext context,
+    List<SavedVideo> all,
+    List<SavedVideo> visible,
+    Widget body,
+  ) {
+    final modeBar = _selecting || _searching;
+    return Row(
+      children: [
+        Expanded(
+          child: MediaQuery.removePadding(
+            context: context,
+            removeRight: true,
+            child: Column(
+              children: [
+                if (modeBar)
+                  SafeArea(
+                    bottom: false,
+                    child: SizedBox(
+                      height: kToolbarHeight,
+                      child: _appBar(all, visible),
+                    ),
+                  ),
+                Expanded(
+                  child:
+                      modeBar
+                          ? MediaQuery.removePadding(
+                            context: context,
+                            removeTop: true,
+                            child: body,
+                          )
+                          : SafeArea(
+                            bottom: false,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                top: AppSpacing.lg,
+                              ),
+                              child: body,
+                            ),
+                          ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        _sideBar(),
+      ],
+    );
+  }
 
   AppBar _appBar(List<SavedVideo> all, List<SavedVideo> visible) {
     if (_selecting) {
@@ -272,11 +370,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
             if (didPop) return;
             _selecting ? _stopSelecting() : _closeSearch();
           },
-          child: Scaffold(
-            appBar: _appBar(state.videos, videos),
-            bottomNavigationBar: _selectionBar(state.videos),
-            body: _body(context, state, videos, theme),
-          ),
+          child:
+              context.hasDuoSideBar
+                  ? Scaffold(
+                    bottomNavigationBar: _selectionBar(state.videos),
+                    body: _withSideBar(
+                      context,
+                      state.videos,
+                      videos,
+                      _body(context, state, videos, theme),
+                    ),
+                  )
+                  : Scaffold(
+                    appBar: _appBar(state.videos, videos),
+                    bottomNavigationBar: _selectionBar(state.videos),
+                    body: _body(context, state, videos, theme),
+                  ),
         );
       },
     );
