@@ -20,7 +20,7 @@
   <img alt="Plataformas: Android e iOS" src="https://img.shields.io/badge/plataformas-Android%20%7C%20iOS-3DDC84">
   <img alt="Tema claro y oscuro" src="https://img.shields.io/badge/tema-claro%20%2B%20oscuro-0E0A1F">
   <br>
-  <img alt="167 pruebas pasan" src="https://img.shields.io/badge/pruebas-167%20pasan-13895A">
+  <img alt="366 pruebas pasan" src="https://img.shields.io/badge/pruebas-366%20pasan-13895A">
   <img alt="Cobertura 78 %" src="https://img.shields.io/badge/cobertura-78%25-13895A">
   <img alt="Estado: en desarrollo" src="https://img.shields.io/badge/estado-en%20desarrollo-FF4D8D">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-C81B60">
@@ -54,16 +54,17 @@ Todavía **no está publicada** en las tiendas.
 | Servidor propio que reemplace a los servicios de terceros | Pendiente |
 | Publicar en App Store y Google Play | Pendiente (nombre, cuenta de Apple de pago y política de privacidad) |
 | Reemplazar `video_thumbnail`, que está abandonado | Hecho: ahora usa `fc_native_video_thumbnail`, con APIs nativas |
+| iPhone Duo (pantalla exterior, interior abierta en horizontal y en vertical) | Hecho con pruebas por tamaño y probado en el simulador del Duo cerrado; el medio doblado y Split View por mitad quedan pendientes. Ver `docs/duo/` |
 
 ## Métricas
 
-Medidas el 14 de octubre de 2026 sobre el proyecto completo.
+Medidas el 18 de octubre de 2026 sobre el proyecto completo.
 
 | Métrica | Valor |
 | --- | --- |
-| Pruebas | **167** en 25 archivos |
-| Cobertura de líneas | **78,5 %** (`core` 84 %, `presentation` 82 %, `config` 72 %, `data` 72 %, `domain` 69 %) |
-| Código Dart | 7 051 líneas en `lib` (102 archivos) y 3 139 en pruebas, sin líneas en blanco |
+| Pruebas | **366** en 48 archivos |
+| Cobertura de líneas | **83,0 %** (`core` 86 %, `presentation` 85 %, `config` 80 %, `data` 77 %, `domain` 73 %) |
+| Código Dart | 10 808 líneas en `lib` (122 archivos, sin el código generado) y 6 629 en pruebas, sin líneas en blanco |
 | Pantallas | **7** (inicio, primer uso, vista previa, descargas, biblioteca, reproductor y ajustes) |
 | Redes compatibles | **2** (TikTok e Instagram) |
 | Versiones | Flutter 3.47.5 (estable), Dart 3.13, iOS 16 o superior, Android con Gradle 8.14 |
