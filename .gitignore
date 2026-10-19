@@ -49,3 +49,4 @@ env.json
 
 # Cobertura de pruebas
 coverage/
+**/failures/
