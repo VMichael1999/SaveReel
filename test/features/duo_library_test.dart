@@ -11,6 +11,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/screens/libr
 import 'package:savetic/src/features/tiktok_downloader/presentation/widgets/library_screen/library_tile.dart';
 
 import '../support/fake_library.dart';
+import '../support/golden.dart';
 
 Future<void> _open(WidgetTester tester, Size size) async {
   tester.view.physicalSize = size * 3;
@@ -114,9 +115,9 @@ void main() {
               tester.getTopLeft(find.byType(LibraryTile).first).dy,
         );
     expect(firstRow.length, 3);
-    await expectLater(
+    await expectGolden(
       find.byType(MaterialApp),
-      matchesGoldenFile('goldens/duo/biblioteca_cerrado.png'),
+      'goldens/duo/biblioteca_cerrado.png',
     );
   });
 

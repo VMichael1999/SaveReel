@@ -25,6 +25,7 @@ import 'package:savetic/src/features/tiktok_downloader/presentation/screens/libr
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/settings_screen.dart';
 
 import '../support/fake_library.dart';
+import '../support/golden.dart';
 
 /// Capturas de las pantallas tal como están hoy en un iPhone normal, vertical
 /// y horizontal. Los diseños del iPhone Duo no deben cambiarlas: si un golden
@@ -131,9 +132,9 @@ void main() {
     for (final size in _sizes.entries) {
       testWidgets('${screen.key} ${size.key} igual a hoy', (tester) async {
         await _pump(tester, size.value, screen.value);
-        await expectLater(
+        await expectGolden(
           find.byType(MaterialApp),
-          matchesGoldenFile('goldens/${screen.key}_${size.key}.png'),
+          'goldens/${screen.key}_${size.key}.png',
         );
       });
     }
