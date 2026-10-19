@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../config/theme/app_text.dart';
 import '../../../../../config/theme/app_tokens.dart';
 import '../../../../../config/theme/savetic_colors.dart';
+import '../../../../../core/layout/duo_context.dart';
+import '../../../../../core/layout/duo_layout.dart';
 import '../../../../../core/utils/app_strings.dart';
 import '../../../../../core/utils/formatters.dart';
 import '../../../../../core/utils/video_link.dart';
@@ -17,7 +19,12 @@ import 'format_option.dart';
 import 'mobile_data_dialog.dart';
 
 /// Abre la vista previa como una hoja que sube desde abajo.
-Future<void> showVideoPreviewSheet(BuildContext context, TikTokVideo video) {
+Future<void> showVideoPreviewSheet(
+  BuildContext context,
+  TikTokVideo video, {
+  DownloadFormat? initialFormat,
+  ValueChanged<DownloadFormat>? onFormatChanged,
+}) {
   final reduceMotion = MediaQuery.disableAnimationsOf(context);
   return showModalBottomSheet<void>(
     context: context,
@@ -32,21 +39,77 @@ Future<void> showVideoPreviewSheet(BuildContext context, TikTokVideo video) {
               reverseDuration: AppMotion.base,
               reverseCurve: AppMotion.exit,
             ),
-    builder: (_) => VideoPreviewSheet(video: video),
+    builder:
+        (_) => VideoPreviewSheet(
+          video: video,
+          initialFormat: initialFormat,
+          onFormatChanged: onFormatChanged,
+          coverWidth: context.duoLayout == DuoLayout.closed ? 96 : 92,
+        ),
   );
 }
 
-class VideoPreviewSheet extends StatefulWidget {
-  const VideoPreviewSheet({super.key, required this.video});
+/// La vista previa dentro de una hoja que sube desde abajo.
+class VideoPreviewSheet extends StatelessWidget {
+  const VideoPreviewSheet({
+    super.key,
+    required this.video,
+    this.initialFormat,
+    this.onFormatChanged,
+    this.coverWidth = VideoPreviewPanel.defaultCoverWidth,
+  });
 
   final TikTokVideo video;
+  final DownloadFormat? initialFormat;
+  final ValueChanged<DownloadFormat>? onFormatChanged;
+  final double coverWidth;
 
   @override
-  State<VideoPreviewSheet> createState() => _VideoPreviewSheetState();
+  Widget build(BuildContext context) {
+    return Semantics(
+      scopesRoute: true,
+      explicitChildNodes: true,
+      label: context.strings.previewSheetLabel,
+      child: VideoPreviewPanel(
+        video: video,
+        initialFormat: initialFormat,
+        onFormatChanged: onFormatChanged,
+        coverWidth: coverWidth,
+      ),
+    );
+  }
 }
 
-class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
+/// El contenido de la vista previa, para la hoja y para la mitad derecha del
+/// iPhone Duo abierto. Si [initialFormat] está disponible en el video, parte
+/// de él; [onFormatChanged] avisa cada vez que se elige otro.
+class VideoPreviewPanel extends StatefulWidget {
+  const VideoPreviewPanel({
+    super.key,
+    required this.video,
+    this.initialFormat,
+    this.onFormatChanged,
+    this.coverWidth = defaultCoverWidth,
+  });
+
+  static const double defaultCoverWidth = 92;
+
+  final TikTokVideo video;
+  final DownloadFormat? initialFormat;
+  final ValueChanged<DownloadFormat>? onFormatChanged;
+  final double coverWidth;
+
+  @override
+  State<VideoPreviewPanel> createState() => _VideoPreviewPanelState();
+}
+
+class _VideoPreviewPanelState extends State<VideoPreviewPanel> {
   late DownloadFormat _format;
+
+  void _select(DownloadFormat format) {
+    setState(() => _format = format);
+    widget.onFormatChanged?.call(format);
+  }
 
   /// Peso en bytes de cada formato; falta el que aún no responde.
   final Map<DownloadFormat, int> _sizes = {};
@@ -56,7 +119,9 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
   @override
   void initState() {
     super.initState();
-    final preferred = context.read<SettingsCubit>().state.defaultFormat;
+    final preferred =
+        widget.initialFormat ??
+        context.read<SettingsCubit>().state.defaultFormat;
     _format =
         _data.isGallery
             ? DownloadFormat.gallery
@@ -136,129 +201,121 @@ class _VideoPreviewSheetState extends State<VideoPreviewSheet> {
     final handle = _data.authorHandle;
     final canDownload = _format.isAvailableIn(_data);
 
-    return Semantics(
-      scopesRoute: true,
-      explicitChildNodes: true,
-      label: context.strings.previewSheetLabel,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _Header(data: _data),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              context.strings.formatLabel,
-              style: theme.textTheme.labelSmall?.copyWith(color: colors.muted),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.xl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _Header(data: _data, coverWidth: widget.coverWidth),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            context.strings.formatLabel,
+            style: theme.textTheme.labelSmall?.copyWith(color: colors.muted),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (_data.isGallery) ...[
+            FormatOption(
+              title:
+                  _onlyPhotos
+                      ? context.strings.formatGallery
+                      : context.strings.formatGalleryMixed,
+              subtitle:
+                  _data.network == VideoNetwork.instagram
+                      ? context.strings.formatGalleryHintInstagram
+                      : context.strings.formatGalleryHintTikTok,
+              selected: _format == DownloadFormat.gallery,
+              size: context.strings.galleryCount(
+                _data.gallery.length,
+                onlyPhotos: _onlyPhotos,
+              ),
+              onTap: () => _select(DownloadFormat.gallery),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            if (_data.isGallery) ...[
-              FormatOption(
-                title:
-                    _onlyPhotos
-                        ? context.strings.formatGallery
-                        : context.strings.formatGalleryMixed,
-                subtitle:
-                    _data.network == VideoNetwork.instagram
-                        ? context.strings.formatGalleryHintInstagram
-                        : context.strings.formatGalleryHintTikTok,
-                selected: _format == DownloadFormat.gallery,
-                size: context.strings.galleryCount(
-                  _data.gallery.length,
-                  onlyPhotos: _onlyPhotos,
-                ),
-                onTap: () => setState(() => _format = DownloadFormat.gallery),
-              ),
-              if (DownloadFormat.audio.isAvailableIn(_data)) ...[
-                const SizedBox(height: AppSpacing.sm),
-                FormatOption(
-                  title: context.strings.formatAudio,
-                  subtitle: context.strings.formatAudioHint,
-                  selected: _format == DownloadFormat.audio,
-                  size: _sizeText(DownloadFormat.audio),
-                  onTap: () => setState(() => _format = DownloadFormat.audio),
-                ),
-              ],
-            ] else if (_data.network == VideoNetwork.instagram)
-              FormatOption(
-                title: context.strings.formatInstagramVideo,
-                subtitle: context.strings.formatInstagramVideoHint,
-                selected: true,
-                size: _sizeText(DownloadFormat.noWatermark),
-                onTap: () {},
-              )
-            else ...[
-              FormatOption(
-                title: context.strings.formatWithCredits,
-                subtitle:
-                    handle == null
-                        ? context.strings.formatWithCreditsNoAuthor
-                        : context.strings.formatWithCreditsHint(handle),
-                selected: _format == DownloadFormat.withCredits,
-                size: _sizeText(DownloadFormat.withCredits),
-                onTap:
-                    DownloadFormat.withCredits.isAvailableIn(_data)
-                        ? () =>
-                            setState(() => _format = DownloadFormat.withCredits)
-                        : null,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              FormatOption(
-                title: context.strings.formatNoWatermark,
-                subtitle: context.strings.formatNoWatermarkHint,
-                selected: _format == DownloadFormat.noWatermark,
-                size: _sizeText(DownloadFormat.noWatermark),
-                onTap:
-                    DownloadFormat.noWatermark.isAvailableIn(_data)
-                        ? () =>
-                            setState(() => _format = DownloadFormat.noWatermark)
-                        : null,
-              ),
+            if (DownloadFormat.audio.isAvailableIn(_data)) ...[
               const SizedBox(height: AppSpacing.sm),
               FormatOption(
                 title: context.strings.formatAudio,
                 subtitle: context.strings.formatAudioHint,
                 selected: _format == DownloadFormat.audio,
                 size: _sizeText(DownloadFormat.audio),
-                onTap:
-                    DownloadFormat.audio.isAvailableIn(_data)
-                        ? () => setState(() => _format = DownloadFormat.audio)
-                        : null,
+                onTap: () => _select(DownloadFormat.audio),
               ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton.icon(
-              onPressed: canDownload ? _download : null,
-              icon: const Icon(Icons.download_rounded),
-              label: Text(_buttonLabel),
+          ] else if (_data.network == VideoNetwork.instagram)
+            FormatOption(
+              title: context.strings.formatInstagramVideo,
+              subtitle: context.strings.formatInstagramVideoHint,
+              selected: true,
+              size: _sizeText(DownloadFormat.noWatermark),
+              onTap: () {},
+            )
+          else ...[
+            FormatOption(
+              title: context.strings.formatWithCredits,
+              subtitle:
+                  handle == null
+                      ? context.strings.formatWithCreditsNoAuthor
+                      : context.strings.formatWithCreditsHint(handle),
+              selected: _format == DownloadFormat.withCredits,
+              size: _sizeText(DownloadFormat.withCredits),
+              onTap:
+                  DownloadFormat.withCredits.isAvailableIn(_data)
+                      ? () => _select(DownloadFormat.withCredits)
+                      : null,
             ),
-            if (handle != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                context.strings.creditNote(handle),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(color: colors.muted),
-              ),
-            ],
+            const SizedBox(height: AppSpacing.sm),
+            FormatOption(
+              title: context.strings.formatNoWatermark,
+              subtitle: context.strings.formatNoWatermarkHint,
+              selected: _format == DownloadFormat.noWatermark,
+              size: _sizeText(DownloadFormat.noWatermark),
+              onTap:
+                  DownloadFormat.noWatermark.isAvailableIn(_data)
+                      ? () => _select(DownloadFormat.noWatermark)
+                      : null,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            FormatOption(
+              title: context.strings.formatAudio,
+              subtitle: context.strings.formatAudioHint,
+              selected: _format == DownloadFormat.audio,
+              size: _sizeText(DownloadFormat.audio),
+              onTap:
+                  DownloadFormat.audio.isAvailableIn(_data)
+                      ? () => _select(DownloadFormat.audio)
+                      : null,
+            ),
           ],
-        ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton.icon(
+            onPressed: canDownload ? _download : null,
+            icon: const Icon(Icons.download_rounded),
+            label: Text(_buttonLabel),
+          ),
+          if (handle != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              context.strings.creditNote(handle),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(color: colors.muted),
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.data});
+  const _Header({required this.data, required this.coverWidth});
 
   final VideoData data;
-
-  static const double _coverWidth = 92;
+  final double coverWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +338,7 @@ class _Header extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: _coverWidth,
+          width: coverWidth,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppRadii.md),
             child: AspectRatio(
