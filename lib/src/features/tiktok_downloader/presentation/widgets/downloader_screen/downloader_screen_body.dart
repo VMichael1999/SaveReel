@@ -4,15 +4,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../config/routes_manager.dart';
 import '../../../../../config/theme/app_tokens.dart';
+import '../../../../../core/layout/duo_context.dart';
+import '../../../../../core/layout/duo_layout.dart';
 import '../../../../../core/utils/app_enums.dart';
 import '../../../../../core/utils/app_strings.dart';
 import '../../../../../core/utils/video_link.dart';
 import '../../../../../core/widgets/app_message.dart';
 import '../../../../../core/widgets/motion.dart';
 import '../../bloc/downloader_bloc/downloader_bloc.dart';
+import '../../bloc/duo_pane_cubit/duo_pane_cubit.dart';
 import '../../bloc/first_use_cubit/first_use_cubit.dart';
 import '../../bloc/library_cubit/library_cubit.dart';
 import '../../bloc/shared_link_cubit/shared_link_cubit.dart';
+import '../../models/download_format.dart';
+import '../../../domain/entities/tiktok_video.dart';
 import '../video_preview/video_preview_sheet.dart';
 import '../video_preview/video_preview_skeleton.dart';
 import 'clipboard_link_card.dart';
@@ -53,6 +58,60 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
 
   /// Si el error del servicio es pasajero y se ofrece «Reintentar».
   bool _serviceRetryable = false;
+
+  /// La vista previa que está en la hoja, y el formato que se eligió en ella:
+  /// al abrir el iPhone Duo pasan al panel derecho sin perderse.
+  TikTokVideo? _sheetVideo;
+  DownloadFormat? _previewFormat;
+
+  DuoLayout? _lastLayout;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final layout = context.duoLayout;
+    final previous = _lastLayout;
+    _lastLayout = layout;
+    if (previous == null || previous == layout) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onLayoutChanged(previous, layout);
+    });
+  }
+
+  /// Abrir el teléfono lleva la hoja de vista previa a la mitad derecha; al
+  /// cerrarlo, la vista previa vuelve a ser la hoja y las descargas, una
+  /// pantalla.
+  void _onLayoutChanged(DuoLayout previous, DuoLayout next) {
+    final pane = context.read<DuoPaneCubit>();
+    if (next == DuoLayout.openLandscape) {
+      final video = _sheetVideo;
+      if (video == null) return;
+      _sheetVideo = null;
+      Navigator.of(context).pop();
+      pane.showPreview(video, _previewFormat);
+    } else if (previous == DuoLayout.openLandscape) {
+      final shown = pane.state;
+      pane.clear();
+      if (shown.video != null) {
+        _openSheet(shown.video!, shown.format);
+      } else if (shown.downloads) {
+        Navigator.of(context).pushNamed(Routes.downloads);
+      }
+    }
+  }
+
+  void _openSheet(TikTokVideo video, DownloadFormat? format) {
+    _sheetVideo = video;
+    _previewFormat = format;
+    showVideoPreviewSheet(
+      context,
+      video,
+      initialFormat: format,
+      onFormatChanged: (f) => _previewFormat = f,
+    ).whenComplete(() {
+      if (_sheetVideo == video) _sheetVideo = null;
+    });
+  }
 
   @override
   void initState() {
@@ -208,7 +267,11 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
       case DownloaderSaveVideoLoading():
         // La descarga ya empezó: el campo queda libre para el próximo enlace.
         _clearField();
-        Navigator.of(context).popAndPushNamed(Routes.downloads);
+        if (context.duoLayout == DuoLayout.openLandscape) {
+          context.read<DuoPaneCubit>().showDownloads();
+        } else {
+          Navigator.of(context).popAndPushNamed(Routes.downloads);
+        }
       case DownloaderGetVideoFailure():
         setState(() {
           _serviceError = state.message;
@@ -223,8 +286,10 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody>
                     : 'videoUnavailable';
             _serviceRetryable = true;
           });
+        } else if (context.duoLayout == DuoLayout.openLandscape) {
+          context.read<DuoPaneCubit>().showPreview(tikTokVideo);
         } else {
-          showVideoPreviewSheet(context, tikTokVideo);
+          _openSheet(tikTokVideo, null);
         }
       case DownloaderSaveVideoSuccess(:final path):
         showAppMessage(
