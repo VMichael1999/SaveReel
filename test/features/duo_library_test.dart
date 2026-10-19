@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:savetic/src/config/theme/app_theme.dart';
+import 'package:savetic/src/core/layout/duo_layout.dart';
 import 'package:savetic/src/core/layout/duo_side_bar.dart';
 import 'package:savetic/src/features/tiktok_downloader/domain/entities/saved_video.dart';
 import 'package:savetic/src/features/tiktok_downloader/presentation/screens/library_screen.dart';
@@ -113,5 +114,50 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/duo/biblioteca_cerrado.png'),
     );
+  });
+
+  group('otros diseños', () {
+    List<Rect> firstRow(WidgetTester tester) {
+      final tiles = find.byType(LibraryTile);
+      final top = tester.getTopLeft(tiles.first).dy;
+      return [
+        for (var i = 0; i < tiles.evaluate().length; i++)
+          if (tester.getTopLeft(tiles.at(i)).dy == top)
+            tester.getRect(tiles.at(i)),
+      ];
+    }
+
+    testWidgets('abierto en horizontal: 6 columnas y el pliegue entre la 3.ª y '
+        'la 4.ª', (tester) async {
+      await _open(tester, const Size(951, 669));
+
+      final row = firstRow(tester);
+      expect(row.length, 6);
+      final gapCenter = (row[2].right + row[3].left) / 2;
+      expect(gapCenter, closeTo(951 / 2, 0.01));
+      // Simetría: lo que sobra a cada lado del conjunto es la franja.
+      expect(row.first.left, kDuoSideBarWidth);
+      expect(951 - row.last.right, kDuoSideBarWidth);
+    });
+
+    testWidgets('abierto en horizontal: la franja trae las mismas acciones', (
+      tester,
+    ) async {
+      await _open(tester, const Size(951, 669));
+
+      expect(find.byType(DuoSideBar), findsOneWidget);
+      expect(find.byTooltip('Buscar'), findsOneWidget);
+      expect(find.byTooltip('Seleccionar'), findsOneWidget);
+    });
+
+    testWidgets('abierto en vertical: 4 columnas, con barra arriba como hoy', (
+      tester,
+    ) async {
+      await _open(tester, const Size(669, 951));
+
+      expect(firstRow(tester).length, 4);
+      expect(find.byType(DuoSideBar), findsNothing);
+      expect(find.byType(AppBar), findsOneWidget);
+    });
   });
 }
