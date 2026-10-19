@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../config/theme/app_tokens.dart';
@@ -23,10 +25,13 @@ class DuoAction {
   final int badgeCount;
 }
 
-/// Franja de 64 pt pegada al borde derecho con las acciones de la pantalla.
+/// Franja pegada al borde derecho con las acciones de la pantalla.
 ///
-/// Arriba deja libre el espacio de la isla y la barra de estado, que sale de
-/// `MediaQuery.paddingOf`, y luego van las acciones de [top]; las de [bottom]
+/// El ancho es el que reserva el sistema en ese borde (`padding.right`, 84 pt
+/// en el simulador del Duo) y, si no reserva nada, [kDuoSideBarWidth].
+/// Arriba se deja libre el espacio de la isla, la hora y la señal, que el
+/// sistema dibuja encima pero no incluye en `padding.top`: ahí se usa
+/// [systemTopHeight]. Luego van las acciones de [top]; las de [bottom]
 /// quedan pegadas al final. Con [overVideo] los botones usan el relleno de
 /// los controles sobre video.
 class DuoSideBar extends StatelessWidget {
@@ -42,17 +47,27 @@ class DuoSideBar extends StatelessWidget {
   final bool overVideo;
 
   static const double buttonSize = 44;
+
+  /// Alto que ocupan la isla, la hora y la señal en la franja. Medido en el
+  /// simulador del Duo (≈ 150 pt); `padding.top` llega en cero.
+  static const double systemTopHeight = 160;
   static const double _gap = 10;
+
+  /// Ancho de la franja en este contexto.
+  static double widthFor(BuildContext context) {
+    final right = MediaQuery.paddingOf(context).right;
+    return right > 0 ? right : kDuoSideBarWidth;
+  }
 
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.paddingOf(context);
 
     return SizedBox(
-      width: kDuoSideBarWidth,
+      width: widthFor(context),
       child: Padding(
         padding: EdgeInsets.only(
-          top: padding.top + AppSpacing.sm,
+          top: math.max(padding.top, systemTopHeight),
           bottom: padding.bottom + AppSpacing.sm,
         ),
         child: Column(
